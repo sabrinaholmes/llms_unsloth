@@ -1,0 +1,14 @@
+# ignore python cache files in every directory
+__pycache__/
+*.pyc
+*.pyo
+# ignore virtual environment folders
+venv/
+env/
+# ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+# ignore log files
+*.log
+logs/
+#ignore unsloth cache files
+unsloth_compiled_cache/
