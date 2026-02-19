@@ -8,7 +8,7 @@ import os
 import gc
 
 
-MODEL = 'llama-70B-adapter'  # Change this to the desired model name
+MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
 SIMULATION_NUMBER = 32
 
@@ -49,77 +49,70 @@ def generate_timeline(num_trials=100, seed=42):
     return timeline
     
 
-def build_generate_prompt(current_trial: int, past_trials: list, total_trials: int) -> str:
-    """
-    Builds a multi-turn prompt where each past choice is an 'assistant' message
-    and each reward is a 'user' message.
-    """
-    # 1. System Prompt (The Rules)
-    system_msg = [
-        "In this task, you have to repeatedly choose between two slot machines labeled U and P."
-        "When you select one of the machines, you will win 1 or 0 points."
-        "Your goal is to choose the slot machines that will give you the most points."
-        "You will receive feedback about the outcome after making a choice."
-        "The environment may change unpredictably, and past success does not guarantee future results. You’ll need to adapt to these changes to keep finding the better machine."
-        "You will play 1 game in total, consisting of 100 trials."
-        "Respond with ONLY the character 'U' or 'P'."
+def build_rl_prompt(past_trials: list) -> str:
+    """Builds the prompt for the current trial with past trial data."""
+    recent_trials = past_trials
+    instructions = [
+        "In this task, you have to repeatedly choose between two slot machines labeled U and P.",
+        "You can choose a slot machine by pressing its corresponding key.",
+        "When you select one of the machines, you will win 1 or 0 points.",
+        "Your goal is to choose the slot machines that will give you the most points.",
+        "You will receive feedback about the outcome after making a choice.",
+        "The environment may change unpredictably, and past success does not guarantee future results.",
+        "You’ll need to adapt to these changes to keep finding the better machine."
+        "You will play 1 game in total, consisting of 100 trials.\n",
+        "Game 1:"
     ]
-    system_text = "".join(system_msg)
-    prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{system_text}<|eot_id|>"
-    # 2. THE FIX: Add the initial User prompt to start the game
-    prompt += f"<|start_header_id|>user<|end_header_id|>\nGame 1."
     
-    if not past_trials:
-        prompt += "No trials completed yet."
-    else:
-        # Build a concise table of history
-        # 3. Interleave History
-        for trial in past_trials:
-            # The choice is what the Assistant did
-            prompt += f"<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n{trial['choice']}<|eot_id|>"
-            # The reward is what the User (Environment) gave back
-            prompt += f"<|start_header_id|>user<|end_header_id|>\n->{trial['reward']} points."
-    
-    # 3. Final Assistant Header
-    prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n"
+    prompt = "\n".join(instructions)
+    # join instruction with \n
+    # Add history of past trials to the prompt
+    for past_trial in recent_trials:
+        prompt += f"You press <<{past_trial['choice']}>> and get {past_trial['reward']} points.\n"
+
+    # Add the current choice prompt
+    prompt += f"You press <<"
     return prompt
 
-def simulate_participant(timeline: list, pipe):
+def simulate_participant(timeline: list, pipe) -> pd.DataFrame:
+    """Simulates a participant with log-likelihood tracking"""
     history = []
     cumulative_reward = 0
     total_trials = 100
 
-    for trial_idx in range(total_trials):
-        current_trial_num = trial_idx + 1
 
-        # Build prompt using existing history
-        prompt_model = build_generate_prompt(current_trial_num, history, total_trials)
+    for trial in range(1,total_trials+1):
+        current_trial_data = timeline[trial - 1]  # Ensure `timeline` is defined
+        prompt_model = build_rl_prompt(history)
+        bandit_1_value = current_trial_data["bandit_1"]["value"]
+        bandit_2_value = current_trial_data["bandit_2"]["value"]
+        #print(f"this is {prompt_model}")
+        model_choice = get_models.generate(prompt_model,pipe)
+        #print(f"this is choice raw {choice_raw}")
+        print(f"this is model choice {model_choice}")
 
-        # Generate the single character 'U' or 'P'
-        # Tip: Set max_new_tokens=2 and temperature=0 for deterministic play
-
-        # Extract the new choice (it will be the very last character of the output)
-        model_choice = get_models.generate(prompt_model, pipe)
-
-        # Determine reward from timeline
-        trial_data = timeline[trial_idx]
-        reward = trial_data["bandit_1"]["value"] if model_choice == 'U' else trial_data["bandit_2"]["value"]
-
+        # Determine reward
+        reward = bandit_1_value if model_choice == 'U' else (bandit_2_value if model_choice == 'P' else 0)
         cumulative_reward += reward
+        #outputs=generate_test(prompt_model,pipe)
+        #print(f"this is whole output {outputs}")
 
-        # Append to history for the NEXT prompt build
+        print(f"Trial {trial}: "
+              f"Choice {model_choice}, "
+              f"Reward {reward}, "
+              f"Total {cumulative_reward}")
+
         history.append({
-            "trial_index": current_trial_num,
+            "trial_index": trial,
             "choice": model_choice,
             "reward": reward,
             "cumulative_reward": cumulative_reward,
             "prompt": prompt_model
         })
 
-        print(f"Trial {current_trial_num}: {model_choice} -> {reward} pts (Total: {cumulative_reward})")
+
 
     return pd.DataFrame(history)
-
 def main():
 
     if not os.path.exists(DATA_FOLDER_OUT):

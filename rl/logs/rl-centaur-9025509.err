@@ -1,0 +1,7 @@
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  17%|█▋        | 1/6 [00:16<01:21, 16.24s/it]Loading checkpoint shards:  33%|███▎      | 2/6 [00:31<01:02, 15.68s/it]Loading checkpoint shards:  50%|█████     | 3/6 [00:44<00:43, 14.57s/it]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:59<00:29, 14.82s/it]Loading checkpoint shards:  83%|████████▎ | 5/6 [01:14<00:14, 14.78s/it]Loading checkpoint shards: 100%|██████████| 6/6 [01:25<00:00, 13.40s/it]Loading checkpoint shards: 100%|██████████| 6/6 [01:25<00:00, 14.23s/it]
+Unsloth 2026.1.4 patched 80 layers with 80 QKV layers, 80 O layers and 80 MLP layers.
+Device set to use cuda:0
+You seem to be using the pipelines sequentially on GPU. In order to maximize efficiency please use a dataset
+slurmstepd: error: *** STEP 9025509.0 ON hpc3-53 CANCELLED AT 2026-02-19T08:14:31 DUE TO TIME LIMIT ***
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** JOB 9025509 ON hpc3-53 CANCELLED AT 2026-02-19T08:14:31 DUE TO TIME LIMIT ***

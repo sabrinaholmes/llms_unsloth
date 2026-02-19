@@ -1,0 +1,6 @@
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  17%|█▋        | 1/6 [00:15<01:16, 15.32s/it]Loading checkpoint shards:  33%|███▎      | 2/6 [00:31<01:03, 15.76s/it]Loading checkpoint shards:  50%|█████     | 3/6 [00:45<00:45, 15.17s/it]Loading checkpoint shards:  67%|██████▋   | 4/6 [01:00<00:29, 14.79s/it]Loading checkpoint shards:  83%|████████▎ | 5/6 [01:17<00:15, 15.83s/it]Loading checkpoint shards: 100%|██████████| 6/6 [01:29<00:00, 14.33s/it]Loading checkpoint shards: 100%|██████████| 6/6 [01:29<00:00, 14.86s/it]
+Device set to use cuda:0
+You seem to be using the pipelines sequentially on GPU. In order to maximize efficiency please use a dataset
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 9025515.0 ON hpc3-53 CANCELLED AT 2026-02-19T08:33:08 ***
+slurmstepd: error: *** JOB 9025515 ON hpc3-53 CANCELLED AT 2026-02-19T08:33:08 ***

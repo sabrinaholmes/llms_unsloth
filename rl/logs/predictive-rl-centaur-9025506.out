@@ -1,0 +1,203 @@
+Current working directory: /home/student/s/snamazova/share/llms_unsloth/rl
+Conda environment 'unsloth_env' activated.
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+==((====))==  Unsloth 2026.1.4: Fast Llama patching. Transformers: 4.57.6. vLLM: 0.11.2.
+   \\   /|    NVIDIA A100-SXM4-80GB. Num GPUs = 1. Max memory: 79.192 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.9.0+cu128. CUDA: 8.0. CUDA Toolkit: 12.8. Triton: 3.5.0
+\        /    Bfloat16 = TRUE. FA [Xformers = 0.0.33.post1. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+
+🧠 Simulating model 83811
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4504
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_83811.csv
+
+🧠 Simulating model 14593
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4090
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_14593.csv
+
+🧠 Simulating model 3279
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4874
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_3279.csv
+
+🧠 Simulating model 97197
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4616
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_97197.csv
+
+🧠 Simulating model 36049
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4850
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_36049.csv
+
+🧠 Simulating model 32099
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.3521
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_32099.csv
+
+🧠 Simulating model 29257
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.5976
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_29257.csv
+
+🧠 Simulating model 18290
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.5402
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_18290.csv
+
+🧠 Simulating model 96531
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4157
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_96531.csv
+
+🧠 Simulating model 13435
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.5974
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_13435.csv
+
+🧠 Simulating model 88697
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.5330
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_88697.csv
+
+🧠 Simulating model 97081
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4355
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_97081.csv
+
+🧠 Simulating model 71483
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.3495
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_71483.csv
+
+🧠 Simulating model 11396
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4169
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_11396.csv
+
+🧠 Simulating model 77398
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.2963
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_77398.csv
+
+🧠 Simulating model 55303
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.3545
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_55303.csv
+
+🧠 Simulating model 4166
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.3633
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_4166.csv
+
+🧠 Simulating model 3906
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4604
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_3906.csv
+
+🧠 Simulating model 12281
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4670
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_12281.csv
+
+🧠 Simulating model 28658
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.5871
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_28658.csv
+
+🧠 Simulating model 30496
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.5402
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_30496.csv
+
+🧠 Simulating model 66238
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4131
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_66238.csv
+
+🧠 Simulating model 78908
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.5623
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_78908.csv
+
+🧠 Simulating model 3479
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.6215
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_3479.csv
+
+🧠 Simulating model 73564
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4303
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_73564.csv
+
+🧠 Simulating model 26063
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4373
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_26063.csv
+
+🧠 Simulating model 93851
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4169
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_93851.csv
+
+🧠 Simulating model 85182
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4442
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_85182.csv
+
+🧠 Simulating model 91925
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4579
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_91925.csv
+
+🧠 Simulating model 71427
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4222
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_71427.csv
+
+🧠 Simulating model 54988
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.5133
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_54988.csv
+
+🧠 Simulating model 28894
+Total trials: 100
+✅ Simulation complete
+🎯 Overall NLL: 0.4873
+Results saved to data/out/predictive/centaur-70B-adapter/singles/model_28894.csv
+Summary of all models saved to data/out/predictive/centaur-70B-adapter/singles/all_models_summary.csv

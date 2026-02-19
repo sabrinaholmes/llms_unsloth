@@ -1,0 +1,2032 @@
+Current working directory: /home/student/s/snamazova/share/llms_unsloth/rl
+Conda environment 'unsloth_env' activated.
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+==((====))==  Unsloth 2026.1.4: Fast Llama patching. Transformers: 4.57.6. vLLM: 0.11.2.
+   \\   /|    NVIDIA A100-SXM4-80GB. Num GPUs = 1. Max memory: 79.192 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.9.0+cu128. CUDA: 8.0. CUDA Toolkit: 12.8. Triton: 3.5.0
+\        /    Bfloat16 = TRUE. FA [Xformers = 0.0.33.post1. FA2 = False]
+ "-____-"     Free license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+File data/out/generative/centaur-70B-adapter/singles/participant_0.csv already exists. Skipping simulation for participant 0.
+File data/out/generative/centaur-70B-adapter/singles/participant_1.csv already exists. Skipping simulation for participant 1.
+File data/out/generative/centaur-70B-adapter/singles/participant_2.csv already exists. Skipping simulation for participant 2.
+File data/out/generative/centaur-70B-adapter/singles/participant_3.csv already exists. Skipping simulation for participant 3.
+File data/out/generative/centaur-70B-adapter/singles/participant_4.csv already exists. Skipping simulation for participant 4.
+File data/out/generative/centaur-70B-adapter/singles/participant_5.csv already exists. Skipping simulation for participant 5.
+File data/out/generative/centaur-70B-adapter/singles/participant_6.csv already exists. Skipping simulation for participant 6.
+File data/out/generative/centaur-70B-adapter/singles/participant_7.csv already exists. Skipping simulation for participant 7.
+File data/out/generative/centaur-70B-adapter/singles/participant_8.csv already exists. Skipping simulation for participant 8.
+File data/out/generative/centaur-70B-adapter/singles/participant_9.csv already exists. Skipping simulation for participant 9.
+File data/out/generative/centaur-70B-adapter/singles/participant_10.csv already exists. Skipping simulation for participant 10.
+File data/out/generative/centaur-70B-adapter/singles/participant_11.csv already exists. Skipping simulation for participant 11.
+File data/out/generative/centaur-70B-adapter/singles/participant_12.csv already exists. Skipping simulation for participant 12.
+File data/out/generative/centaur-70B-adapter/singles/participant_13.csv already exists. Skipping simulation for participant 13.
+File data/out/generative/centaur-70B-adapter/singles/participant_14.csv already exists. Skipping simulation for participant 14.
+File data/out/generative/centaur-70B-adapter/singles/participant_15.csv already exists. Skipping simulation for participant 15.
+File data/out/generative/centaur-70B-adapter/singles/participant_16.csv already exists. Skipping simulation for participant 16.
+File data/out/generative/centaur-70B-adapter/singles/participant_17.csv already exists. Skipping simulation for participant 17.
+File data/out/generative/centaur-70B-adapter/singles/participant_18.csv already exists. Skipping simulation for participant 18.
+File data/out/generative/centaur-70B-adapter/singles/participant_19.csv already exists. Skipping simulation for participant 19.
+File data/out/generative/centaur-70B-adapter/singles/participant_20.csv already exists. Skipping simulation for participant 20.
+File data/out/generative/centaur-70B-adapter/singles/participant_21.csv already exists. Skipping simulation for participant 21.
+this is model choice P
+Trial 1: Choice P, Reward 1, Total 1
+this is model choice U
+Trial 2: Choice U, Reward 1, Total 2
+this is model choice P
+Trial 3: Choice P, Reward 0, Total 2
+this is model choice U
+Trial 4: Choice U, Reward 0, Total 2
+this is model choice P
+Trial 5: Choice P, Reward 1, Total 3
+this is model choice U
+Trial 6: Choice U, Reward 1, Total 4
+this is model choice P
+Trial 7: Choice P, Reward 1, Total 5
+this is model choice U
+Trial 8: Choice U, Reward 1, Total 6
+this is model choice P
+Trial 9: Choice P, Reward 0, Total 6
+this is model choice U
+Trial 10: Choice U, Reward 0, Total 6
+this is model choice P
+Trial 11: Choice P, Reward 1, Total 7
+this is model choice U
+Trial 12: Choice U, Reward 1, Total 8
+this is model choice P
+Trial 13: Choice P, Reward 0, Total 8
+this is model choice U
+Trial 14: Choice U, Reward 1, Total 9
+this is model choice P
+Trial 15: Choice P, Reward 1, Total 10
+this is model choice U
+Trial 16: Choice U, Reward 1, Total 11
+this is model choice P
+Trial 17: Choice P, Reward 0, Total 11
+this is model choice U
+Trial 18: Choice U, Reward 1, Total 12
+this is model choice P
+Trial 19: Choice P, Reward 0, Total 12
+this is model choice U
+Trial 20: Choice U, Reward 1, Total 13
+this is model choice P
+Trial 21: Choice P, Reward 0, Total 13
+this is model choice U
+Trial 22: Choice U, Reward 1, Total 14
+this is model choice P
+Trial 23: Choice P, Reward 0, Total 14
+this is model choice U
+Trial 24: Choice U, Reward 1, Total 15
+this is model choice P
+Trial 25: Choice P, Reward 0, Total 15
+this is model choice U
+Trial 26: Choice U, Reward 1, Total 16
+this is model choice P
+Trial 27: Choice P, Reward 0, Total 16
+this is model choice U
+Trial 28: Choice U, Reward 1, Total 17
+this is model choice P
+Trial 29: Choice P, Reward 0, Total 17
+this is model choice U
+Trial 30: Choice U, Reward 1, Total 18
+this is model choice P
+Trial 31: Choice P, Reward 0, Total 18
+this is model choice U
+Trial 32: Choice U, Reward 1, Total 19
+this is model choice P
+Trial 33: Choice P, Reward 0, Total 19
+this is model choice U
+Trial 34: Choice U, Reward 1, Total 20
+this is model choice P
+Trial 35: Choice P, Reward 0, Total 20
+this is model choice U
+Trial 36: Choice U, Reward 1, Total 21
+this is model choice P
+Trial 37: Choice P, Reward 0, Total 21
+this is model choice U
+Trial 38: Choice U, Reward 1, Total 22
+this is model choice P
+Trial 39: Choice P, Reward 0, Total 22
+this is model choice U
+Trial 40: Choice U, Reward 1, Total 23
+this is model choice P
+Trial 41: Choice P, Reward 0, Total 23
+this is model choice U
+Trial 42: Choice U, Reward 1, Total 24
+this is model choice P
+Trial 43: Choice P, Reward 1, Total 25
+this is model choice U
+Trial 44: Choice U, Reward 1, Total 26
+this is model choice P
+Trial 45: Choice P, Reward 1, Total 27
+this is model choice U
+Trial 46: Choice U, Reward 1, Total 28
+this is model choice P
+Trial 47: Choice P, Reward 0, Total 28
+this is model choice U
+Trial 48: Choice U, Reward 1, Total 29
+this is model choice P
+Trial 49: Choice P, Reward 0, Total 29
+this is model choice U
+Trial 50: Choice U, Reward 1, Total 30
+this is model choice P
+Trial 51: Choice P, Reward 1, Total 31
+this is model choice U
+Trial 52: Choice U, Reward 1, Total 32
+this is model choice P
+Trial 53: Choice P, Reward 1, Total 33
+this is model choice U
+Trial 54: Choice U, Reward 0, Total 33
+this is model choice P
+Trial 55: Choice P, Reward 1, Total 34
+this is model choice U
+Trial 56: Choice U, Reward 0, Total 34
+this is model choice P
+Trial 57: Choice P, Reward 1, Total 35
+this is model choice U
+Trial 58: Choice U, Reward 0, Total 35
+this is model choice P
+Trial 59: Choice P, Reward 1, Total 36
+this is model choice U
+Trial 60: Choice U, Reward 1, Total 37
+this is model choice P
+Trial 61: Choice P, Reward 1, Total 38
+this is model choice U
+Trial 62: Choice U, Reward 0, Total 38
+this is model choice P
+Trial 63: Choice P, Reward 1, Total 39
+this is model choice U
+Trial 64: Choice U, Reward 0, Total 39
+this is model choice P
+Trial 65: Choice P, Reward 1, Total 40
+this is model choice U
+Trial 66: Choice U, Reward 0, Total 40
+this is model choice P
+Trial 67: Choice P, Reward 1, Total 41
+this is model choice U
+Trial 68: Choice U, Reward 0, Total 41
+this is model choice P
+Trial 69: Choice P, Reward 1, Total 42
+this is model choice U
+Trial 70: Choice U, Reward 1, Total 43
+this is model choice P
+Trial 71: Choice P, Reward 1, Total 44
+this is model choice U
+Trial 72: Choice U, Reward 0, Total 44
+this is model choice P
+Trial 73: Choice P, Reward 1, Total 45
+this is model choice U
+Trial 74: Choice U, Reward 0, Total 45
+this is model choice P
+Trial 75: Choice P, Reward 1, Total 46
+this is model choice U
+Trial 76: Choice U, Reward 1, Total 47
+this is model choice P
+Trial 77: Choice P, Reward 1, Total 48
+this is model choice U
+Trial 78: Choice U, Reward 0, Total 48
+this is model choice P
+Trial 79: Choice P, Reward 1, Total 49
+this is model choice U
+Trial 80: Choice U, Reward 0, Total 49
+this is model choice P
+Trial 81: Choice P, Reward 1, Total 50
+this is model choice U
+Trial 82: Choice U, Reward 0, Total 50
+this is model choice P
+Trial 83: Choice P, Reward 1, Total 51
+this is model choice U
+Trial 84: Choice U, Reward 0, Total 51
+this is model choice P
+Trial 85: Choice P, Reward 1, Total 52
+this is model choice U
+Trial 86: Choice U, Reward 0, Total 52
+this is model choice P
+Trial 87: Choice P, Reward 1, Total 53
+this is model choice U
+Trial 88: Choice U, Reward 1, Total 54
+this is model choice P
+Trial 89: Choice P, Reward 0, Total 54
+this is model choice U
+Trial 90: Choice U, Reward 1, Total 55
+this is model choice P
+Trial 91: Choice P, Reward 1, Total 56
+this is model choice U
+Trial 92: Choice U, Reward 0, Total 56
+this is model choice P
+Trial 93: Choice P, Reward 1, Total 57
+this is model choice U
+Trial 94: Choice U, Reward 0, Total 57
+this is model choice P
+Trial 95: Choice P, Reward 1, Total 58
+this is model choice U
+Trial 96: Choice U, Reward 0, Total 58
+this is model choice P
+Trial 97: Choice P, Reward 1, Total 59
+this is model choice U
+Trial 98: Choice U, Reward 0, Total 59
+this is model choice P
+Trial 99: Choice P, Reward 1, Total 60
+this is model choice U
+Trial 100: Choice U, Reward 1, Total 61
+this is model choice P
+Trial 1: Choice P, Reward 1, Total 1
+this is model choice P
+Trial 2: Choice P, Reward 0, Total 1
+this is model choice U
+Trial 3: Choice U, Reward 1, Total 2
+this is model choice U
+Trial 4: Choice U, Reward 0, Total 2
+this is model choice P
+Trial 5: Choice P, Reward 1, Total 3
+this is model choice P
+Trial 6: Choice P, Reward 0, Total 3
+this is model choice U
+Trial 7: Choice U, Reward 1, Total 4
+this is model choice P
+Trial 8: Choice P, Reward 0, Total 4
+this is model choice U
+Trial 9: Choice U, Reward 1, Total 5
+this is model choice U
+Trial 10: Choice U, Reward 0, Total 5
+this is model choice P
+Trial 11: Choice P, Reward 1, Total 6
+this is model choice P
+Trial 12: Choice P, Reward 1, Total 7
+this is model choice P
+Trial 13: Choice P, Reward 0, Total 7
+this is model choice U
+Trial 14: Choice U, Reward 1, Total 8
+this is model choice U
+Trial 15: Choice U, Reward 1, Total 9
+this is model choice U
+Trial 16: Choice U, Reward 1, Total 10
+this is model choice U
+Trial 17: Choice U, Reward 1, Total 11
+this is model choice U
+Trial 18: Choice U, Reward 1, Total 12
+this is model choice U
+Trial 19: Choice U, Reward 1, Total 13
+this is model choice U
+Trial 20: Choice U, Reward 1, Total 14
+this is model choice U
+Trial 21: Choice U, Reward 1, Total 15
+this is model choice U
+Trial 22: Choice U, Reward 1, Total 16
+this is model choice U
+Trial 23: Choice U, Reward 1, Total 17
+this is model choice U
+Trial 24: Choice U, Reward 1, Total 18
+this is model choice U
+Trial 25: Choice U, Reward 1, Total 19
+this is model choice U
+Trial 26: Choice U, Reward 1, Total 20
+this is model choice U
+Trial 27: Choice U, Reward 1, Total 21
+this is model choice U
+Trial 28: Choice U, Reward 1, Total 22
+this is model choice U
+Trial 29: Choice U, Reward 1, Total 23
+this is model choice U
+Trial 30: Choice U, Reward 1, Total 24
+this is model choice U
+Trial 31: Choice U, Reward 1, Total 25
+this is model choice U
+Trial 32: Choice U, Reward 1, Total 26
+this is model choice U
+Trial 33: Choice U, Reward 1, Total 27
+this is model choice U
+Trial 34: Choice U, Reward 1, Total 28
+this is model choice U
+Trial 35: Choice U, Reward 1, Total 29
+this is model choice U
+Trial 36: Choice U, Reward 1, Total 30
+this is model choice U
+Trial 37: Choice U, Reward 1, Total 31
+this is model choice U
+Trial 38: Choice U, Reward 1, Total 32
+this is model choice U
+Trial 39: Choice U, Reward 1, Total 33
+this is model choice U
+Trial 40: Choice U, Reward 1, Total 34
+this is model choice U
+Trial 41: Choice U, Reward 1, Total 35
+this is model choice U
+Trial 42: Choice U, Reward 1, Total 36
+this is model choice U
+Trial 43: Choice U, Reward 1, Total 37
+this is model choice U
+Trial 44: Choice U, Reward 1, Total 38
+this is model choice U
+Trial 45: Choice U, Reward 1, Total 39
+this is model choice U
+Trial 46: Choice U, Reward 1, Total 40
+this is model choice U
+Trial 47: Choice U, Reward 1, Total 41
+this is model choice U
+Trial 48: Choice U, Reward 1, Total 42
+this is model choice U
+Trial 49: Choice U, Reward 1, Total 43
+this is model choice U
+Trial 50: Choice U, Reward 1, Total 44
+this is model choice U
+Trial 51: Choice U, Reward 1, Total 45
+this is model choice U
+Trial 52: Choice U, Reward 1, Total 46
+this is model choice U
+Trial 53: Choice U, Reward 0, Total 46
+this is model choice P
+Trial 54: Choice P, Reward 1, Total 47
+this is model choice P
+Trial 55: Choice P, Reward 1, Total 48
+this is model choice P
+Trial 56: Choice P, Reward 1, Total 49
+this is model choice P
+Trial 57: Choice P, Reward 1, Total 50
+this is model choice P
+Trial 58: Choice P, Reward 1, Total 51
+this is model choice P
+Trial 59: Choice P, Reward 1, Total 52
+this is model choice P
+Trial 60: Choice P, Reward 1, Total 53
+this is model choice P
+Trial 61: Choice P, Reward 1, Total 54
+this is model choice P
+Trial 62: Choice P, Reward 1, Total 55
+this is model choice P
+Trial 63: Choice P, Reward 1, Total 56
+this is model choice P
+Trial 64: Choice P, Reward 1, Total 57
+this is model choice P
+Trial 65: Choice P, Reward 1, Total 58
+this is model choice P
+Trial 66: Choice P, Reward 1, Total 59
+this is model choice P
+Trial 67: Choice P, Reward 1, Total 60
+this is model choice P
+Trial 68: Choice P, Reward 1, Total 61
+this is model choice P
+Trial 69: Choice P, Reward 1, Total 62
+this is model choice P
+Trial 70: Choice P, Reward 1, Total 63
+this is model choice P
+Trial 71: Choice P, Reward 1, Total 64
+this is model choice P
+Trial 72: Choice P, Reward 1, Total 65
+this is model choice P
+Trial 73: Choice P, Reward 1, Total 66
+this is model choice P
+Trial 74: Choice P, Reward 1, Total 67
+this is model choice P
+Trial 75: Choice P, Reward 1, Total 68
+this is model choice P
+Trial 76: Choice P, Reward 1, Total 69
+this is model choice P
+Trial 77: Choice P, Reward 1, Total 70
+this is model choice P
+Trial 78: Choice P, Reward 1, Total 71
+this is model choice P
+Trial 79: Choice P, Reward 1, Total 72
+this is model choice P
+Trial 80: Choice P, Reward 1, Total 73
+this is model choice P
+Trial 81: Choice P, Reward 1, Total 74
+this is model choice P
+Trial 82: Choice P, Reward 1, Total 75
+this is model choice P
+Trial 83: Choice P, Reward 1, Total 76
+this is model choice P
+Trial 84: Choice P, Reward 1, Total 77
+this is model choice P
+Trial 85: Choice P, Reward 1, Total 78
+this is model choice P
+Trial 86: Choice P, Reward 1, Total 79
+this is model choice P
+Trial 87: Choice P, Reward 1, Total 80
+this is model choice P
+Trial 88: Choice P, Reward 1, Total 81
+this is model choice P
+Trial 89: Choice P, Reward 0, Total 81
+this is model choice P
+Trial 90: Choice P, Reward 1, Total 82
+this is model choice P
+Trial 91: Choice P, Reward 1, Total 83
+this is model choice P
+Trial 92: Choice P, Reward 1, Total 84
+this is model choice P
+Trial 93: Choice P, Reward 1, Total 85
+this is model choice P
+Trial 94: Choice P, Reward 1, Total 86
+this is model choice P
+Trial 95: Choice P, Reward 1, Total 87
+this is model choice P
+Trial 96: Choice P, Reward 1, Total 88
+this is model choice P
+Trial 97: Choice P, Reward 1, Total 89
+this is model choice P
+Trial 98: Choice P, Reward 1, Total 90
+this is model choice P
+Trial 99: Choice P, Reward 1, Total 91
+this is model choice P
+Trial 100: Choice P, Reward 1, Total 92
+this is model choice P
+Trial 1: Choice P, Reward 1, Total 1
+this is model choice P
+Trial 2: Choice P, Reward 0, Total 1
+this is model choice U
+Trial 3: Choice U, Reward 1, Total 2
+this is model choice U
+Trial 4: Choice U, Reward 0, Total 2
+this is model choice P
+Trial 5: Choice P, Reward 1, Total 3
+this is model choice P
+Trial 6: Choice P, Reward 0, Total 3
+this is model choice U
+Trial 7: Choice U, Reward 1, Total 4
+this is model choice U
+Trial 8: Choice U, Reward 1, Total 5
+this is model choice U
+Trial 9: Choice U, Reward 1, Total 6
+this is model choice U
+Trial 10: Choice U, Reward 0, Total 6
+this is model choice P
+Trial 11: Choice P, Reward 1, Total 7
+this is model choice P
+Trial 12: Choice P, Reward 1, Total 8
+this is model choice P
+Trial 13: Choice P, Reward 0, Total 8
+this is model choice P
+Trial 14: Choice P, Reward 0, Total 8
+this is model choice U
+Trial 15: Choice U, Reward 1, Total 9
+this is model choice U
+Trial 16: Choice U, Reward 1, Total 10
+this is model choice U
+Trial 17: Choice U, Reward 1, Total 11
+this is model choice U
+Trial 18: Choice U, Reward 1, Total 12
+this is model choice U
+Trial 19: Choice U, Reward 1, Total 13
+this is model choice U
+Trial 20: Choice U, Reward 1, Total 14
+this is model choice U
+Trial 21: Choice U, Reward 1, Total 15
+this is model choice U
+Trial 22: Choice U, Reward 1, Total 16
+this is model choice U
+Trial 23: Choice U, Reward 1, Total 17
+this is model choice U
+Trial 24: Choice U, Reward 1, Total 18
+this is model choice U
+Trial 25: Choice U, Reward 1, Total 19
+this is model choice U
+Trial 26: Choice U, Reward 1, Total 20
+this is model choice U
+Trial 27: Choice U, Reward 1, Total 21
+this is model choice U
+Trial 28: Choice U, Reward 1, Total 22
+this is model choice U
+Trial 29: Choice U, Reward 1, Total 23
+this is model choice U
+Trial 30: Choice U, Reward 1, Total 24
+this is model choice U
+Trial 31: Choice U, Reward 1, Total 25
+this is model choice U
+Trial 32: Choice U, Reward 1, Total 26
+this is model choice U
+Trial 33: Choice U, Reward 1, Total 27
+this is model choice U
+Trial 34: Choice U, Reward 1, Total 28
+this is model choice U
+Trial 35: Choice U, Reward 1, Total 29
+this is model choice U
+Trial 36: Choice U, Reward 1, Total 30
+this is model choice U
+Trial 37: Choice U, Reward 1, Total 31
+this is model choice U
+Trial 38: Choice U, Reward 1, Total 32
+this is model choice U
+Trial 39: Choice U, Reward 1, Total 33
+this is model choice U
+Trial 40: Choice U, Reward 1, Total 34
+this is model choice U
+Trial 41: Choice U, Reward 1, Total 35
+this is model choice U
+Trial 42: Choice U, Reward 1, Total 36
+this is model choice U
+Trial 43: Choice U, Reward 1, Total 37
+this is model choice U
+Trial 44: Choice U, Reward 1, Total 38
+this is model choice U
+Trial 45: Choice U, Reward 1, Total 39
+this is model choice U
+Trial 46: Choice U, Reward 1, Total 40
+this is model choice U
+Trial 47: Choice U, Reward 1, Total 41
+this is model choice U
+Trial 48: Choice U, Reward 1, Total 42
+this is model choice U
+Trial 49: Choice U, Reward 1, Total 43
+this is model choice U
+Trial 50: Choice U, Reward 1, Total 44
+this is model choice U
+Trial 51: Choice U, Reward 1, Total 45
+this is model choice U
+Trial 52: Choice U, Reward 1, Total 46
+this is model choice U
+Trial 53: Choice U, Reward 0, Total 46
+this is model choice P
+Trial 54: Choice P, Reward 1, Total 47
+this is model choice P
+Trial 55: Choice P, Reward 1, Total 48
+this is model choice P
+Trial 56: Choice P, Reward 1, Total 49
+this is model choice P
+Trial 57: Choice P, Reward 1, Total 50
+this is model choice P
+Trial 58: Choice P, Reward 1, Total 51
+this is model choice P
+Trial 59: Choice P, Reward 1, Total 52
+this is model choice P
+Trial 60: Choice P, Reward 1, Total 53
+this is model choice P
+Trial 61: Choice P, Reward 1, Total 54
+this is model choice P
+Trial 62: Choice P, Reward 1, Total 55
+this is model choice P
+Trial 63: Choice P, Reward 1, Total 56
+this is model choice P
+Trial 64: Choice P, Reward 1, Total 57
+this is model choice P
+Trial 65: Choice P, Reward 1, Total 58
+this is model choice P
+Trial 66: Choice P, Reward 1, Total 59
+this is model choice P
+Trial 67: Choice P, Reward 1, Total 60
+this is model choice P
+Trial 68: Choice P, Reward 1, Total 61
+this is model choice P
+Trial 69: Choice P, Reward 1, Total 62
+this is model choice P
+Trial 70: Choice P, Reward 1, Total 63
+this is model choice P
+Trial 71: Choice P, Reward 1, Total 64
+this is model choice P
+Trial 72: Choice P, Reward 1, Total 65
+this is model choice P
+Trial 73: Choice P, Reward 1, Total 66
+this is model choice P
+Trial 74: Choice P, Reward 1, Total 67
+this is model choice P
+Trial 75: Choice P, Reward 1, Total 68
+this is model choice P
+Trial 76: Choice P, Reward 1, Total 69
+this is model choice P
+Trial 77: Choice P, Reward 1, Total 70
+this is model choice P
+Trial 78: Choice P, Reward 1, Total 71
+this is model choice P
+Trial 79: Choice P, Reward 1, Total 72
+this is model choice P
+Trial 80: Choice P, Reward 1, Total 73
+this is model choice P
+Trial 81: Choice P, Reward 1, Total 74
+this is model choice P
+Trial 82: Choice P, Reward 1, Total 75
+this is model choice P
+Trial 83: Choice P, Reward 1, Total 76
+this is model choice P
+Trial 84: Choice P, Reward 1, Total 77
+this is model choice P
+Trial 85: Choice P, Reward 1, Total 78
+this is model choice P
+Trial 86: Choice P, Reward 1, Total 79
+this is model choice P
+Trial 87: Choice P, Reward 1, Total 80
+this is model choice P
+Trial 88: Choice P, Reward 1, Total 81
+this is model choice P
+Trial 89: Choice P, Reward 0, Total 81
+this is model choice U
+Trial 90: Choice U, Reward 1, Total 82
+this is model choice U
+Trial 91: Choice U, Reward 0, Total 82
+this is model choice P
+Trial 92: Choice P, Reward 1, Total 83
+this is model choice P
+Trial 93: Choice P, Reward 1, Total 84
+this is model choice P
+Trial 94: Choice P, Reward 1, Total 85
+this is model choice P
+Trial 95: Choice P, Reward 1, Total 86
+this is model choice P
+Trial 96: Choice P, Reward 1, Total 87
+this is model choice P
+Trial 97: Choice P, Reward 1, Total 88
+this is model choice P
+Trial 98: Choice P, Reward 1, Total 89
+this is model choice P
+Trial 99: Choice P, Reward 1, Total 90
+this is model choice P
+Trial 100: Choice P, Reward 1, Total 91
+this is model choice P
+Trial 1: Choice P, Reward 1, Total 1
+this is model choice P
+Trial 2: Choice P, Reward 0, Total 1
+this is model choice U
+Trial 3: Choice U, Reward 1, Total 2
+this is model choice U
+Trial 4: Choice U, Reward 0, Total 2
+this is model choice U
+Trial 5: Choice U, Reward 1, Total 3
+this is model choice U
+Trial 6: Choice U, Reward 1, Total 4
+this is model choice U
+Trial 7: Choice U, Reward 1, Total 5
+this is model choice U
+Trial 8: Choice U, Reward 1, Total 6
+this is model choice U
+Trial 9: Choice U, Reward 1, Total 7
+this is model choice U
+Trial 10: Choice U, Reward 0, Total 7
+this is model choice U
+Trial 11: Choice U, Reward 1, Total 8
+this is model choice U
+Trial 12: Choice U, Reward 1, Total 9
+this is model choice U
+Trial 13: Choice U, Reward 1, Total 10
+this is model choice U
+Trial 14: Choice U, Reward 1, Total 11
+this is model choice U
+Trial 15: Choice U, Reward 1, Total 12
+this is model choice U
+Trial 16: Choice U, Reward 1, Total 13
+this is model choice U
+Trial 17: Choice U, Reward 1, Total 14
+this is model choice U
+Trial 18: Choice U, Reward 1, Total 15
+this is model choice U
+Trial 19: Choice U, Reward 1, Total 16
+this is model choice U
+Trial 20: Choice U, Reward 1, Total 17
+this is model choice U
+Trial 21: Choice U, Reward 1, Total 18
+this is model choice U
+Trial 22: Choice U, Reward 1, Total 19
+this is model choice U
+Trial 23: Choice U, Reward 1, Total 20
+this is model choice U
+Trial 24: Choice U, Reward 1, Total 21
+this is model choice U
+Trial 25: Choice U, Reward 1, Total 22
+this is model choice U
+Trial 26: Choice U, Reward 1, Total 23
+this is model choice U
+Trial 27: Choice U, Reward 1, Total 24
+this is model choice U
+Trial 28: Choice U, Reward 1, Total 25
+this is model choice U
+Trial 29: Choice U, Reward 1, Total 26
+this is model choice U
+Trial 30: Choice U, Reward 1, Total 27
+this is model choice U
+Trial 31: Choice U, Reward 1, Total 28
+this is model choice U
+Trial 32: Choice U, Reward 1, Total 29
+this is model choice U
+Trial 33: Choice U, Reward 1, Total 30
+this is model choice U
+Trial 34: Choice U, Reward 1, Total 31
+this is model choice U
+Trial 35: Choice U, Reward 1, Total 32
+this is model choice U
+Trial 36: Choice U, Reward 1, Total 33
+this is model choice U
+Trial 37: Choice U, Reward 1, Total 34
+this is model choice U
+Trial 38: Choice U, Reward 1, Total 35
+this is model choice U
+Trial 39: Choice U, Reward 1, Total 36
+this is model choice U
+Trial 40: Choice U, Reward 1, Total 37
+this is model choice U
+Trial 41: Choice U, Reward 1, Total 38
+this is model choice U
+Trial 42: Choice U, Reward 1, Total 39
+this is model choice U
+Trial 43: Choice U, Reward 1, Total 40
+this is model choice U
+Trial 44: Choice U, Reward 1, Total 41
+this is model choice U
+Trial 45: Choice U, Reward 1, Total 42
+this is model choice U
+Trial 46: Choice U, Reward 1, Total 43
+this is model choice U
+Trial 47: Choice U, Reward 1, Total 44
+this is model choice U
+Trial 48: Choice U, Reward 1, Total 45
+this is model choice U
+Trial 49: Choice U, Reward 1, Total 46
+this is model choice U
+Trial 50: Choice U, Reward 1, Total 47
+this is model choice U
+Trial 51: Choice U, Reward 1, Total 48
+this is model choice U
+Trial 52: Choice U, Reward 1, Total 49
+this is model choice U
+Trial 53: Choice U, Reward 0, Total 49
+this is model choice U
+Trial 54: Choice U, Reward 0, Total 49
+this is model choice U
+Trial 55: Choice U, Reward 0, Total 49
+this is model choice U
+Trial 56: Choice U, Reward 0, Total 49
+this is model choice U
+Trial 57: Choice U, Reward 0, Total 49
+this is model choice P
+Trial 58: Choice P, Reward 1, Total 50
+this is model choice P
+Trial 59: Choice P, Reward 1, Total 51
+this is model choice P
+Trial 60: Choice P, Reward 1, Total 52
+this is model choice P
+Trial 61: Choice P, Reward 1, Total 53
+this is model choice P
+Trial 62: Choice P, Reward 1, Total 54
+this is model choice P
+Trial 63: Choice P, Reward 1, Total 55
+this is model choice P
+Trial 64: Choice P, Reward 1, Total 56
+this is model choice P
+Trial 65: Choice P, Reward 1, Total 57
+this is model choice P
+Trial 66: Choice P, Reward 1, Total 58
+this is model choice P
+Trial 67: Choice P, Reward 1, Total 59
+this is model choice P
+Trial 68: Choice P, Reward 1, Total 60
+this is model choice P
+Trial 69: Choice P, Reward 1, Total 61
+this is model choice P
+Trial 70: Choice P, Reward 1, Total 62
+this is model choice P
+Trial 71: Choice P, Reward 1, Total 63
+this is model choice P
+Trial 72: Choice P, Reward 1, Total 64
+this is model choice P
+Trial 73: Choice P, Reward 1, Total 65
+this is model choice P
+Trial 74: Choice P, Reward 1, Total 66
+this is model choice P
+Trial 75: Choice P, Reward 1, Total 67
+this is model choice P
+Trial 76: Choice P, Reward 1, Total 68
+this is model choice P
+Trial 77: Choice P, Reward 1, Total 69
+this is model choice P
+Trial 78: Choice P, Reward 1, Total 70
+this is model choice P
+Trial 79: Choice P, Reward 1, Total 71
+this is model choice P
+Trial 80: Choice P, Reward 1, Total 72
+this is model choice P
+Trial 81: Choice P, Reward 1, Total 73
+this is model choice P
+Trial 82: Choice P, Reward 1, Total 74
+this is model choice P
+Trial 83: Choice P, Reward 1, Total 75
+this is model choice P
+Trial 84: Choice P, Reward 1, Total 76
+this is model choice P
+Trial 85: Choice P, Reward 1, Total 77
+this is model choice P
+Trial 86: Choice P, Reward 1, Total 78
+this is model choice P
+Trial 87: Choice P, Reward 1, Total 79
+this is model choice P
+Trial 88: Choice P, Reward 1, Total 80
+this is model choice P
+Trial 89: Choice P, Reward 0, Total 80
+this is model choice P
+Trial 90: Choice P, Reward 1, Total 81
+this is model choice P
+Trial 91: Choice P, Reward 1, Total 82
+this is model choice P
+Trial 92: Choice P, Reward 1, Total 83
+this is model choice P
+Trial 93: Choice P, Reward 1, Total 84
+this is model choice P
+Trial 94: Choice P, Reward 1, Total 85
+this is model choice P
+Trial 95: Choice P, Reward 1, Total 86
+this is model choice P
+Trial 96: Choice P, Reward 1, Total 87
+this is model choice P
+Trial 97: Choice P, Reward 1, Total 88
+this is model choice P
+Trial 98: Choice P, Reward 1, Total 89
+this is model choice P
+Trial 99: Choice P, Reward 1, Total 90
+this is model choice P
+Trial 100: Choice P, Reward 1, Total 91
+this is model choice U
+Trial 1: Choice U, Reward 1, Total 1
+this is model choice P
+Trial 2: Choice P, Reward 0, Total 1
+this is model choice U
+Trial 3: Choice U, Reward 1, Total 2
+this is model choice P
+Trial 4: Choice P, Reward 1, Total 3
+this is model choice U
+Trial 5: Choice U, Reward 1, Total 4
+this is model choice P
+Trial 6: Choice P, Reward 0, Total 4
+this is model choice U
+Trial 7: Choice U, Reward 1, Total 5
+this is model choice P
+Trial 8: Choice P, Reward 0, Total 5
+this is model choice U
+Trial 9: Choice U, Reward 1, Total 6
+this is model choice P
+Trial 10: Choice P, Reward 1, Total 7
+this is model choice U
+Trial 11: Choice U, Reward 1, Total 8
+this is model choice P
+Trial 12: Choice P, Reward 1, Total 9
+this is model choice U
+Trial 13: Choice U, Reward 1, Total 10
+this is model choice P
+Trial 14: Choice P, Reward 0, Total 10
+this is model choice U
+Trial 15: Choice U, Reward 1, Total 11
+this is model choice P
+Trial 16: Choice P, Reward 0, Total 11
+this is model choice U
+Trial 17: Choice U, Reward 1, Total 12
+this is model choice P
+Trial 18: Choice P, Reward 0, Total 12
+this is model choice U
+Trial 19: Choice U, Reward 1, Total 13
+this is model choice P
+Trial 20: Choice P, Reward 0, Total 13
+this is model choice U
+Trial 21: Choice U, Reward 1, Total 14
+this is model choice P
+Trial 22: Choice P, Reward 0, Total 14
+this is model choice U
+Trial 23: Choice U, Reward 1, Total 15
+this is model choice P
+Trial 24: Choice P, Reward 0, Total 15
+this is model choice U
+Trial 25: Choice U, Reward 1, Total 16
+this is model choice P
+Trial 26: Choice P, Reward 1, Total 17
+this is model choice U
+Trial 27: Choice U, Reward 1, Total 18
+this is model choice P
+Trial 28: Choice P, Reward 0, Total 18
+this is model choice U
+Trial 29: Choice U, Reward 1, Total 19
+this is model choice P
+Trial 30: Choice P, Reward 0, Total 19
+this is model choice U
+Trial 31: Choice U, Reward 1, Total 20
+this is model choice P
+Trial 32: Choice P, Reward 0, Total 20
+this is model choice U
+Trial 33: Choice U, Reward 1, Total 21
+this is model choice P
+Trial 34: Choice P, Reward 1, Total 22
+this is model choice U
+Trial 35: Choice U, Reward 1, Total 23
+this is model choice P
+Trial 36: Choice P, Reward 0, Total 23
+this is model choice U
+Trial 37: Choice U, Reward 1, Total 24
+this is model choice P
+Trial 38: Choice P, Reward 0, Total 24
+this is model choice U
+Trial 39: Choice U, Reward 1, Total 25
+this is model choice P
+Trial 40: Choice P, Reward 0, Total 25
+this is model choice U
+Trial 41: Choice U, Reward 1, Total 26
+this is model choice P
+Trial 42: Choice P, Reward 0, Total 26
+this is model choice U
+Trial 43: Choice U, Reward 1, Total 27
+this is model choice P
+Trial 44: Choice P, Reward 0, Total 27
+this is model choice U
+Trial 45: Choice U, Reward 1, Total 28
+this is model choice P
+Trial 46: Choice P, Reward 0, Total 28
+this is model choice U
+Trial 47: Choice U, Reward 1, Total 29
+this is model choice P
+Trial 48: Choice P, Reward 0, Total 29
+this is model choice U
+Trial 49: Choice U, Reward 1, Total 30
+this is model choice P
+Trial 50: Choice P, Reward 1, Total 31
+this is model choice U
+Trial 51: Choice U, Reward 1, Total 32
+this is model choice P
+Trial 52: Choice P, Reward 1, Total 33
+this is model choice U
+Trial 53: Choice U, Reward 0, Total 33
+this is model choice P
+Trial 54: Choice P, Reward 1, Total 34
+this is model choice U
+Trial 55: Choice U, Reward 0, Total 34
+this is model choice P
+Trial 56: Choice P, Reward 1, Total 35
+this is model choice U
+Trial 57: Choice U, Reward 0, Total 35
+this is model choice P
+Trial 58: Choice P, Reward 1, Total 36
+this is model choice U
+Trial 59: Choice U, Reward 0, Total 36
+this is model choice P
+Trial 60: Choice P, Reward 1, Total 37
+this is model choice U
+Trial 61: Choice U, Reward 0, Total 37
+this is model choice P
+Trial 62: Choice P, Reward 1, Total 38
+this is model choice U
+Trial 63: Choice U, Reward 1, Total 39
+this is model choice P
+Trial 64: Choice P, Reward 1, Total 40
+this is model choice U
+Trial 65: Choice U, Reward 0, Total 40
+this is model choice P
+Trial 66: Choice P, Reward 1, Total 41
+this is model choice U
+Trial 67: Choice U, Reward 0, Total 41
+this is model choice P
+Trial 68: Choice P, Reward 1, Total 42
+this is model choice U
+Trial 69: Choice U, Reward 0, Total 42
+this is model choice P
+Trial 70: Choice P, Reward 1, Total 43
+this is model choice U
+Trial 71: Choice U, Reward 0, Total 43
+this is model choice P
+Trial 72: Choice P, Reward 1, Total 44
+this is model choice U
+Trial 73: Choice U, Reward 0, Total 44
+this is model choice P
+Trial 74: Choice P, Reward 1, Total 45
+this is model choice U
+Trial 75: Choice U, Reward 0, Total 45
+this is model choice P
+Trial 76: Choice P, Reward 1, Total 46
+this is model choice U
+Trial 77: Choice U, Reward 0, Total 46
+this is model choice P
+Trial 78: Choice P, Reward 1, Total 47
+this is model choice U
+Trial 79: Choice U, Reward 0, Total 47
+this is model choice P
+Trial 80: Choice P, Reward 1, Total 48
+this is model choice U
+Trial 81: Choice U, Reward 0, Total 48
+this is model choice P
+Trial 82: Choice P, Reward 1, Total 49
+this is model choice U
+Trial 83: Choice U, Reward 0, Total 49
+this is model choice P
+Trial 84: Choice P, Reward 1, Total 50
+this is model choice U
+Trial 85: Choice U, Reward 1, Total 51
+this is model choice P
+Trial 86: Choice P, Reward 1, Total 52
+this is model choice U
+Trial 87: Choice U, Reward 0, Total 52
+this is model choice P
+Trial 88: Choice P, Reward 1, Total 53
+this is model choice U
+Trial 89: Choice U, Reward 1, Total 54
+this is model choice P
+Trial 90: Choice P, Reward 1, Total 55
+this is model choice U
+Trial 91: Choice U, Reward 0, Total 55
+this is model choice P
+Trial 92: Choice P, Reward 1, Total 56
+this is model choice U
+Trial 93: Choice U, Reward 0, Total 56
+this is model choice P
+Trial 94: Choice P, Reward 1, Total 57
+this is model choice U
+Trial 95: Choice U, Reward 0, Total 57
+this is model choice P
+Trial 96: Choice P, Reward 1, Total 58
+this is model choice U
+Trial 97: Choice U, Reward 0, Total 58
+this is model choice P
+Trial 98: Choice P, Reward 1, Total 59
+this is model choice U
+Trial 99: Choice U, Reward 0, Total 59
+this is model choice P
+Trial 100: Choice P, Reward 1, Total 60
+this is model choice U
+Trial 1: Choice U, Reward 1, Total 1
+this is model choice U
+Trial 2: Choice U, Reward 1, Total 2
+this is model choice U
+Trial 3: Choice U, Reward 1, Total 3
+this is model choice U
+Trial 4: Choice U, Reward 0, Total 3
+this is model choice P
+Trial 5: Choice P, Reward 1, Total 4
+this is model choice P
+Trial 6: Choice P, Reward 0, Total 4
+this is model choice P
+Trial 7: Choice P, Reward 1, Total 5
+this is model choice U
+Trial 8: Choice U, Reward 1, Total 6
+this is model choice U
+Trial 9: Choice U, Reward 1, Total 7
+this is model choice U
+Trial 10: Choice U, Reward 0, Total 7
+this is model choice U
+Trial 11: Choice U, Reward 1, Total 8
+this is model choice U
+Trial 12: Choice U, Reward 1, Total 9
+this is model choice U
+Trial 13: Choice U, Reward 1, Total 10
+this is model choice U
+Trial 14: Choice U, Reward 1, Total 11
+this is model choice U
+Trial 15: Choice U, Reward 1, Total 12
+this is model choice U
+Trial 16: Choice U, Reward 1, Total 13
+this is model choice U
+Trial 17: Choice U, Reward 1, Total 14
+this is model choice U
+Trial 18: Choice U, Reward 1, Total 15
+this is model choice U
+Trial 19: Choice U, Reward 1, Total 16
+this is model choice U
+Trial 20: Choice U, Reward 1, Total 17
+this is model choice U
+Trial 21: Choice U, Reward 1, Total 18
+this is model choice U
+Trial 22: Choice U, Reward 1, Total 19
+this is model choice U
+Trial 23: Choice U, Reward 1, Total 20
+this is model choice U
+Trial 24: Choice U, Reward 1, Total 21
+this is model choice U
+Trial 25: Choice U, Reward 1, Total 22
+this is model choice U
+Trial 26: Choice U, Reward 1, Total 23
+this is model choice U
+Trial 27: Choice U, Reward 1, Total 24
+this is model choice U
+Trial 28: Choice U, Reward 1, Total 25
+this is model choice U
+Trial 29: Choice U, Reward 1, Total 26
+this is model choice U
+Trial 30: Choice U, Reward 1, Total 27
+this is model choice U
+Trial 31: Choice U, Reward 1, Total 28
+this is model choice U
+Trial 32: Choice U, Reward 1, Total 29
+this is model choice U
+Trial 33: Choice U, Reward 1, Total 30
+this is model choice U
+Trial 34: Choice U, Reward 1, Total 31
+this is model choice U
+Trial 35: Choice U, Reward 1, Total 32
+this is model choice U
+Trial 36: Choice U, Reward 1, Total 33
+this is model choice U
+Trial 37: Choice U, Reward 1, Total 34
+this is model choice U
+Trial 38: Choice U, Reward 1, Total 35
+this is model choice U
+Trial 39: Choice U, Reward 1, Total 36
+this is model choice U
+Trial 40: Choice U, Reward 1, Total 37
+this is model choice U
+Trial 41: Choice U, Reward 1, Total 38
+this is model choice U
+Trial 42: Choice U, Reward 1, Total 39
+this is model choice U
+Trial 43: Choice U, Reward 1, Total 40
+this is model choice U
+Trial 44: Choice U, Reward 1, Total 41
+this is model choice U
+Trial 45: Choice U, Reward 1, Total 42
+this is model choice U
+Trial 46: Choice U, Reward 1, Total 43
+this is model choice U
+Trial 47: Choice U, Reward 1, Total 44
+this is model choice U
+Trial 48: Choice U, Reward 1, Total 45
+this is model choice U
+Trial 49: Choice U, Reward 1, Total 46
+this is model choice U
+Trial 50: Choice U, Reward 1, Total 47
+this is model choice U
+Trial 51: Choice U, Reward 1, Total 48
+this is model choice U
+Trial 52: Choice U, Reward 1, Total 49
+this is model choice U
+Trial 53: Choice U, Reward 0, Total 49
+this is model choice U
+Trial 54: Choice U, Reward 0, Total 49
+this is model choice P
+Trial 55: Choice P, Reward 1, Total 50
+this is model choice P
+Trial 56: Choice P, Reward 1, Total 51
+this is model choice P
+Trial 57: Choice P, Reward 1, Total 52
+this is model choice P
+Trial 58: Choice P, Reward 1, Total 53
+this is model choice P
+Trial 59: Choice P, Reward 1, Total 54
+this is model choice P
+Trial 60: Choice P, Reward 1, Total 55
+this is model choice P
+Trial 61: Choice P, Reward 1, Total 56
+this is model choice P
+Trial 62: Choice P, Reward 1, Total 57
+this is model choice P
+Trial 63: Choice P, Reward 1, Total 58
+this is model choice P
+Trial 64: Choice P, Reward 1, Total 59
+this is model choice P
+Trial 65: Choice P, Reward 1, Total 60
+this is model choice P
+Trial 66: Choice P, Reward 1, Total 61
+this is model choice P
+Trial 67: Choice P, Reward 1, Total 62
+this is model choice P
+Trial 68: Choice P, Reward 1, Total 63
+this is model choice P
+Trial 69: Choice P, Reward 1, Total 64
+this is model choice P
+Trial 70: Choice P, Reward 1, Total 65
+this is model choice P
+Trial 71: Choice P, Reward 1, Total 66
+this is model choice P
+Trial 72: Choice P, Reward 1, Total 67
+this is model choice P
+Trial 73: Choice P, Reward 1, Total 68
+this is model choice P
+Trial 74: Choice P, Reward 1, Total 69
+this is model choice P
+Trial 75: Choice P, Reward 1, Total 70
+this is model choice P
+Trial 76: Choice P, Reward 1, Total 71
+this is model choice P
+Trial 77: Choice P, Reward 1, Total 72
+this is model choice P
+Trial 78: Choice P, Reward 1, Total 73
+this is model choice P
+Trial 79: Choice P, Reward 1, Total 74
+this is model choice P
+Trial 80: Choice P, Reward 1, Total 75
+this is model choice P
+Trial 81: Choice P, Reward 1, Total 76
+this is model choice P
+Trial 82: Choice P, Reward 1, Total 77
+this is model choice P
+Trial 83: Choice P, Reward 1, Total 78
+this is model choice P
+Trial 84: Choice P, Reward 1, Total 79
+this is model choice P
+Trial 85: Choice P, Reward 1, Total 80
+this is model choice P
+Trial 86: Choice P, Reward 1, Total 81
+this is model choice P
+Trial 87: Choice P, Reward 1, Total 82
+this is model choice P
+Trial 88: Choice P, Reward 1, Total 83
+this is model choice P
+Trial 89: Choice P, Reward 0, Total 83
+this is model choice P
+Trial 90: Choice P, Reward 1, Total 84
+this is model choice P
+Trial 91: Choice P, Reward 1, Total 85
+this is model choice P
+Trial 92: Choice P, Reward 1, Total 86
+this is model choice P
+Trial 93: Choice P, Reward 1, Total 87
+this is model choice P
+Trial 94: Choice P, Reward 1, Total 88
+this is model choice P
+Trial 95: Choice P, Reward 1, Total 89
+this is model choice P
+Trial 96: Choice P, Reward 1, Total 90
+this is model choice P
+Trial 97: Choice P, Reward 1, Total 91
+this is model choice P
+Trial 98: Choice P, Reward 1, Total 92
+this is model choice P
+Trial 99: Choice P, Reward 1, Total 93
+this is model choice P
+Trial 100: Choice P, Reward 1, Total 94
+this is model choice U
+Trial 1: Choice U, Reward 1, Total 1
+this is model choice P
+Trial 2: Choice P, Reward 0, Total 1
+this is model choice U
+Trial 3: Choice U, Reward 1, Total 2
+this is model choice U
+Trial 4: Choice U, Reward 0, Total 2
+this is model choice P
+Trial 5: Choice P, Reward 1, Total 3
+this is model choice P
+Trial 6: Choice P, Reward 0, Total 3
+this is model choice U
+Trial 7: Choice U, Reward 1, Total 4
+this is model choice P
+Trial 8: Choice P, Reward 0, Total 4
+this is model choice U
+Trial 9: Choice U, Reward 1, Total 5
+this is model choice P
+Trial 10: Choice P, Reward 1, Total 6
+this is model choice P
+Trial 11: Choice P, Reward 1, Total 7
+this is model choice U
+Trial 12: Choice U, Reward 1, Total 8
+this is model choice P
+Trial 13: Choice P, Reward 0, Total 8
+this is model choice U
+Trial 14: Choice U, Reward 1, Total 9
+this is model choice P
+Trial 15: Choice P, Reward 1, Total 10
+this is model choice U
+Trial 16: Choice U, Reward 1, Total 11
+this is model choice P
+Trial 17: Choice P, Reward 0, Total 11
+this is model choice U
+Trial 18: Choice U, Reward 1, Total 12
+this is model choice P
+Trial 19: Choice P, Reward 0, Total 12
+this is model choice U
+Trial 20: Choice U, Reward 1, Total 13
+this is model choice P
+Trial 21: Choice P, Reward 0, Total 13
+this is model choice U
+Trial 22: Choice U, Reward 1, Total 14
+this is model choice P
+Trial 23: Choice P, Reward 0, Total 14
+this is model choice U
+Trial 24: Choice U, Reward 1, Total 15
+this is model choice P
+Trial 25: Choice P, Reward 0, Total 15
+this is model choice U
+Trial 26: Choice U, Reward 1, Total 16
+this is model choice P
+Trial 27: Choice P, Reward 0, Total 16
+this is model choice U
+Trial 28: Choice U, Reward 1, Total 17
+this is model choice P
+Trial 29: Choice P, Reward 0, Total 17
+this is model choice U
+Trial 30: Choice U, Reward 1, Total 18
+this is model choice P
+Trial 31: Choice P, Reward 0, Total 18
+this is model choice U
+Trial 32: Choice U, Reward 1, Total 19
+this is model choice P
+Trial 33: Choice P, Reward 0, Total 19
+this is model choice U
+Trial 34: Choice U, Reward 1, Total 20
+this is model choice P
+Trial 35: Choice P, Reward 0, Total 20
+this is model choice U
+Trial 36: Choice U, Reward 1, Total 21
+this is model choice P
+Trial 37: Choice P, Reward 0, Total 21
+this is model choice U
+Trial 38: Choice U, Reward 1, Total 22
+this is model choice P
+Trial 39: Choice P, Reward 0, Total 22
+this is model choice U
+Trial 40: Choice U, Reward 1, Total 23
+this is model choice P
+Trial 41: Choice P, Reward 0, Total 23
+this is model choice U
+Trial 42: Choice U, Reward 1, Total 24
+this is model choice P
+Trial 43: Choice P, Reward 1, Total 25
+this is model choice U
+Trial 44: Choice U, Reward 1, Total 26
+this is model choice P
+Trial 45: Choice P, Reward 1, Total 27
+this is model choice U
+Trial 46: Choice U, Reward 1, Total 28
+this is model choice P
+Trial 47: Choice P, Reward 0, Total 28
+this is model choice U
+Trial 48: Choice U, Reward 1, Total 29
+this is model choice P
+Trial 49: Choice P, Reward 0, Total 29
+this is model choice U
+Trial 50: Choice U, Reward 1, Total 30
+this is model choice P
+Trial 51: Choice P, Reward 1, Total 31
+this is model choice U
+Trial 52: Choice U, Reward 1, Total 32
+this is model choice P
+Trial 53: Choice P, Reward 1, Total 33
+this is model choice U
+Trial 54: Choice U, Reward 0, Total 33
+this is model choice P
+Trial 55: Choice P, Reward 1, Total 34
+this is model choice U
+Trial 56: Choice U, Reward 0, Total 34
+this is model choice P
+Trial 57: Choice P, Reward 1, Total 35
+this is model choice U
+Trial 58: Choice U, Reward 0, Total 35
+this is model choice P
+Trial 59: Choice P, Reward 1, Total 36
+this is model choice U
+Trial 60: Choice U, Reward 1, Total 37
+this is model choice P
+Trial 61: Choice P, Reward 1, Total 38
+this is model choice U
+Trial 62: Choice U, Reward 0, Total 38
+this is model choice P
+Trial 63: Choice P, Reward 1, Total 39
+this is model choice U
+Trial 64: Choice U, Reward 0, Total 39
+this is model choice P
+Trial 65: Choice P, Reward 1, Total 40
+this is model choice U
+Trial 66: Choice U, Reward 0, Total 40
+this is model choice P
+Trial 67: Choice P, Reward 1, Total 41
+this is model choice U
+Trial 68: Choice U, Reward 0, Total 41
+this is model choice P
+Trial 69: Choice P, Reward 1, Total 42
+this is model choice U
+Trial 70: Choice U, Reward 1, Total 43
+this is model choice P
+Trial 71: Choice P, Reward 1, Total 44
+this is model choice U
+Trial 72: Choice U, Reward 0, Total 44
+this is model choice P
+Trial 73: Choice P, Reward 1, Total 45
+this is model choice U
+Trial 74: Choice U, Reward 0, Total 45
+this is model choice P
+Trial 75: Choice P, Reward 1, Total 46
+this is model choice U
+Trial 76: Choice U, Reward 1, Total 47
+this is model choice P
+Trial 77: Choice P, Reward 1, Total 48
+this is model choice U
+Trial 78: Choice U, Reward 0, Total 48
+this is model choice P
+Trial 79: Choice P, Reward 1, Total 49
+this is model choice U
+Trial 80: Choice U, Reward 0, Total 49
+this is model choice P
+Trial 81: Choice P, Reward 1, Total 50
+this is model choice U
+Trial 82: Choice U, Reward 0, Total 50
+this is model choice P
+Trial 83: Choice P, Reward 1, Total 51
+this is model choice U
+Trial 84: Choice U, Reward 0, Total 51
+this is model choice P
+Trial 85: Choice P, Reward 1, Total 52
+this is model choice U
+Trial 86: Choice U, Reward 0, Total 52
+this is model choice P
+Trial 87: Choice P, Reward 1, Total 53
+this is model choice U
+Trial 88: Choice U, Reward 1, Total 54
+this is model choice P
+Trial 89: Choice P, Reward 0, Total 54
+this is model choice U
+Trial 90: Choice U, Reward 1, Total 55
+this is model choice P
+Trial 91: Choice P, Reward 1, Total 56
+this is model choice U
+Trial 92: Choice U, Reward 0, Total 56
+this is model choice P
+Trial 93: Choice P, Reward 1, Total 57
+this is model choice U
+Trial 94: Choice U, Reward 0, Total 57
+this is model choice P
+Trial 95: Choice P, Reward 1, Total 58
+this is model choice U
+Trial 96: Choice U, Reward 0, Total 58
+this is model choice P
+Trial 97: Choice P, Reward 1, Total 59
+this is model choice U
+Trial 98: Choice U, Reward 0, Total 59
+this is model choice P
+Trial 99: Choice P, Reward 1, Total 60
+this is model choice U
+Trial 100: Choice U, Reward 1, Total 61
+this is model choice P
+Trial 1: Choice P, Reward 1, Total 1
+this is model choice P
+Trial 2: Choice P, Reward 0, Total 1
+this is model choice U
+Trial 3: Choice U, Reward 1, Total 2
+this is model choice U
+Trial 4: Choice U, Reward 0, Total 2
+this is model choice P
+Trial 5: Choice P, Reward 1, Total 3
+this is model choice U
+Trial 6: Choice U, Reward 1, Total 4
+this is model choice P
+Trial 7: Choice P, Reward 1, Total 5
+this is model choice U
+Trial 8: Choice U, Reward 1, Total 6
+this is model choice P
+Trial 9: Choice P, Reward 0, Total 6
+this is model choice U
+Trial 10: Choice U, Reward 0, Total 6
+this is model choice P
+Trial 11: Choice P, Reward 1, Total 7
+this is model choice P
+Trial 12: Choice P, Reward 1, Total 8
+this is model choice P
+Trial 13: Choice P, Reward 0, Total 8
+this is model choice P
+Trial 14: Choice P, Reward 0, Total 8
+this is model choice U
+Trial 15: Choice U, Reward 1, Total 9
+this is model choice U
+Trial 16: Choice U, Reward 1, Total 10
+this is model choice U
+Trial 17: Choice U, Reward 1, Total 11
+this is model choice U
+Trial 18: Choice U, Reward 1, Total 12
+this is model choice U
+Trial 19: Choice U, Reward 1, Total 13
+this is model choice U
+Trial 20: Choice U, Reward 1, Total 14
+this is model choice U
+Trial 21: Choice U, Reward 1, Total 15
+this is model choice U
+Trial 22: Choice U, Reward 1, Total 16
+this is model choice U
+Trial 23: Choice U, Reward 1, Total 17
+this is model choice U
+Trial 24: Choice U, Reward 1, Total 18
+this is model choice U
+Trial 25: Choice U, Reward 1, Total 19
+this is model choice U
+Trial 26: Choice U, Reward 1, Total 20
+this is model choice U
+Trial 27: Choice U, Reward 1, Total 21
+this is model choice U
+Trial 28: Choice U, Reward 1, Total 22
+this is model choice U
+Trial 29: Choice U, Reward 1, Total 23
+this is model choice U
+Trial 30: Choice U, Reward 1, Total 24
+this is model choice U
+Trial 31: Choice U, Reward 1, Total 25
+this is model choice U
+Trial 32: Choice U, Reward 1, Total 26
+this is model choice U
+Trial 33: Choice U, Reward 1, Total 27
+this is model choice U
+Trial 34: Choice U, Reward 1, Total 28
+this is model choice U
+Trial 35: Choice U, Reward 1, Total 29
+this is model choice U
+Trial 36: Choice U, Reward 1, Total 30
+this is model choice U
+Trial 37: Choice U, Reward 1, Total 31
+this is model choice U
+Trial 38: Choice U, Reward 1, Total 32
+this is model choice U
+Trial 39: Choice U, Reward 1, Total 33
+this is model choice U
+Trial 40: Choice U, Reward 1, Total 34
+this is model choice U
+Trial 41: Choice U, Reward 1, Total 35
+this is model choice U
+Trial 42: Choice U, Reward 1, Total 36
+this is model choice U
+Trial 43: Choice U, Reward 1, Total 37
+this is model choice U
+Trial 44: Choice U, Reward 1, Total 38
+this is model choice U
+Trial 45: Choice U, Reward 1, Total 39
+this is model choice U
+Trial 46: Choice U, Reward 1, Total 40
+this is model choice U
+Trial 47: Choice U, Reward 1, Total 41
+this is model choice U
+Trial 48: Choice U, Reward 1, Total 42
+this is model choice U
+Trial 49: Choice U, Reward 1, Total 43
+this is model choice U
+Trial 50: Choice U, Reward 1, Total 44
+this is model choice U
+Trial 51: Choice U, Reward 1, Total 45
+this is model choice U
+Trial 52: Choice U, Reward 1, Total 46
+this is model choice U
+Trial 53: Choice U, Reward 0, Total 46
+this is model choice P
+Trial 54: Choice P, Reward 1, Total 47
+this is model choice P
+Trial 55: Choice P, Reward 1, Total 48
+this is model choice P
+Trial 56: Choice P, Reward 1, Total 49
+this is model choice P
+Trial 57: Choice P, Reward 1, Total 50
+this is model choice P
+Trial 58: Choice P, Reward 1, Total 51
+this is model choice P
+Trial 59: Choice P, Reward 1, Total 52
+this is model choice P
+Trial 60: Choice P, Reward 1, Total 53
+this is model choice P
+Trial 61: Choice P, Reward 1, Total 54
+this is model choice P
+Trial 62: Choice P, Reward 1, Total 55
+this is model choice P
+Trial 63: Choice P, Reward 1, Total 56
+this is model choice P
+Trial 64: Choice P, Reward 1, Total 57
+this is model choice P
+Trial 65: Choice P, Reward 1, Total 58
+this is model choice P
+Trial 66: Choice P, Reward 1, Total 59
+this is model choice P
+Trial 67: Choice P, Reward 1, Total 60
+this is model choice P
+Trial 68: Choice P, Reward 1, Total 61
+this is model choice P
+Trial 69: Choice P, Reward 1, Total 62
+this is model choice P
+Trial 70: Choice P, Reward 1, Total 63
+this is model choice P
+Trial 71: Choice P, Reward 1, Total 64
+this is model choice P
+Trial 72: Choice P, Reward 1, Total 65
+this is model choice P
+Trial 73: Choice P, Reward 1, Total 66
+this is model choice P
+Trial 74: Choice P, Reward 1, Total 67
+this is model choice P
+Trial 75: Choice P, Reward 1, Total 68
+this is model choice P
+Trial 76: Choice P, Reward 1, Total 69
+this is model choice P
+Trial 77: Choice P, Reward 1, Total 70
+this is model choice P
+Trial 78: Choice P, Reward 1, Total 71
+this is model choice P
+Trial 79: Choice P, Reward 1, Total 72
+this is model choice P
+Trial 80: Choice P, Reward 1, Total 73
+this is model choice P
+Trial 81: Choice P, Reward 1, Total 74
+this is model choice P
+Trial 82: Choice P, Reward 1, Total 75
+this is model choice P
+Trial 83: Choice P, Reward 1, Total 76
+this is model choice P
+Trial 84: Choice P, Reward 1, Total 77
+this is model choice P
+Trial 85: Choice P, Reward 1, Total 78
+this is model choice P
+Trial 86: Choice P, Reward 1, Total 79
+this is model choice P
+Trial 87: Choice P, Reward 1, Total 80
+this is model choice P
+Trial 88: Choice P, Reward 1, Total 81
+this is model choice P
+Trial 89: Choice P, Reward 0, Total 81
+this is model choice P
+Trial 90: Choice P, Reward 1, Total 82
+this is model choice P
+Trial 91: Choice P, Reward 1, Total 83
+this is model choice P
+Trial 92: Choice P, Reward 1, Total 84
+this is model choice P
+Trial 93: Choice P, Reward 1, Total 85
+this is model choice P
+Trial 94: Choice P, Reward 1, Total 86
+this is model choice P
+Trial 95: Choice P, Reward 1, Total 87
+this is model choice P
+Trial 96: Choice P, Reward 1, Total 88
+this is model choice P
+Trial 97: Choice P, Reward 1, Total 89
+this is model choice P
+Trial 98: Choice P, Reward 1, Total 90
+this is model choice P
+Trial 99: Choice P, Reward 1, Total 91
+this is model choice P
+Trial 100: Choice P, Reward 1, Total 92
+this is model choice P
+Trial 1: Choice P, Reward 1, Total 1
+this is model choice U
+Trial 2: Choice U, Reward 1, Total 2
+this is model choice P
+Trial 3: Choice P, Reward 0, Total 2
+this is model choice U
+Trial 4: Choice U, Reward 0, Total 2
+this is model choice P
+Trial 5: Choice P, Reward 1, Total 3
+this is model choice U
+Trial 6: Choice U, Reward 1, Total 4
+this is model choice U
+Trial 7: Choice U, Reward 1, Total 5
+this is model choice U
+Trial 8: Choice U, Reward 1, Total 6
+this is model choice U
+Trial 9: Choice U, Reward 1, Total 7
+this is model choice U
+Trial 10: Choice U, Reward 0, Total 7
+this is model choice P
+Trial 11: Choice P, Reward 1, Total 8
+this is model choice P
+Trial 12: Choice P, Reward 1, Total 9
+this is model choice P
+Trial 13: Choice P, Reward 0, Total 9
+this is model choice U
+Trial 14: Choice U, Reward 1, Total 10
+this is model choice U
+Trial 15: Choice U, Reward 1, Total 11
+this is model choice U
+Trial 16: Choice U, Reward 1, Total 12
+this is model choice U
+Trial 17: Choice U, Reward 1, Total 13
+this is model choice U
+Trial 18: Choice U, Reward 1, Total 14
+this is model choice U
+Trial 19: Choice U, Reward 1, Total 15
+this is model choice U
+Trial 20: Choice U, Reward 1, Total 16
+this is model choice U
+Trial 21: Choice U, Reward 1, Total 17
+this is model choice U
+Trial 22: Choice U, Reward 1, Total 18
+this is model choice U
+Trial 23: Choice U, Reward 1, Total 19
+this is model choice U
+Trial 24: Choice U, Reward 1, Total 20
+this is model choice U
+Trial 25: Choice U, Reward 1, Total 21
+this is model choice U
+Trial 26: Choice U, Reward 1, Total 22
+this is model choice U
+Trial 27: Choice U, Reward 1, Total 23
+this is model choice U
+Trial 28: Choice U, Reward 1, Total 24
+this is model choice U
+Trial 29: Choice U, Reward 1, Total 25
+this is model choice U
+Trial 30: Choice U, Reward 1, Total 26
+this is model choice U
+Trial 31: Choice U, Reward 1, Total 27
+this is model choice U
+Trial 32: Choice U, Reward 1, Total 28
+this is model choice U
+Trial 33: Choice U, Reward 1, Total 29
+this is model choice U
+Trial 34: Choice U, Reward 1, Total 30
+this is model choice U
+Trial 35: Choice U, Reward 1, Total 31
+this is model choice U
+Trial 36: Choice U, Reward 1, Total 32
+this is model choice U
+Trial 37: Choice U, Reward 1, Total 33
+this is model choice U
+Trial 38: Choice U, Reward 1, Total 34
+this is model choice U
+Trial 39: Choice U, Reward 1, Total 35
+this is model choice U
+Trial 40: Choice U, Reward 1, Total 36
+this is model choice U
+Trial 41: Choice U, Reward 1, Total 37
+this is model choice U
+Trial 42: Choice U, Reward 1, Total 38
+this is model choice U
+Trial 43: Choice U, Reward 1, Total 39
+this is model choice U
+Trial 44: Choice U, Reward 1, Total 40
+this is model choice U
+Trial 45: Choice U, Reward 1, Total 41
+this is model choice U
+Trial 46: Choice U, Reward 1, Total 42
+this is model choice U
+Trial 47: Choice U, Reward 1, Total 43
+this is model choice U
+Trial 48: Choice U, Reward 1, Total 44
+this is model choice U
+Trial 49: Choice U, Reward 1, Total 45
+this is model choice U
+Trial 50: Choice U, Reward 1, Total 46
+this is model choice U
+Trial 51: Choice U, Reward 1, Total 47
+this is model choice U
+Trial 52: Choice U, Reward 1, Total 48
+this is model choice U
+Trial 53: Choice U, Reward 0, Total 48
+this is model choice U
+Trial 54: Choice U, Reward 0, Total 48
+this is model choice P
+Trial 55: Choice P, Reward 1, Total 49
+this is model choice P
+Trial 56: Choice P, Reward 1, Total 50
+this is model choice P
+Trial 57: Choice P, Reward 1, Total 51
+this is model choice P
+Trial 58: Choice P, Reward 1, Total 52
+this is model choice P
+Trial 59: Choice P, Reward 1, Total 53
+this is model choice P
+Trial 60: Choice P, Reward 1, Total 54
+this is model choice P
+Trial 61: Choice P, Reward 1, Total 55
+this is model choice P
+Trial 62: Choice P, Reward 1, Total 56
+this is model choice P
+Trial 63: Choice P, Reward 1, Total 57
+this is model choice P
+Trial 64: Choice P, Reward 1, Total 58
+this is model choice P
+Trial 65: Choice P, Reward 1, Total 59
+this is model choice P
+Trial 66: Choice P, Reward 1, Total 60
+this is model choice P
+Trial 67: Choice P, Reward 1, Total 61
+this is model choice P
+Trial 68: Choice P, Reward 1, Total 62
+this is model choice P
+Trial 69: Choice P, Reward 1, Total 63
+this is model choice P
+Trial 70: Choice P, Reward 1, Total 64
+this is model choice P
+Trial 71: Choice P, Reward 1, Total 65
+this is model choice P
+Trial 72: Choice P, Reward 1, Total 66
+this is model choice P
+Trial 73: Choice P, Reward 1, Total 67
+this is model choice P
+Trial 74: Choice P, Reward 1, Total 68
+this is model choice P
+Trial 75: Choice P, Reward 1, Total 69
+this is model choice P
+Trial 76: Choice P, Reward 1, Total 70
+this is model choice P
+Trial 77: Choice P, Reward 1, Total 71
+this is model choice P
+Trial 78: Choice P, Reward 1, Total 72
+this is model choice P
+Trial 79: Choice P, Reward 1, Total 73
+this is model choice P
+Trial 80: Choice P, Reward 1, Total 74
+this is model choice P
+Trial 81: Choice P, Reward 1, Total 75
+this is model choice P
+Trial 82: Choice P, Reward 1, Total 76
+this is model choice P
+Trial 83: Choice P, Reward 1, Total 77
+this is model choice P
+Trial 84: Choice P, Reward 1, Total 78
+this is model choice P
+Trial 85: Choice P, Reward 1, Total 79
+this is model choice P
+Trial 86: Choice P, Reward 1, Total 80
+this is model choice P
+Trial 87: Choice P, Reward 1, Total 81
+this is model choice P
+Trial 88: Choice P, Reward 1, Total 82
+this is model choice P
+Trial 89: Choice P, Reward 0, Total 82
+this is model choice U
+Trial 90: Choice U, Reward 1, Total 83
+this is model choice U
+Trial 91: Choice U, Reward 0, Total 83
+this is model choice U
+Trial 92: Choice U, Reward 0, Total 83
+this is model choice P
+Trial 93: Choice P, Reward 1, Total 84
+this is model choice P
+Trial 94: Choice P, Reward 1, Total 85
+this is model choice P
+Trial 95: Choice P, Reward 1, Total 86
+this is model choice P
+Trial 96: Choice P, Reward 1, Total 87
+this is model choice P
+Trial 97: Choice P, Reward 1, Total 88
+this is model choice P
+Trial 98: Choice P, Reward 1, Total 89
+this is model choice P
+Trial 99: Choice P, Reward 1, Total 90
+this is model choice P
+Trial 100: Choice P, Reward 1, Total 91
+this is model choice P
+Trial 1: Choice P, Reward 1, Total 1
+this is model choice U
+Trial 2: Choice U, Reward 1, Total 2
+this is model choice P
+Trial 3: Choice P, Reward 0, Total 2
+this is model choice U
+Trial 4: Choice U, Reward 0, Total 2
+this is model choice U
+Trial 5: Choice U, Reward 1, Total 3
+this is model choice P
+Trial 6: Choice P, Reward 0, Total 3
+this is model choice P
+Trial 7: Choice P, Reward 1, Total 4
+this is model choice U
+Trial 8: Choice U, Reward 1, Total 5
+this is model choice P
+Trial 9: Choice P, Reward 0, Total 5
+this is model choice P
+Trial 10: Choice P, Reward 1, Total 6
+this is model choice U
+Trial 11: Choice U, Reward 1, Total 7
+this is model choice U
+Trial 12: Choice U, Reward 1, Total 8
+this is model choice U
+Trial 13: Choice U, Reward 1, Total 9
+this is model choice P
+Trial 14: Choice P, Reward 0, Total 9
+this is model choice P
+Trial 15: Choice P, Reward 1, Total 10
+this is model choice U
+Trial 16: Choice U, Reward 1, Total 11
+this is model choice P
+Trial 17: Choice P, Reward 0, Total 11
+this is model choice P
+Trial 18: Choice P, Reward 0, Total 11
+this is model choice U
+Trial 19: Choice U, Reward 1, Total 12
+this is model choice U
+Trial 20: Choice U, Reward 1, Total 13
+this is model choice P
+Trial 21: Choice P, Reward 0, Total 13
+this is model choice U
+Trial 22: Choice U, Reward 1, Total 14
+this is model choice U
+Trial 23: Choice U, Reward 1, Total 15
+this is model choice U
+Trial 24: Choice U, Reward 1, Total 16
+this is model choice P
+Trial 25: Choice P, Reward 0, Total 16
+this is model choice U
+Trial 26: Choice U, Reward 1, Total 17
+this is model choice U
+Trial 27: Choice U, Reward 1, Total 18
+this is model choice U
+Trial 28: Choice U, Reward 1, Total 19
+this is model choice P
+Trial 29: Choice P, Reward 0, Total 19
+this is model choice U
+Trial 30: Choice U, Reward 1, Total 20
+this is model choice P
+Trial 31: Choice P, Reward 0, Total 20
+this is model choice U
+Trial 32: Choice U, Reward 1, Total 21
+this is model choice U
+Trial 33: Choice U, Reward 1, Total 22
+this is model choice P
+Trial 34: Choice P, Reward 1, Total 23
+this is model choice P
+Trial 35: Choice P, Reward 0, Total 23
+this is model choice P
+Trial 36: Choice P, Reward 0, Total 23
+this is model choice P
+Trial 37: Choice P, Reward 0, Total 23
+this is model choice U
+Trial 38: Choice U, Reward 1, Total 24
+this is model choice P
+Trial 39: Choice P, Reward 0, Total 24
+this is model choice U
+Trial 40: Choice U, Reward 1, Total 25
+this is model choice P
+Trial 41: Choice P, Reward 0, Total 25
+this is model choice U
+Trial 42: Choice U, Reward 1, Total 26
+this is model choice U
+Trial 43: Choice U, Reward 1, Total 27
+this is model choice P
+Trial 44: Choice P, Reward 0, Total 27
+this is model choice U
+Trial 45: Choice U, Reward 1, Total 28
+this is model choice P
+Trial 46: Choice P, Reward 0, Total 28
+this is model choice U
+Trial 47: Choice U, Reward 1, Total 29
+this is model choice U
+Trial 48: Choice U, Reward 1, Total 30
+this is model choice P
+Trial 49: Choice P, Reward 0, Total 30
+this is model choice U
+Trial 50: Choice U, Reward 1, Total 31
+this is model choice U
+Trial 51: Choice U, Reward 1, Total 32
+this is model choice U
+Trial 52: Choice U, Reward 1, Total 33
+this is model choice P
+Trial 53: Choice P, Reward 1, Total 34
+this is model choice P
+Trial 54: Choice P, Reward 1, Total 35
+this is model choice P
+Trial 55: Choice P, Reward 1, Total 36
+this is model choice P
+Trial 56: Choice P, Reward 1, Total 37
+this is model choice P
+Trial 57: Choice P, Reward 1, Total 38
+this is model choice U
+Trial 58: Choice U, Reward 0, Total 38
+this is model choice P
+Trial 59: Choice P, Reward 1, Total 39
+this is model choice U
+Trial 60: Choice U, Reward 1, Total 40
+this is model choice P
+Trial 61: Choice P, Reward 1, Total 41
+this is model choice U
+Trial 62: Choice U, Reward 0, Total 41
+this is model choice P
+Trial 63: Choice P, Reward 1, Total 42
+this is model choice U
+Trial 64: Choice U, Reward 0, Total 42
+this is model choice P
+Trial 65: Choice P, Reward 1, Total 43
+this is model choice U
+Trial 66: Choice U, Reward 0, Total 43
+this is model choice P
+Trial 67: Choice P, Reward 1, Total 44
+this is model choice U
+Trial 68: Choice U, Reward 0, Total 44
+this is model choice P
+Trial 69: Choice P, Reward 1, Total 45
+this is model choice U
+Trial 70: Choice U, Reward 1, Total 46
+this is model choice P
+Trial 71: Choice P, Reward 1, Total 47
+this is model choice U
+Trial 72: Choice U, Reward 0, Total 47
+this is model choice P
+Trial 73: Choice P, Reward 1, Total 48
+this is model choice U
+Trial 74: Choice U, Reward 0, Total 48
+this is model choice P
+Trial 75: Choice P, Reward 1, Total 49
+this is model choice U
+Trial 76: Choice U, Reward 1, Total 50
+this is model choice P
+Trial 77: Choice P, Reward 1, Total 51
+this is model choice P
+Trial 78: Choice P, Reward 1, Total 52
+this is model choice U
+Trial 79: Choice U, Reward 0, Total 52
+this is model choice P
+Trial 80: Choice P, Reward 1, Total 53
+this is model choice U
+Trial 81: Choice U, Reward 0, Total 53
+this is model choice P
+Trial 82: Choice P, Reward 1, Total 54
+this is model choice P
+Trial 83: Choice P, Reward 1, Total 55
+this is model choice U
+Trial 84: Choice U, Reward 0, Total 55
+this is model choice P
+Trial 85: Choice P, Reward 1, Total 56
+this is model choice U
+Trial 86: Choice U, Reward 0, Total 56
+this is model choice P
+Trial 87: Choice P, Reward 1, Total 57
+this is model choice U
+Trial 88: Choice U, Reward 1, Total 58
+this is model choice P
+Trial 89: Choice P, Reward 0, Total 58
+this is model choice P
+Trial 90: Choice P, Reward 1, Total 59
+this is model choice U
+Trial 91: Choice U, Reward 0, Total 59
+this is model choice P
+Trial 92: Choice P, Reward 1, Total 60
+this is model choice U
+Trial 93: Choice U, Reward 0, Total 60
+this is model choice P
+Trial 94: Choice P, Reward 1, Total 61
+this is model choice U
+Trial 95: Choice U, Reward 0, Total 61
+this is model choice P
+Trial 96: Choice P, Reward 1, Total 62
+this is model choice U
+Trial 97: Choice U, Reward 0, Total 62
+this is model choice P
+Trial 98: Choice P, Reward 1, Total 63
+this is model choice U
+Trial 99: Choice U, Reward 0, Total 63
+this is model choice P
+Trial 100: Choice P, Reward 1, Total 64

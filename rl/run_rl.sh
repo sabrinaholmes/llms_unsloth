@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=llama-70B-predictive-rl
+#SBATCH --job-name=rl-centaur
 #SBATCH --partition=gpu
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
@@ -30,4 +30,4 @@ source $(spack location -i miniconda3)/etc/profile.d/conda.sh
 conda activate unsloth_env
 echo "Conda environment 'unsloth_env' activated."
 
-srun python predictive_rl_llama.py
+srun python rl_centaur.py
