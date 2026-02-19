@@ -1,5 +1,3 @@
-import transformers
-
 import pandas as pd
 import numpy as np
 import random
@@ -12,33 +10,26 @@ DATA_IN_TEST = 'data/in/test_data.csv'
 
 MODEL = 'llama-70B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/predictive/{MODEL}/singles'
-
-def build_full_transcript(past_trials: list,total_trials) -> str:
+def build_prediction_prompt(past_trials: list,total_trials) -> str:
     """
     Formats the entire game history as a continuous dialogue.
     Each trial is an assistant turn, allowing for NLL extraction
     at every 'choice' token in a single forward pass.
     """
     # 1. System Prompt (The Rules)
-    transcript = (
-        "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-        "In this task, you have to repeatedly choose between two slot machines labeled U and P.\n"
-        "You can choose a slot machine by pressing its corresponding key."
+    system_msg = [
+        "In this task, you have to repeatedly choose between two slot machines labeled U and P."
         "When you select one of the machines, you will win 1 or 0 points."
         "Your goal is to choose the slot machines that will give you the most points."
-        "You will receive feedback about the outcome after making a choice.\n"
+        "You will receive feedback about the outcome after making a choice."
         "The environment may change unpredictably, and past success does not guarantee future results. You’ll need to adapt to these changes to keep finding the better machine."
-        f"You will play 1 game in total, consisting of {total_trials} trials."
-        " Game 1:"
-        "Respond with ONLY the character 'U' or 'P'.<|eot_id|>"
-    )
-
-    # 2. Initial User Trigger
-    transcript += (
-        "<|start_header_id|>user<|end_header_id|>\n\n"
-        "The game begins now. Please make your first choice.<|eot_id|>"
-    )
-
+        "You will play 1 game in total, consisting of 100 trials."
+        "Respond with ONLY the character 'U' or 'P'."
+    ]
+    system_text = "".join(system_msg)
+    transcript = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{system_text}<|eot_id|>"
+    # 2. THE FIX: Add the initial User prompt to start the game
+    transcript += f"<|start_header_id|>user<|end_header_id|>\nGame 1."
     # 3. Iterative Assistant/User turns
     for i, trial in enumerate(past_trials):
         # The choice is the Assistant's action
@@ -47,14 +38,14 @@ def build_full_transcript(past_trials: list,total_trials) -> str:
         #print(choice)
 
         # We wrap the choice in the assistant header so the model "owns" it
-        transcript += f"<|start_header_id|>assistant<|end_header_id|>\n\n{choice}<|eot_id|>"
+        transcript += f"<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n{choice}<|eot_id|>"
 
         # We provide the reward in a User block (as feedback from the environment)
         # We only add this if it's not the very last trial (unless you want to evaluate the next)
         if i < len(past_trials) - 1:
             transcript += (
-                f"<|start_header_id|>user<|end_header_id|>\n\n"
-                f"Result: {reward} points. Make your next choice.<|eot_id|>"
+                f"<|start_header_id|>user<|end_header_id|>\n"
+                f"-> {reward} points."
             )
 
     return transcript
@@ -77,7 +68,7 @@ def predict_participant(df_participant: pd.DataFrame, model, tokenizer):
             "cumulative_reward": df_participant.iloc[:trial+1]['reward'].sum()
         })
 
-    prompt = build_full_transcript(past_trials,total_trials)
+    prompt = build_prediction_prompt(past_trials,total_trials)
     #print(f"Prompt:\n{prompt}")
 
     # Tokenize the full participant prompt once
@@ -95,7 +86,8 @@ def predict_participant(df_participant: pd.DataFrame, model, tokenizer):
         # 4. Find choice positions using Regex
         # We look for the Choice (U or P) immediately followed by the <|eot_id|>
         # This matches the specific Assistant turns in our transcript
-        choice_pattern = r"(?<=\n\n)([UP])(?=<\|eot_id\|>)"
+        # Regex to find 'I' or 'H' only when they follow the assistant header
+        choice_pattern = r"(?<=<\|start_header_id\|>assistant<\|end_header_id\|>\n)([UP])(?=<\|eot_id\|>)"
         matches = list(re.finditer(choice_pattern, prompt))
 
         for choice_idx, match in enumerate(matches):
@@ -137,8 +129,6 @@ def predict_participant(df_participant: pd.DataFrame, model, tokenizer):
     print(f"🎯 Overall NLL: {overall_nll:.4f}")
 
     return per_trial_results, overall_nll,prompt
-
-
 
 def main():
 

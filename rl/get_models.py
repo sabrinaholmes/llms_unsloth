@@ -5,6 +5,11 @@ from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 from tqdm import tqdm
 import random, torch
 
+from huggingface_hub import whoami, HfApi,HfFolder,login
+
+access_token = HfFolder.get_token()
+login(token=access_token)
+
 MODEL_PATHS = {
     'centaur-70B': 'marcelbinz/Llama-3.1-Centaur-70B',
     'centaur-70B-adapter': 'marcelbinz/Llama-3.1-Centaur-70B-adapter',
@@ -64,21 +69,25 @@ def create_text_generation_pipeline(model, tokenizer, temperature=1.0, max_new_t
     Returns:
         A transformers pipeline object for text generation.
     """
-    return transformers.pipeline(
-            "text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            trust_remote_code=True,
-            pad_token_id=0,
-            do_sample=True,
-            temperature=1.0,
-            max_new_tokens=1,
-)
-def generate(prompt: str, pipe: transformers.pipeline) -> str:
-     """Generates a response from the model using the provided prompt.
+    return pipeline(
+        "text-generation",
+        model=model,
+        tokenizer=tokenizer,
+        trust_remote_code=True,
+        pad_token_id=0,
+        do_sample=True,
+        temperature=temperature,
+        max_new_tokens=max_new_tokens,
+    )
+
+
+def generate(prompt: str, pipe) -> str:
+    """Generates a response from the model using the provided prompt.
+
     Args:
         prompt (str): The input prompt for the model.
-        pipe (transformers.pipeline): The text generation pipeline.
+        pipe: The text generation pipeline.
+
     Returns:
         str: The generated text response from the model.
     """

@@ -1,6 +1,5 @@
 import get_models
 from unsloth import FastLanguageModel
-import transformers
 import pandas as pd
 import numpy as np
 import random
@@ -10,8 +9,8 @@ import gc
 
 
 MODEL = 'llama-70B-adapter'  # Change this to the desired model name
-DATA_FOLDER_OUT = f'data/out/{MODEL}_unsloth_seeds/singles'
-
+DATA_FOLDER_OUT = f'data/out/{MODEL}/singles'
+SIMULATION_NUMBER = 32
 
 
 def generate_timeline(num_trials=100, seed=42):
@@ -55,55 +54,35 @@ def build_generate_prompt(current_trial: int, past_trials: list, total_trials: i
     Builds a multi-turn prompt where each past choice is an 'assistant' message
     and each reward is a 'user' message.
     """
-    # 1. System Identity
-    prompt = (
-       "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-        "In this task, you have to repeatedly choose between two slot machines labeled U and P.\n"
-        "You can choose a slot machine by pressing its corresponding key."
+    # 1. System Prompt (The Rules)
+    system_msg = [
+        "In this task, you have to repeatedly choose between two slot machines labeled U and P."
         "When you select one of the machines, you will win 1 or 0 points."
         "Your goal is to choose the slot machines that will give you the most points."
-        "You will receive feedback about the outcome after making a choice.\n"
+        "You will receive feedback about the outcome after making a choice."
         "The environment may change unpredictably, and past success does not guarantee future results. You’ll need to adapt to these changes to keep finding the better machine."
-        f"You will play 1 game in total, consisting of {total_trials} trials."
-        " Game 1:"
-        "Respond with ONLY the character 'U' or 'P'.<|eot_id|>"
-    )
-
-    # 2. History of turns
+        "You will play 1 game in total, consisting of 100 trials."
+        "Respond with ONLY the character 'U' or 'P'."
+    ]
+    system_text = "".join(system_msg)
+    prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{system_text}<|eot_id|>"
+    # 2. THE FIX: Add the initial User prompt to start the game
+    prompt += f"<|start_header_id|>user<|end_header_id|>\nGame 1."
+    
     if not past_trials:
-        # First turn trigger
-        prompt += (
-            "<|start_header_id|>user<|end_header_id|>\n\n"
-            f"Trial 1 of {total_trials}. Make your choice.<|eot_id|>"
-        )
+        prompt += "No trials completed yet."
     else:
-        # Reconstruct the conversation
-        for i, trial in enumerate(past_trials):
-            # What the user (environment) said
-            if i == 0:
-                user_msg = f"Trial 1 of {total_trials}. Make your choice."
-            else:
-                user_msg = f"Result: {past_trials[i-1]['reward']} points. Trial {trial['trial_num']} of {total_trials}."
-
-            prompt += f"<|start_header_id|>user<|end_header_id|>\n\n{user_msg}<|eot_id|>"
-
-            # What the model (assistant) chose
-            prompt += f"<|start_header_id|>assistant<|end_header_id|>\n\n{trial['choice']}<|eot_id|>"
-
-        # 3. The current trial request
-        last_reward = past_trials[-1]['reward']
-        prompt += (
-            f"<|start_header_id|>user<|end_header_id|>\n\n"
-            f"Result: {last_reward} points. Trial {current_trial} of {total_trials}. "
-            "Make your choice.<|eot_id|>"
-        )
-
-    # 4. Final Assistant Header to trigger generation
-    prompt += "<|start_header_id|>assistant<|end_header_id|>\n\n"
-    #print(prompt)
-
-    return 
-
+        # Build a concise table of history
+        # 3. Interleave History
+        for trial in past_trials:
+            # The choice is what the Assistant did
+            prompt += f"<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n{trial['choice']}<|eot_id|>"
+            # The reward is what the User (Environment) gave back
+            prompt += f"<|start_header_id|>user<|end_header_id|>\n->{trial['reward']} points."
+    
+    # 3. Final Assistant Header
+    prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n"
+    return prompt
 
 def simulate_participant(timeline: list, pipe):
     history = []
@@ -141,7 +120,6 @@ def simulate_participant(timeline: list, pipe):
 
     return pd.DataFrame(history)
 
-
 def main():
 
     if not os.path.exists(DATA_FOLDER_OUT):
@@ -154,12 +132,12 @@ def main():
     model._past = None  # Reset past states if necessary
     torch.cuda.empty_cache()  # Clear GPU memory again
     pipe=get_models.create_text_generation_pipeline(model,tokenizer,max_new_tokens=1)
+
     # Run simulation for each seed
-    for run_id, seed in enumerate(seeds):
-        out_path = f'{DATA_FOLDER_OUT}/participant_' + str(seed) + '.csv'
+    for run_id in range(SIMULATION_NUMBER):
+        out_path = f'{DATA_FOLDER_OUT}/participant_{run_id}.csv'
         gc.collect()
         torch.cuda.empty_cache()
-        fix_seed(seed)  # Ensure reproducibility
         # Run simulation
         history = simulate_participant(timeline,pipe)
         # Save results
