@@ -1,0 +1,7 @@
+model_id,overall_nll,prompt_path
+llama-70B-adapter,1.4049020494733537,data/out/predictive/llama-70B-adapter/singles/prompts/participant_1_d83ad41828ab.txt.gz
+llama-70B-adapter,1.387832236289978,data/out/predictive/llama-70B-adapter/singles/prompts/participant_2_86ab78c8421a.txt.gz
+llama-70B-adapter,1.2541896368776049,data/out/predictive/llama-70B-adapter/singles/prompts/participant_7_a0dcb588fb77.txt.gz
+llama-70B-adapter,1.293669262102672,data/out/predictive/llama-70B-adapter/singles/prompts/participant_23_3d09c011ce8d.txt.gz
+llama-70B-adapter,1.1915958280009882,data/out/predictive/llama-70B-adapter/singles/prompts/participant_26_543957428092.txt.gz
+llama-70B-adapter,1.2380858148847307,data/out/predictive/llama-70B-adapter/singles/prompts/participant_31_6ddbd98915af.txt.gz
