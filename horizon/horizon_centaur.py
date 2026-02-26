@@ -135,6 +135,7 @@ def simulate_participant(timeline_df, pipe):
             print(f"Game {game_id} (H={horizon}) Trial {row['trial_num_block']}: {model_choice} -> {reward} pts")
 
     return pd.DataFrame(history)
+
 def main():
 
     if not os.path.exists(DATA_FOLDER_OUT):

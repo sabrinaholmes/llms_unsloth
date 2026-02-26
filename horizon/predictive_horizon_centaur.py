@@ -2,76 +2,18 @@ import pandas as pd
 import numpy as np
 import random
 import torch
-import torch.nn.functional as F
 import get_models
 import os
 import hashlib
 import gzip
 import re
+from horizon_prompt import build_multi_game_prompt, define_choice_options_from_df
 
 DATA_IN_TEST = 'data/in/test_data.csv'
 
 MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
-DATA_FOLDER_OUT = f'data/out/predictive/{MODEL}/singles'
+DATA_FOLDER_OUT = f'data/out/predictive_h100/{MODEL}/singles'
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
-
-def format_single_game_history(game_id, game_df, is_current_game=False, current_trial=None,trial_col=None):
-    """Formats a single game's header and trials into a block of text."""
-    total_trials = game_df[trial_col].max()
-    
-    # Header for the game
-    lines = [f"Game {game_id}. There are {total_trials} trials in this game."]
-    
-    # 1. Add Forced Trials (always included)
-    forced = game_df[game_df["type"] == "forced"]
-    for _, row in forced.iterrows():
-        lines.append(f"You are instructed to press {row['choice']} and get {row['reward']} points.")
-    
-    # 2. Add Free Trials
-    # If it's the current game, only add trials BEFORE the current decision
-    if is_current_game:
-        free = game_df[(game_df["type"] == "free") & (game_df[trial_col] < current_trial)]
-    else:
-        free = game_df[game_df["type"] == "free"]
-        
-    for _, row in free.iterrows():
-        lines.append(f"You press <<{row['choice']}>> and get {row['reward']} points.")
-        
-    return "\n".join(lines)
-
-def build_multi_game_prompt(block_df, current_game_id, current_trial, trial_col='trial'):
-    """Constructs the full prompt history across all games in a block."""
-    
-    # Initial Instructions (Only show this once at the very top)
-    full_prompt = [
-        "You are participating in multiple games involving two slot machines, labeled I and H",
-        "The two slot machines are different across different games.",
-        "Each time you choose a slot machine, you get some points.",
-        "You choose a slot machine by pressing the corresponding key.",
-        "Each slot machine tends to pay out about the same amount of points on average.",
-        "Your goal is to choose the slot machines that will give you the most points across the experiment",
-        "The first 4 trials in each game are instructed trials where you will be told which slot machine to choose."
-        "After these instructed trials, you will have the freedom to choose for either 1 or 6 trials"
-    ]
-    # 1. Add all COMPLETED games
-    past_games_ids = sorted(block_df[block_df['game'] < current_game_id]['game'].unique())
-    for g_id in past_games_ids:
-        game_data = block_df[block_df['game'] == g_id]
-        full_prompt.append(format_single_game_history(g_id, game_data,trial_col=trial_col))
-    
-    # 2. Add the CURRENT game history
-    current_game_data = block_df[block_df['game'] == current_game_id]
-    full_prompt.append(format_single_game_history(
-        current_game_id, 
-        current_game_data, 
-        is_current_game=True, 
-        current_trial=current_trial,
-        trial_col=trial_col  # <--- Essential fix
-    ))    
-    # 3. Add the final trigger
-    return "\n".join(full_prompt) + "\nYou press <<"
-
-
 
 def save_prompt_file(prompt_text: str, participant_id: int) -> str:
     """Save a prompt as gzipped UTF-8 text and return the path."""
@@ -82,22 +24,30 @@ def save_prompt_file(prompt_text: str, participant_id: int) -> str:
     with gzip.open(path, "wt", encoding="utf-8") as f:
         f.write(prompt_text)
     return path
-import torch
-import pandas as pd
-import re
 
-def predict_participant_horizon(participant_df, model, tokenizer):
+def predict_participant_horizon(participant_df, model, tokenizer,llm_type='centaur'):
     """
     Simulates a participant by processing the entire game history in ONE forward pass.
     Calculates NLL, Top-2 probabilities, and aligns model predictions with human choices.
     """
     all_results = []
-
+    choice_options = define_choice_options_from_df(participant_df)
+    # Map choice labels (e.g., 'J', 'R') to their tokenizer token ids (first token)
+    raw_choice_labels = [str(c).strip() for c in choice_options]
+    choice_token_ids = {}
+    for lbl in raw_choice_labels:
+        enc = tokenizer(lbl, add_special_tokens=False)
+        if enc.get('input_ids'):
+            choice_token_ids[lbl.upper()] = enc['input_ids'][0]
+        else:
+            print(f"⚠️ Warning: Could not tokenize choice label '{lbl}'")
     # 1. Build the full prompt representing the entire game history
     # We use the final state to get the full string, then index into it
     full_prompt = build_multi_game_prompt(participant_df, 
                                           participant_df['game'].max(), 
-                                          participant_df['trial'].max())
+                                          participant_df['trial'].max(),
+                                          choice_options=choice_options,
+                                          llm_type='centaur')
 
     # 2. Tokenize once
     encoding = tokenizer(full_prompt, return_tensors="pt", truncation=True)
@@ -119,7 +69,9 @@ def predict_participant_horizon(participant_df, model, tokenizer):
             
             # Map character position to token index
             token_idx = encoding.char_to_token(0, char_pos)
-            if token_idx is None: continue
+            if token_idx is None:
+                print(f"⚠️ Warning: Could not map choice at position {char_pos} to a token.")
+                continue
 
             # ALIGNMENT: The logit predicting the choice is at [token_idx - 1]
             logits = all_logits[token_idx - 1]
@@ -129,34 +81,86 @@ def predict_participant_horizon(participant_df, model, tokenizer):
             probs = torch.exp(log_probs)
 
             # Get NLL for the actual human choice
-            actual_token_id = input_ids[0, token_idx]
-            nll = -log_probs[actual_token_id].item()
-            
-            # 6. Get Top-2 for analysis
+            actual_token_id = int(input_ids[0, token_idx].item())
+            raw_nll = -log_probs[actual_token_id].item()
+
+            # Compute normalized NLL by conditioning on the mass over choice-token ids
+            choice_ids = list(choice_token_ids.values())
+            if choice_ids:
+                device = log_probs.device
+                # Build a tensor of log_probs for the choice ids, guarding out-of-range ids
+                choice_log_probs = []
+                for cid in choice_ids:
+                    if 0 <= cid < log_probs.shape[-1]:
+                        choice_log_probs.append(log_probs[cid])
+                    else:
+                        choice_log_probs.append(torch.tensor(float('-inf'), device=device))
+                choice_log_probs = torch.stack(choice_log_probs)
+                logsum = torch.logsumexp(choice_log_probs, dim=0).item()
+                normalized_nll = -(log_probs[actual_token_id].item() - logsum)
+            else:
+                normalized_nll = raw_nll
+
+            # Save raw and normalized probabilities for each choice label
+            choice_raw_probs = {}
+            choice_probs = {}
+            if choice_token_ids:
+                # compute raw probs and normalized probs (conditioned on choice mass)
+                for lbl, cid in choice_token_ids.items():
+                    if 0 <= cid < log_probs.shape[-1]:
+                        raw_p = float(torch.exp(log_probs[cid]).item())
+                    else:
+                        raw_p = 0.0
+                    choice_raw_probs[lbl] = raw_p
+                # normalize over the choice tokens mass
+                total_raw = sum(choice_raw_probs.values())
+                if total_raw > 0:
+                    for lbl in choice_raw_probs:
+                        choice_probs[lbl] = choice_raw_probs[lbl] / total_raw
+                else:
+                    for lbl in choice_raw_probs:
+                        choice_probs[lbl] = 0.0
+            else:
+                choice_raw_probs = {}
+                choice_probs = {}
+
+            # Get Top-2 for analysis
             top2_probs, top2_indices = torch.topk(log_probs, 2)
             top2_tokens = tokenizer.convert_ids_to_tokens(top2_indices)
             top2_probs = top2_probs.exp().tolist()
 
-            # Extract trial-specific metadata from the original DF
-            # This ensures we match the correct reward/horizon for this trial
+            # Extract trial-specific metadata
             row = participant_df.iloc[trial_idx]
-
             all_results.append({
                 "participant_id": participant_df['participant_id'].iloc[0],
                 "game": row["game"],
-                "trial_index": row["trial"],
-                "ground_truth": choice_char,
-                "nll": nll,
-                "is_free": row["type"] == "free",
-                'top2': list(zip(top2_tokens, top2_probs))
+                "ground_truth": match.group(1),
+                "raw_nll": raw_nll,
+                "nll": normalized_nll,
+                "choice_raw_probs": choice_raw_probs,
+                "choice_probs": choice_probs,
+                'top2': list(zip(top2_tokens, top2_probs)),
             })
-    
+            
+
     # Compute summary statistics
     valid_trial_nlls = [r['nll'] for r in all_results if r['nll'] != float('inf')]
     overall_nll = sum(valid_trial_nlls) / len(valid_trial_nlls) if valid_trial_nlls else float('inf')
-
-    print(f"✅ Simulation complete")
     print(f"🎯 Overall NLL: {overall_nll:.4f}")
+    # raw nll summary
+    valid_raw_nlls = [r['raw_nll'] for r in all_results if r['raw_nll'] != float('inf')]
+    overall_raw_nll = sum(valid_raw_nlls) / len(valid_raw_nlls) if valid_raw_nlls else float('inf')
+    print(f"🎯 Overall NLL (raw): {overall_raw_nll}")
+    # compute how many trials had a top-2 token that was not a choice label
+    non_choice_top2_count = sum(
+        1 for r in all_results
+        if not all(
+            token in choice_token_ids for token, _ in r.get('top2', [])
+        )
+    )
+    print(f"Number of trials with non-choice-label top-2 tokens: {non_choice_top2_count}")
+    
+    print(f"\n✅ Simulation complete")
 
     return all_results, overall_nll, full_prompt
 
@@ -198,7 +202,6 @@ def main():
         all_model_results.append({
             'model_id': MODEL,
             'overall_nll': overall_nll,
-            'prompt_path': prompt_path
         })
 
     # Create a DataFrame for all models
