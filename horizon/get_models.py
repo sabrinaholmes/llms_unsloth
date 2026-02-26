@@ -14,9 +14,11 @@ MODEL_PATHS = {
     'centaur-70B': 'marcelbinz/Llama-3.1-Centaur-70B',
     'centaur-70B-adapter': 'marcelbinz/Llama-3.1-Centaur-70B-adapter',
     'centaur-8B': 'marcelbinz/Llama-3.1-Centaur-8B',
+    'centaur-8b-unsloth':'marcelbinz/Llama-3.1-Minitaur-8B-adapter',
     'llama-70B': 'meta-llama/Meta-Llama-3.1-70B-Instruct',
     'llama-70B-adapter': 'unsloth/Meta-Llama-3.1-70B-Instruct-bnb-4bit',
     'llama-8B': 'meta-llama/Meta-Llama-3.1-8B-Instruct',
+    'llama-8b-unsloth': 'unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit',
     'llama-3-8B': 'meta-llama/Meta-Llama-3-8B-Instruct',
     'llama-3-70B': 'meta-llama/Meta-Llama-3-70B-Instruct' # Added for completeness
 }

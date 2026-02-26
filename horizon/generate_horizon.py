@@ -14,7 +14,7 @@ import horizon_prompt
 from horizon_prompt import build_multi_game_prompt, define_choice_options_from_df
 
 DATA_IN_ = 'data/in/timeline_structure.csv'
-MODEL = 'llama-70B-adapter'  # Change this to the desired model name
+MODEL = 'centaur-8b-unsloth'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
 
@@ -90,6 +90,8 @@ def main():
     for participant_id in participant_ids:
         out_path = f'{DATA_FOLDER_OUT}/participant_{participant_id}.csv'
         participant_data = timeline[timeline['participant_id'] == participant_id]
+        #simulate only first 100 games
+        participant_data = participant_data[participant_data['game'] <= 100]
         if os.path.exists(out_path):
             print(f"File {out_path} already exists. Skipping simulation for participant {participant_id}.")
             continue
@@ -98,7 +100,7 @@ def main():
         gc.collect()
         torch.cuda.empty_cache()
         # Run simulation
-        history = simulate_participant(participant_data, pipe, model, tokenizer, choice_options=CHOICE_OPTIONS, llm_type=LLM_TYPE)
+        history = simulate_participant(participant_data, pipe, CHOICE_OPTIONS, llm_type=LLM_TYPE)
         # Save results
         history.to_csv(out_path, index=False)
         # Cleanup: delete model and clear memory

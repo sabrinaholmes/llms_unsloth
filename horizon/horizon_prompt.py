@@ -92,13 +92,13 @@ def format_single_game_llama(game_id, game_df):
 def format_single_game(game_id, game_df, llm_type='centaur', is_current_game=False, current_trial=None, trial_col='trial'):
     """Dispatch to the appropriate per-game formatter for `llm_type`.
 
-    - For `centaur`, uses `format_single_game_history` which produces natural-language
+    - For `centaur`, uses `format_single_game_centaur` which produces natural-language
       instructions and respects `is_current_game`/`current_trial`.
-    - For `llama`, uses `format_single_game_block` which produces the token-marked
+    - For `llama`, uses `format_single_game_llama` which produces the token-marked
       blocks used by the llama prompt format and also respects current-game filtering.
     """
     if llm_type == 'centaur':
-        return format_single_game_history(game_id, game_df, is_current_game=is_current_game, current_trial=current_trial, trial_col=trial_col)
+        return format_single_game_centaur(game_id, game_df, is_current_game=is_current_game, current_trial=current_trial, trial_col=trial_col)
     elif llm_type == 'llama':
         # For llama, format_single_game_llama currently includes all free trials.
         # If we need to limit to trials before the current decision, emulate that here.
