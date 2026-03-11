@@ -60,7 +60,7 @@ def build_prediction_centaur_prompt(timeline_df) -> str:
 
         # Remaining elements are the participant's actual choices
         for trial in range(1, len(x)):
-            prompt += f"You press <<{x[trial]}>> and get {y[trial]} points.\n"
+            prompt += f"You press <<{x[trial]}>> and receive {y[trial]} points.\n"
 
     return prompt
 
@@ -91,7 +91,7 @@ def build_generate_prompt_centaur(completed_envs, current_env_history, scenario,
         prompt += f'\n\nEnvironment number {env_idx + 1}:\n'
         prompt += f'The value of option {x[0]} is {y[0]}. You have {env_horizon} choices to make in this environment.\n'
         for i in range(1, len(x)):
-            prompt += f'You press <<{x[i]}>> and get {y[i]} points.\n'
+            prompt += f'You press <<{x[i]}>> and receive {y[i]} points.\n'
 
     # Current in-progress environment
     env_num = len(completed_envs) + 1
@@ -99,7 +99,7 @@ def build_generate_prompt_centaur(completed_envs, current_env_history, scenario,
     prompt += f'\n\nEnvironment number {env_num}:\n'
     prompt += f'The value of option {x[0]} is {y[0]}. You have {horizon} choices to make in this environment.\n'
     for i in range(1, len(x)):
-        prompt += f'You press <<{x[i]}>> and get {y[i]} points.\n'
+        prompt += f'You press <<{x[i]}>> and receive {y[i]} points.\n'
 
     # Elicit next choice
     prompt += 'You press <<'

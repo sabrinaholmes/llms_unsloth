@@ -23,7 +23,7 @@ NUMBER_OF_PARTICIPANTS_PER_SCENARIO_2 = NUMBER_OF_PARTICIPANTS - NUMBER_OF_PARTI
 
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
 
-def simulate_participant(timeline_df, pipe, scenario=0,n_envs=16,kernel_type='rough'):
+def simulate_participant(timeline_df, pipe, participant_id, scenario=0, n_envs=16, kernel_type='rough', seed=None):
     """
     Open-loop centaur simulation: model generates choices step-by-step
     using kernel reward landscapes.
@@ -33,14 +33,21 @@ def simulate_participant(timeline_df, pipe, scenario=0,n_envs=16,kernel_type='ro
                      columns: env, tile_0..tile_29 (float 0-1), scale (int 65-85).
                      Also accepts pre-scaled versions (tile values as ints).
         pipe: transformers text-generation pipeline.
+        participant_id: unique participant index used as default RNG seed.
         scenario: 0 = accumulation, 1 = maximization.
         horizon: choices per environment; if None, randomly 5 or 10 per env.
         n_envs: number of environments to simulate (default 16).
         kernel_type: type of kernel (rough or smooth).
+        seed: explicit RNG seed; defaults to participant_id.
 
     Returns:
         results: list of dicts per trial with env_idx, env_id, trial, choice, reward.
     """
+    random_seed = seed if seed is not None else participant_id
+    random.seed(random_seed)
+    np.random.seed(random_seed)
+    torch.manual_seed(random_seed)
+
     envs = timeline_df['env'].unique()
     selected_envs = random.sample(list(envs), n_envs)
     print(f'Selected environments: {selected_envs}')
@@ -49,7 +56,6 @@ def simulate_participant(timeline_df, pipe, scenario=0,n_envs=16,kernel_type='ro
     horizon_assignments = [5] * half + [10] * (n_envs - half)
     random.shuffle(horizon_assignments)
     horizon_dict = dict(zip(selected_envs, horizon_assignments))
-    
     completed_envs = []
     results = []
 
@@ -100,6 +106,7 @@ def simulate_participant(timeline_df, pipe, scenario=0,n_envs=16,kernel_type='ro
                 'kernel': kernel_type,
                 'reward': reward,
                 'prompt':prompt,
+                'random_seed': random_seed,
             })
             print(f'  Choice={choice}, Reward={reward}, Number of invalid choices so far: {sum(1 for r in results if r["choice"] is None)}')
 
@@ -149,7 +156,7 @@ def main():
             print(f'\nSimulating participant {participant_id} (scenario={scenario}, kernel={kernel_type})')
             gc.collect()
             torch.cuda.empty_cache()
-            results = simulate_participant(kernel_df, pipe, scenario=scenario, kernel_type=kernel_type)
+            results = simulate_participant(kernel_df, pipe, participant_id=participant_id, scenario=scenario, kernel_type=kernel_type)
             result_df = pd.DataFrame(results)
             result_df.to_csv(out_path, index=False)
             print(f'Results saved to {out_path}')
