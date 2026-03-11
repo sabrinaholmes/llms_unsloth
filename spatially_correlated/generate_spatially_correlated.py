@@ -70,9 +70,9 @@ def simulate_participant(timeline_df, pipe, participant_id, scenario=0, n_envs=1
             base_reward = env_row[f'tile_{option}']
             # add some normally distributed noise to the reward with mean 0 and std 1
             return int(base_reward + np.random.normal(0, 1))
-        reward = get_reward(init_option)
-        current_env = {'x': [init_option], 'y': [reward]}
-        print(f'\nEnv {env_idx + 1} (id={env_id}): initial option={init_option}, reward={reward}, horizon={env_horizon}')
+        init_reward = get_reward(init_option)
+        current_env = {'x': [init_option], 'y': [init_reward]}
+        print(f'\nEnv {env_idx + 1} (id={env_id}): initial option={init_option}, reward={init_reward}, horizon={env_horizon}')
 
         for trial in range(env_horizon):
             prompt = build_generate_prompt_centaur(
@@ -104,6 +104,9 @@ def simulate_participant(timeline_df, pipe, participant_id, scenario=0, n_envs=1
                 'choice': choice,
                 'scenario': scenario,
                 'kernel': kernel_type,
+                'init_option': init_option,
+                'horizon': env_horizon,
+                'init_reward': init_reward,
                 'reward': reward,
                 'prompt':prompt,
                 'random_seed': random_seed,
