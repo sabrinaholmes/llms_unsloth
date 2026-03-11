@@ -73,8 +73,21 @@ def simulate_participant(timeline_df, pipe, scenario=0,n_envs=16,kernel_type='ro
                 completed_envs, current_env, scenario, env_horizon
             )
             choice = generate(prompt, pipe)
+            if choice is not None:
+                choice = choice.strip()  # Remove any leading/trailing whitespace
+            if choice is not None and choice != 'None':
+                choice=int(choice)
+                if choice not in range(1, 31):
+                    print(f"⚠️ Invalid choice '{choice}' generated")
+                    choice = None
+                    reward = 0
+                else:
+                    reward = get_reward(choice)
+            else:
+                choice = None
+                reward = 0
             print(f'Trial {trial + 1}: raw response={choice}')
-            reward = get_reward(choice)
+            
             current_env['x'].append(choice)
             current_env['y'].append(reward)
 
@@ -88,7 +101,7 @@ def simulate_participant(timeline_df, pipe, scenario=0,n_envs=16,kernel_type='ro
                 'reward': reward,
                 'prompt':prompt,
             })
-            print(f'  Choice={choice}, Reward={reward}')
+            print(f'  Choice={choice}, Reward={reward}, Number of invalid choices so far: {sum(1 for r in results if r["choice"] is None)}')
 
         completed_envs.append(current_env)
 
