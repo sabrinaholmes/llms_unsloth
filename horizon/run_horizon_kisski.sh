@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --job-name=horizon_centaur
-#SBATCH -t 00:05:00                  # Estimated time, adapt to your needs
+#SBATCH --job-name=gen_horizon_centaur
+#SBATCH -t 04:00:00                  # Estimated time, adapt to your needs
 #SBATCH --mail-type=all              # Send mail when job begins and ends
 #SBATCH -p kisski-h100                   # The partition
 #SBATCH -G H100:1                    # Request 1 GPUs
@@ -42,4 +42,4 @@ echo "Submitting job with sbatch from directory: ${SLURM_SUBMIT_DIR}"
 echo "Home directory: ${HOME}"
 echo "Working directory: $PWD"
 echo "Current node: ${SLURM_NODELIST}"
-python predictive_horizon_centaur.py
+python generate_horizon.py

@@ -14,7 +14,7 @@ import horizon_prompt
 from horizon_prompt import build_multi_game_prompt, define_choice_options_from_df
 
 DATA_IN_ = 'data/in/timeline_structure.csv'
-MODEL = 'centaur-8b-unsloth'  # Change this to the desired model name
+MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
 

@@ -118,7 +118,7 @@ def format_single_game_centaur(game_id, game_df, is_current_game=False, current_
     total_trials = game_df[trial_col].max()
     
     # Header for the game
-    lines = [f"Game {game_id}. There are {total_trials} trials in this game."]
+    lines = [f"\nGame {game_id}. There are {total_trials} trials in this game."]
     
     # 1. Add Forced Trials (always included)
     forced = game_df[game_df["type"] == "forced"]

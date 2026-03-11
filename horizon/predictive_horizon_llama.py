@@ -213,7 +213,6 @@ def main():
         })
         
         # delete cache to save space after each participant
-        del encoding, input_ids, all_logits
         torch.cuda.empty_cache()
         gc.collect()
 
