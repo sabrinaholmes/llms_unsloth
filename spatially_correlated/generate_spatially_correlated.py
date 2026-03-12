@@ -14,7 +14,7 @@ import gzip
 from spatially_correlated_prompt import build_generate_prompt_centaur
 
 DATA_IN_ = 'data/in/scaled_kernels'
-MODEL = 'centaur-8B-adapter'  # Change this to the desired model name
+MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
 NUMBER_OF_PARTICIPANTS = 81

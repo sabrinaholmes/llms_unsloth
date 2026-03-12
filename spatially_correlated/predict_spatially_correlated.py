@@ -7,12 +7,14 @@ import torch
 import torch.nn.functional as F
 import os
 from spatially_correlated_prompt import build_prediction_centaur_prompt
+from compare_prompts import is_prompt_in_test_set
 
-DATA_IN_TEST = 'data/in/experimentData1D.csv'
 
+DATA_IN_TEST = 'data/in/test/test_df.csv'  # This should be the test set created by create_test_df.py
 MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
-DATA_FOLDER_OUT = f'data/out/predictive_h100/{MODEL}/singles'
-
+DATA_FOLDER_OUT = f'data/out/predictive_accum/{MODEL}/singles'
+RUN_TEST_SET_ONLY = True  # Set to True to only run on prompts that are in the test set (for analysis purposes)
+TASK_TYPE = 'accumulation'  # Set to 'accumulation' or 'maximization' based on the scenario
 
 def predict_participant(participant_df, model, tokenizer):
     """
@@ -23,12 +25,21 @@ def predict_participant(participant_df, model, tokenizer):
 
     # 1. Build the full prompt representing the entire game history
     # We use the final state to get the full string, then index into it
-    full_prompt = build_prediction_centaur_prompt(participant_df)
+    if TASK_TYPE is not None:
+        print(f"Building prompt with specified task type: {TASK_TYPE}")
+        full_prompt = build_prediction_centaur_prompt(participant_df, task_type=TASK_TYPE)
+    else:
+        print(f"Building prompt with task type determined by participant scenario")
+        full_prompt = build_prediction_centaur_prompt(participant_df)
     participant_id = participant_df['id'].iloc[0]
 
     # 2. Tokenize once
     encoding = tokenizer(full_prompt, return_tensors="pt", truncation=True)
     input_ids = encoding['input_ids'].to(model.device)
+
+    # Check if the prompt is in the test set (for analysis purposes)
+    in_test_set = is_prompt_in_test_set(full_prompt)
+    print(f"Participant {participant_id} - Prompt in test set: {in_test_set}")
 
     with torch.no_grad():
         # 3. Single Forward Pass
@@ -106,6 +117,13 @@ def main():
 
         # Run simulation with model and tokenizer passed
         model_data = timeline[timeline['id'] == p]
+
+        if RUN_TEST_SET_ONLY:
+            full_prompt = build_prediction_centaur_prompt(model_data)
+            if not is_prompt_in_test_set(full_prompt):
+                print(f"Participant {p} not in test set. Skipping...")
+                continue
+
         results, overall_nll, prompt = predict_participant(model_data, model, tokenizer)
         result = pd.DataFrame(results)
 

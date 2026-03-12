@@ -9,8 +9,7 @@ def system_message(llm_type='llama',task_type='accumulation'):
         "You will be presented with a series of 16 different environments to explore.",
         "In each trial, you can select an option between numbers 1 and 30 by pressing the corresponding key.",
         "By selecting any of these options, you will earn points associated with each unique option.",
-        "Imagine these options 1 through 30 as lying next to each other in an ordered line;",
-        "options closer to each other tend to have similar rewards as rewards tend to cluster together.",
+        "Imagine these options 1 through 30 as lying next to each other in an ordered line; options closer to each other tend to have similar rewards as rewards tend to cluster together.",
         "For each environment, you will be able to make either 5 or 10 choices.",
         "When you made all your choices in a given environment, you will start making choices in the next unexplored environment.",
         "The rewards underlying the different options are different in each environment so you will learn them anew for each environment.",
@@ -27,19 +26,17 @@ def system_message(llm_type='llama',task_type='accumulation'):
     if llm_type == 'centaur' and task_type == 'accumulation':
         # insert task objective at the end of the system message for centaur
         sentences.append(
-            "It is your task to gain as many points as possible across all 16 environments.")
+            "It is your task to gain as many points as possible across all 16 environments.\n")
     if llm_type == 'centaur' and task_type == 'maximization':
         sentences.append(
-            "It is your task to to learn where the largest reward is in each of the 16 environments. ")
+            "It is your task to to learn where the largest reward is in each of the 16 environments.\n")
     return sentences
 
 
-def build_prediction_centaur_prompt(timeline_df) -> str:
+def build_prediction_centaur_prompt(timeline_df,task_type=None) -> str:
     """Builds the centaur-style prompt for the current trial with past trial data."""
-    if timeline_df['scenario'].iloc[0] == 0:
-        task_type = 'accumulation'
-    elif timeline_df['scenario'].iloc[0] == 1:
-        task_type = 'maximization'
+    if task_type is None:
+        task_type = 'accumulation' if timeline_df['scenario'].iloc[0] == 0 else 'maximization'
     system_msg = system_message(llm_type='centaur', task_type=task_type)
     prompt = "\n".join(system_msg)
     # Parse search history from the participant's row
@@ -50,7 +47,7 @@ def build_prediction_centaur_prompt(timeline_df) -> str:
     num_envs = len(search_history['xcollect'])
     print(f"Number of environments in search history: {num_envs}")
     for env in range(num_envs):
-        prompt += f"\n\nEnvironment number {env + 1}:\n"
+        prompt += f"\nEnvironment number {env + 1}:\n"
         # Determine number of choices per environment from horizon
         x = search_history['xcollect'][env]
         y = search_history['ycollectScaled'][env]
