@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import get_models
 from get_models import generate, create_text_generation_pipeline
 from unsloth import FastLanguageModel

@@ -1,8 +1,10 @@
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import pandas as pd
 import numpy as np
 import torch
 import get_models
-import os
 import hashlib
 import gzip
 import re

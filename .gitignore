@@ -12,3 +12,11 @@ env/
 logs/
 #ignore unsloth cache files
 unsloth_compiled_cache/
+# ignore cluster scripts
+*.sh
+#ignore prompts
+prompts/
+#ignore data folders
+data/
+#ignores figures
+figures/
