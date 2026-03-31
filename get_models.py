@@ -1,11 +1,20 @@
 import os
 import glob
 from unsloth import FastLanguageModel
-from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
+import transformers
+from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer, LogitsProcessor, LogitsProcessorList
 from tqdm import tqdm
 import random, torch
 
 from huggingface_hub import whoami, HfApi,HfFolder,login
+
+class AllowlistLogitsProcessor(LogitsProcessor):
+    def __init__(self, allowed_token_ids: list[int], device):
+        self.mask = torch.full((len(tokenizer),), float("-inf"), device=device)
+        self.mask[allowed_token_ids] = 0.0
+
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
+        return scores + self.mask
 
 access_token = HfFolder.get_token()
 login(token=access_token)
@@ -18,7 +27,7 @@ MODEL_PATHS = {
     'llama-70B': 'meta-llama/Meta-Llama-3.1-70B-Instruct',
     'llama-70B-adapter': 'unsloth/Meta-Llama-3.1-70B-Instruct-bnb-4bit',
     'llama-8B': 'meta-llama/Meta-Llama-3.1-8B-Instruct',
-    'llama-8b-unsloth': 'unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit',
+    'llama-8B-adapter': 'unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit',
     'llama-3-8B': 'meta-llama/Meta-Llama-3-8B-Instruct',
     'llama-3-70B': 'meta-llama/Meta-Llama-3-70B-Instruct' # Added for completeness
 }
@@ -83,14 +92,34 @@ def create_text_generation_pipeline(model, tokenizer, temperature=1.0, max_new_t
     )
 
 
-def generate(prompt: str, pipe) -> str:
-    """Generates a response from the model using the provided prompt.
+def generate(prompt: str, pipe: transformers.pipeline, tokenizer: AutoTokenizer, choice_options: list[str] = None, max_new_tokens: int = 1) -> str:
+    """Generates a response from the model using the provided prompt."""
 
-    Args:
-        prompt (str): The input prompt for the model.
-        pipe: The text generation pipeline.
+    logits_processor = None
+    if choice_options:
+        allowed_ids = pipe.tokenizer.convert_tokens_to_ids(choice_options)
+        allowed_ids = [i for i in allowed_ids if i != pipe.tokenizer.unk_token_id]
+        processor = AllowlistLogitsProcessor(allowed_ids, device=pipe.device)
+        logits_processor = LogitsProcessorList([processor])
+    return pipe(
+        prompt,
+        logits_processor=logits_processor,
+        max_new_tokens=max_new_tokens,       # for MCQ, you only need 1 token
+    )[0]['generated_text'][len(prompt):]
 
-    Returns:
-        str: The generated text response from the model.
-    """
-    return pipe(prompt)[0]['generated_text'][len(prompt):]
+
+class ModelWrapper:
+    def __init__(self, name: str, use_unsloth: bool = False, temperature: float = 1.0):
+        if use_unsloth:
+            self.model, self.tokenizer = get_model_no_pipe_unsloth(name)
+            FastLanguageModel.for_inference(self.model)
+        else:
+            self.model, self.tokenizer = get_model_no_pipe(name)
+        self.model._past = None
+        self.pipe = create_text_generation_pipeline(self.model, self.tokenizer, temperature)
+
+    def generate(self, prompt: str, choice_options: list[str] = None, max_new_tokens: int = 1) -> str:
+        # AllowlistLogitsProcessor reads the global `tokenizer`, so set it before instantiating
+        global tokenizer
+        tokenizer = self.tokenizer
+        return generate(prompt, self.pipe, self.tokenizer, choice_options, max_new_tokens)

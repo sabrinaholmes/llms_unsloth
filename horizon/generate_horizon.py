@@ -2,9 +2,6 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import get_models
-from get_models import generate, create_text_generation_pipeline
-from unsloth import FastLanguageModel
-import transformers
 import pandas as pd
 import numpy as np
 import random
@@ -24,7 +21,7 @@ PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
 CHOICE_OPTIONS=['I', 'H']
 
-def simulate_participant(timeline_df, pipe, choice_options, llm_type='llama'):
+def simulate_participant(timeline_df, wrapper, choice_options, llm_type='llama'):
     history = []
 
     for game_id, game_data in timeline_df.groupby('game'):
@@ -47,7 +44,7 @@ def simulate_participant(timeline_df, pipe, choice_options, llm_type='llama'):
             prompt = build_multi_game_prompt(current_history_df, game_id, i, trial_col='trial', choice_options=choice_options, llm_type=llm_type)
             #print(prompt)
             # 1. Generate Choice
-            model_choice = generate(prompt, pipe)
+            model_choice = wrapper.generate(prompt)
             if model_choice not in choice_options:
                 print(f"⚠️ Invalid choice '{model_choice}' at Game {game_id}, Trial {row['trial_num_block']}. Retrying...")
                 # Optional: Re-run with a tiny bit of temperature if it failed
@@ -84,11 +81,8 @@ def main():
     timeline = pd.read_csv(DATA_IN_)
     participant_ids = timeline['participant_id'].unique()
     # Initialize model
-    model,tokenizer = get_models.get_model_no_pipe_unsloth(MODEL)
-    FastLanguageModel.for_inference(model)
-    model._past = None  # Reset past states if necessary
-    torch.cuda.empty_cache()  # Clear GPU memory again
-    pipe=get_models.create_text_generation_pipeline(model,tokenizer,max_new_tokens=1)
+    wrapper = get_models.ModelWrapper(MODEL, use_unsloth=True)
+    torch.cuda.empty_cache()
     # Run simulation for each seed
     for participant_id in participant_ids:
         out_path = f'{DATA_FOLDER_OUT}/participant_{participant_id}.csv'
@@ -103,7 +97,7 @@ def main():
         gc.collect()
         torch.cuda.empty_cache()
         # Run simulation
-        history = simulate_participant(participant_data, pipe, CHOICE_OPTIONS, llm_type=LLM_TYPE)
+        history = simulate_participant(participant_data, wrapper, CHOICE_OPTIONS, llm_type=LLM_TYPE)
         # Save results
         history.to_csv(out_path, index=False)
         # Cleanup: delete model and clear memory

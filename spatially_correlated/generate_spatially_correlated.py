@@ -2,9 +2,6 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import get_models
-from get_models import generate, create_text_generation_pipeline
-from unsloth import FastLanguageModel
-import transformers
 import pandas as pd
 import numpy as np
 import random
@@ -14,19 +11,21 @@ import os
 import gc
 import hashlib
 import gzip
-from spatially_correlated_prompt import build_generate_prompt_centaur
+from spatially_correlated_prompt import build_generate_prompt_centaur,build_generate_prompt_llama
+
 
 DATA_IN_ = 'data/in/scaled_kernels'
-MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
+MODEL = 'llama-8B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
-NUMBER_OF_PARTICIPANTS = 81
-NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1 = 45
+NUMBER_OF_PARTICIPANTS = 5
+NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1 = 2
 NUMBER_OF_PARTICIPANTS_PER_SCENARIO_2 = NUMBER_OF_PARTICIPANTS - NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1
 
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
+choice_options = [str(i) for i in range(1, 31)]  # Model generates just the number after 'You press <<'
 
-def simulate_participant(timeline_df, pipe, participant_id, scenario=0, n_envs=16, kernel_type='rough', seed=None):
+def simulate_participant(timeline_df, wrapper, participant_id, scenario=0, n_envs=16, kernel_type='rough', seed=None):
     """
     Open-loop centaur simulation: model generates choices step-by-step
     using kernel reward landscapes.
@@ -36,6 +35,7 @@ def simulate_participant(timeline_df, pipe, participant_id, scenario=0, n_envs=1
                      columns: env, tile_0..tile_29 (float 0-1), scale (int 65-85).
                      Also accepts pre-scaled versions (tile values as ints).
         pipe: transformers text-generation pipeline.
+        tokenizer: The corresponding tokenizer.
         participant_id: unique participant index used as default RNG seed.
         scenario: 0 = accumulation, 1 = maximization.
         horizon: choices per environment; if None, randomly 5 or 10 per env.
@@ -78,10 +78,15 @@ def simulate_participant(timeline_df, pipe, participant_id, scenario=0, n_envs=1
         print(f'\nEnv {env_idx + 1} (id={env_id}): initial option={init_option}, reward={init_reward}, horizon={env_horizon}')
 
         for trial in range(env_horizon):
-            prompt = build_generate_prompt_centaur(
-                completed_envs, current_env, scenario, env_horizon
-            )
-            choice = generate(prompt, pipe)
+            if LLM_TYPE == 'centaur':
+                prompt = build_generate_prompt_centaur(
+                    completed_envs, current_env, scenario, env_horizon
+                )
+            else:
+                prompt = build_generate_prompt_llama(
+                    completed_envs, current_env, scenario, env_horizon
+                )
+            choice = wrapper.generate(prompt, choice_options=choice_options)
             if choice is not None:
                 choice = choice.strip()  # Remove any leading/trailing whitespace
             if choice is not None and choice != 'None':
@@ -129,11 +134,8 @@ def main():
     #load kernels for rough(kernel1_flat) and smooth(kernel2_flat) reward landscapes
     kernel1_df = pd.read_csv(f'{DATA_IN_}/kernel1_scaled.csv')
     kernel2_df = pd.read_csv(f'{DATA_IN_}/kernel2_scaled.csv')
-    model, tokenizer = get_models.get_model_no_pipe_unsloth(MODEL)
-    FastLanguageModel.for_inference(model)
-    model._past = None
+    wrapper = get_models.ModelWrapper(MODEL, use_unsloth=True, temperature=1.0)
     torch.cuda.empty_cache()
-    pipe = create_text_generation_pipeline(model, tokenizer, temperature=1.0, max_new_tokens=1)
     all_model_results = []
     for scenario in [0, 1]:
         num_participants= NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1 if scenario == 0 else NUMBER_OF_PARTICIPANTS_PER_SCENARIO_2
@@ -162,7 +164,7 @@ def main():
             print(f'\nSimulating participant {participant_id} (scenario={scenario}, kernel={kernel_type})')
             gc.collect()
             torch.cuda.empty_cache()
-            results = simulate_participant(kernel_df, pipe, participant_id=participant_id, scenario=scenario, kernel_type=kernel_type)
+            results = simulate_participant(kernel_df, wrapper, participant_id=participant_id, scenario=scenario, kernel_type=kernel_type)
             result_df = pd.DataFrame(results)
             result_df.to_csv(out_path, index=False)
             print(f'Results saved to {out_path}')

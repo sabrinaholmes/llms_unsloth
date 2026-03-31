@@ -2,7 +2,6 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import get_models
-from unsloth import FastLanguageModel
 import pandas as pd
 import numpy as np
 import random
@@ -87,7 +86,7 @@ def build_generate_prompt(current_trial: int, past_trials: list, total_trials: i
     prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n"
     return prompt
 
-def simulate_participant(timeline: list, pipe):
+def simulate_participant(timeline: list, wrapper):
     history = []
     cumulative_reward = 0
     total_trials = 100
@@ -102,7 +101,7 @@ def simulate_participant(timeline: list, pipe):
         # Tip: Set max_new_tokens=2 and temperature=0 for deterministic play
 
         # Extract the new choice (it will be the very last character of the output)
-        model_choice = get_models.generate(prompt_model, pipe)
+        model_choice = wrapper.generate(prompt_model)
 
         # Determine reward from timeline
         trial_data = timeline[trial_idx]
@@ -130,11 +129,8 @@ def main():
     # generate the timeline once
     timeline = generate_timeline(num_trials=100)
     # Initialize model
-    model,tokenizer = get_models.get_model_no_pipe_unsloth(MODEL)
-    FastLanguageModel.for_inference(model)
-    model._past = None  # Reset past states if necessary
-    torch.cuda.empty_cache()  # Clear GPU memory again
-    pipe=get_models.create_text_generation_pipeline(model,tokenizer,max_new_tokens=1)
+    wrapper = get_models.ModelWrapper(MODEL, use_unsloth=True)
+    torch.cuda.empty_cache()
 
     # Run simulation for each seed
     for run_id in range(SIMULATION_NUMBER):
@@ -145,7 +141,7 @@ def main():
         gc.collect()
         torch.cuda.empty_cache()
         # Run simulation
-        history = simulate_participant(timeline,pipe)
+        history = simulate_participant(timeline, wrapper)
         # Save results
         history.to_csv(out_path, index=False)
         # Cleanup: delete model and clear memory

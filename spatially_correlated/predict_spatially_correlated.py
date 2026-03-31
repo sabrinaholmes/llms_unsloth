@@ -9,37 +9,55 @@ import random
 import torch
 import torch.nn.functional as F
 import os
-from spatially_correlated_prompt import build_prediction_centaur_prompt
+from spatially_correlated_prompt import build_predict_centaur_prompt,build_predict_llama_prompt
 from compare_prompts import is_prompt_in_test_set
 
 
 DATA_IN_TEST = 'data/in/test/test_df.csv'  # This should be the test set created by create_test_df.py
-MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
-DATA_FOLDER_OUT = f'data/out/predictive_accum/{MODEL}/singles'
-RUN_TEST_SET_ONLY = True  # Set to True to only run on prompts that are in the test set (for analysis purposes)
+MODEL = 'llama-8B-adapter'  # Change this to the desired model name
+DATA_FOLDER_OUT = f'data/out/predictive_accum/{MODEL}_no_space_2/singles'
+RUN_TEST_SET_ONLY = False  # Set to True to only run on prompts that are in the test set (for analysis purposes)
 TASK_TYPE = 'accumulation'  # Set to 'accumulation' or 'maximization' based on the scenario
 
-def predict_participant(participant_df, model, tokenizer):
+LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
+
+def predict_participant(participant_df, model, tokenizer,choice_options=None):
     """
     Simulates a participant by processing the entire game history in ONE forward pass.
     Calculates NLL, Top-2 probabilities, and aligns model predictions with human choices.
     """
     all_results = []
+    # select the prompt building function based on the model type
+    if LLM_TYPE == 'centaur':
+        print("Using Centaur prompt builder")
+        trigger_pattern = r'You press <<([^>]+)>>'
+        if TASK_TYPE is not None:
+            print(f"Building prompt with specified task type: {TASK_TYPE}")
+            full_prompt = build_predict_centaur_prompt(participant_df, task_type=TASK_TYPE)
+        else:
+            print(f"Building prompt with task type determined by participant scenario")
+            full_prompt = build_predict_centaur_prompt(participant_df)
+    elif LLM_TYPE == 'llama':
+        print("Using LLaMA prompt builder")
+        trigger_pattern = r'<\|start_header_id\|>assistant<\|end_header_id\|>\n(\d+)'
+        if TASK_TYPE is not None:
+            print(f"Building prompt with specified task type: {TASK_TYPE}")
+            full_prompt = build_predict_llama_prompt(participant_df, task_type=TASK_TYPE)
+        else:
+            print(f"Building prompt with task type determined by participant scenario")
+            full_prompt = build_predict_llama_prompt(participant_df)
 
-    # 1. Build the full prompt representing the entire game history
-    # We use the final state to get the full string, then index into it
-    if TASK_TYPE is not None:
-        print(f"Building prompt with specified task type: {TASK_TYPE}")
-        full_prompt = build_prediction_centaur_prompt(participant_df, task_type=TASK_TYPE)
-    else:
-        print(f"Building prompt with task type determined by participant scenario")
-        full_prompt = build_prediction_centaur_prompt(participant_df)
     participant_id = participant_df['id'].iloc[0]
-
     # 2. Tokenize once
     encoding = tokenizer(full_prompt, return_tensors="pt", truncation=True)
     input_ids = encoding['input_ids'].to(model.device)
-
+    
+    # 3. Pre-compute valid choice token IDs (if provided)
+    if choice_options:
+        choice_token_ids = tokenizer.convert_tokens_to_ids(choice_options)
+        choice_token_ids = [tok_id for tok_id in choice_token_ids if tok_id != tokenizer.unk_token_id]
+    else:
+        choice_token_ids = None
     # Check if the prompt is in the test set (for analysis purposes)
     in_test_set = is_prompt_in_test_set(full_prompt)
     print(f"Participant {participant_id} - Prompt in test set: {in_test_set}")
@@ -50,8 +68,6 @@ def predict_participant(participant_df, model, tokenizer):
         all_logits = outputs.logits[0]  # Shape: [seq_len, vocab_size]
 
         # 4. Use Regex to find every "choice trigger" in the prompt
-        # Pattern matches your specific format: You press <<U>>
-        trigger_pattern = r'You press <<([^>]+)>>'
         matches = list(re.finditer(trigger_pattern, full_prompt))
 
         for trial_idx, match in enumerate(matches):
@@ -64,6 +80,12 @@ def predict_participant(participant_df, model, tokenizer):
 
             # ALIGNMENT: The logit predicting the choice is at [token_idx - 1]
             logits = all_logits[token_idx - 1]
+            
+            # 6. Mask invalid choices if choice_options were provided
+            if choice_token_ids is not None:
+                mask = torch.full(logits.shape, float("-inf"), device=logits.device)
+                mask[choice_token_ids] = 0.0
+                logits = logits + mask
             
             # Calculate Probabilities
             log_probs = torch.nn.functional.log_softmax(logits, dim=-1)
@@ -121,8 +143,8 @@ def main():
         # Run simulation with model and tokenizer passed
         model_data = timeline[timeline['id'] == p]
 
-        if RUN_TEST_SET_ONLY:
-            full_prompt = build_prediction_centaur_prompt(model_data)
+        if RUN_TEST_SET_ONLY and LLM_TYPE == 'centaur':
+            full_prompt = build_predict_centaur_prompt(model_data, task_type=TASK_TYPE)
             if not is_prompt_in_test_set(full_prompt):
                 print(f"Participant {p} not in test set. Skipping...")
                 continue
