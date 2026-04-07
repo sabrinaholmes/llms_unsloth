@@ -394,8 +394,8 @@ def load_and_plot(base_path='predictive', out_png='loglikelihood_bars.png', nll_
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--base', default='predictive', help='Base predictive folder containing model subfolders')
-    parser.add_argument('--out', default='loglikelihood_bars.png', help='Output PNG filename')
+    parser.add_argument('--base', default='data/out/predictive_accum', help='Base predictive folder containing model subfolders')
+    parser.add_argument('--out', default='figures/loglikelihood_bars.png', help='Output PNG filename')
     parser.add_argument('--include_participants', type=int, nargs='+', default=PARTICIPANTS_TO_PLOT,
                         help='List of participant IDs to plot (default: None = plot all)')
     args = parser.parse_args()

@@ -14,7 +14,7 @@ from compare_prompts import is_prompt_in_test_set
 
 
 DATA_IN_TEST = 'data/in/test/test_df.csv'  # This should be the test set created by create_test_df.py
-MODEL = 'llama-8B-adapter'  # Change this to the desired model name
+MODEL = 'llama-70B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/predictive_accum/{MODEL}_no_space_2/singles'
 RUN_TEST_SET_ONLY = False  # Set to True to only run on prompts that are in the test set (for analysis purposes)
 TASK_TYPE = 'accumulation'  # Set to 'accumulation' or 'maximization' based on the scenario

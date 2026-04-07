@@ -15,11 +15,11 @@ from spatially_correlated_prompt import build_generate_prompt_centaur,build_gene
 
 
 DATA_IN_ = 'data/in/scaled_kernels'
-MODEL = 'llama-8B-adapter'  # Change this to the desired model name
+MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
-NUMBER_OF_PARTICIPANTS = 5
-NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1 = 2
+NUMBER_OF_PARTICIPANTS = 81
+NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1 = 45  # For scenario 1 (accumulation), we have 45 participants, which is more than half of the total participants. The remaining 36 participants will be assigned to scenario 2 (maximization).
 NUMBER_OF_PARTICIPANTS_PER_SCENARIO_2 = NUMBER_OF_PARTICIPANTS - NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1
 
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
