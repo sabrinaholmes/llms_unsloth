@@ -1,103 +1,166 @@
 import json
-def system_message(llm_type='llama',task_type='accumulation'):
-    """Construct the system message with dynamic choice options.
-
-    For `centaur` LLMs, insert the instruction about pressing the corresponding
-    key as the 4th sentence (right after the sentence about points).
-    """
+import pandas as pd
+def system_message(llm_type='llama', task_type='verbal'):
     sentences = [
-        "You will be presented with a series of 16 different environments to explore.",
-        "In each trial, you can select an option between numbers 1 and 30 by pressing the corresponding key.",
-        "By selecting any of these options, you will earn points associated with each unique option.",
-        "Imagine these options 1 through 30 as lying next to each other in an ordered line; options closer to each other tend to have similar rewards as rewards tend to cluster together.",
-        "For each environment, you will be able to make either 5 or 10 choices.",
-        "When you made all your choices in a given environment, you will start making choices in the next unexplored environment.",
-        "The rewards underlying the different options are different in each environment so you will learn them anew for each environment.",
-        "Each environment starts with the value of a single option revealed.",
-        "When you choose the number corresponding to a different option, you will be told the value of that option and receive those points.",
-        "Previously revealed options, including the starting option, can also be reselected, although there may be small changes in the point value.",
+        "Your task is to estimate the blood concentration of the hormone Caldionine based on information about the amount of two other hormones, Progladine and Amalydine, in multiple individuals' urine.",
+        # ← removed hardcoded numerical lines here
+        "Your goal is to estimate the concentration of Caldionine correctly.",
+        "You will receive feedback about the actual concentration after making your estimate.",
+        "This feedback will stop at some point.\n"
     ]
 
-    if llm_type == 'llama':
-        sentences.append(
-            "Respond with exactly ONE character. "
-            "Reply with single character only — do not include quotes, spaces, punctuation, extra words, or newlines."
-        )
-    if llm_type == 'centaur' and task_type == 'accumulation':
-        # insert task objective at the end of the system message for centaur
-        sentences.append(
-            "It is your task to gain as many points as possible across all 16 environments.\n")
-    if llm_type == 'centaur' and task_type == 'maximization':
-        sentences.append(
-            "It is your task to to learn where the largest reward is in each of the 16 environments.\n")
+    if task_type == 'verbal':
+        sentences.insert(1, "Both Progladine and Amalydine can take five values (very little, a little, average, a lot, very much).\nCaldionine can take nine values (extremely low, very low, low, somewhat low, normal, somewhat high, high, very high, extremely high).")
+    elif task_type == 'numerical':
+        sentences.insert(1, "Both Progladine and Amalydine can take five values (1, 2, 3, 4, 5).\nCaldionine can take nine values (10, 20, 30, 40, 50, 60, 70, 80, 90).")
+
     return sentences
 
+def build_predict_centaur_prompt(timeline: pd.DataFrame) -> str:
+    """Builds the multi-cue prediction prompt from all trials in the timeline.
 
-def build_prediction_centaur_prompt(timeline_df,task_type=None) -> str:
-    """Builds the centaur-style prompt for the current trial with past trial data."""
-    if task_type is None:
-        task_type = 'accumulation' if timeline_df['scenario'].iloc[0] == 0 else 'maximization'
+    Iterates through each trial. For condition 1 or 3 (English cues/responses),
+    and condition 2 or 4 (numeric cues/responses), appends the error-feedback
+    line using the values already stored in each column.
+    Response is wrapped in <<...>> for downstream NLL evaluation.
+    """
+    participant_condition=timeline['condition'].iloc[0]
+    system_msg = system_message(llm_type='centaur', task_type='verbal' if participant_condition in [1,3] else 'numerical')
+    prompt = "\n".join(system_msg)+"\n"
+    for _, row in timeline.iterrows():
+        #if cues,response,criterium are strings, then lowercase them for better readability
+        cue1 = row['Cue1_English'].lower() if isinstance(row['Cue1_English'], str) else row['Cue1_English']
+        cue2 = row['Cue2_English'].lower() if isinstance(row['Cue2_English'], str) else row['Cue2_English']
+        raw_response = row['response_raw'].lower() if isinstance(row['response_raw'], str) else row['response_raw']
+        criterium = row['Criterium_English'].lower() if isinstance(row['Criterium_English'], str) else row['Criterium_English']
+        condition = row['condition']
+        block=row['Block']
+        prompt += (
+                f"Progladine: {cue1}. Amalydine: {cue2}. "
+                f"You say that the Caldionine concentration is <<{raw_response}>>."
+            )
+        if block<=10:
+            if raw_response == criterium:
+                prompt += f" That is correct. The correct concentration of Caldionine is indeed {criterium}.\n"
+            else:
+                prompt += f" That is incorrect. The correct concentration of Caldionine is {criterium}.\n"
+        else:
+            prompt += " \n"
+    return prompt
+
+def build_generate_centaur_prompt(timeline: pd.DataFrame) -> str:
+    """Open-loop prompt for generation: past trials with feedback, current trial ends with <<.
+
+    All completed trials (iloc[:-1]) are appended with their responses and feedback.
+    The last row (current trial) contributes only its cues, ending with << so the
+    model can generate its answer.
+    """
+    participant_condition = timeline['condition'].iloc[0]
+    task_type = 'verbal' if participant_condition in [1, 3] else 'numerical'
     system_msg = system_message(llm_type='centaur', task_type=task_type)
-    prompt = "\n".join(system_msg)
-    # Parse search history from the participant's row
-    search_history = timeline_df['searchHistory'].iloc[0]
-    if isinstance(search_history, str):
-        search_history = json.loads(search_history)
+    prompt = "\n".join(system_msg) + "\n"
 
-    num_envs = len(search_history['xcollect'])
-    print(f"Number of environments in search history: {num_envs}")
-    for env in range(num_envs):
-        prompt += f"\nEnvironment number {env + 1}:\n"
-        # Determine number of choices per environment from horizon
-        x = search_history['xcollect'][env]
-        y = search_history['ycollectScaled'][env]
-        horizon=len(x)-1
-        # First element is the initial revealed option
-        prompt += f"The value of option {x[0]} is {y[0]}. You have {horizon} choices to make in this environment.\n"
+    past_trials = timeline.iloc[:-1]
+    current = timeline.iloc[-1]
 
-        # Remaining elements are the participant's actual choices
-        for trial in range(1, len(x)):
-            prompt += f"You press <<{x[trial]}>> and receive {y[trial]} points.\n"
+    for _, row in past_trials.iterrows():
+        cue1 = row['Cue1_English'].lower() if isinstance(row['Cue1_English'], str) else row['Cue1_English']
+        cue2 = row['Cue2_English'].lower() if isinstance(row['Cue2_English'], str) else row['Cue2_English']
+        raw_response = row['response_raw'].lower() if isinstance(row['response_raw'], str) else row['response_raw']
+        criterium = row['Criterium_English'].lower() if isinstance(row['Criterium_English'], str) else row['Criterium_English']
+        block = row['Block']
 
+        prompt += (
+            f"Progladine: {cue1}. Amalydine: {cue2}. "
+            f"You say that the Caldionine concentration is <<{raw_response}>>."
+        )
+        if block <= 10:
+            if raw_response == criterium:
+                prompt += f" That is correct. The correct concentration of Caldionine is indeed {criterium}.\n"
+            else:
+                prompt += f" That is incorrect. The correct concentration of Caldionine is {criterium}.\n"
+        else:
+            prompt += " \n"
+
+    cur_cue1 = current['Cue1_English'].lower() if isinstance(current['Cue1_English'], str) else current['Cue1_English']
+    cur_cue2 = current['Cue2_English'].lower() if isinstance(current['Cue2_English'], str) else current['Cue2_English']
+    prompt += f"Progladine: {cur_cue1}. Amalydine: {cur_cue2}. You say that the Caldionine concentration is <<"
     return prompt
 
 
-def build_generate_prompt_centaur(completed_envs, current_env_history, scenario, horizon):
+def build_predict_llama_prompt(timeline: pd.DataFrame) -> str:
+    """Builds the multi-cue prediction prompt from all trials in the timeline.
+
+    Iterates through each trial. For condition 1 or 3 (English cues/responses),
+    and condition 2 or 4 (numeric cues/responses), appends the error-feedback
+    line using the values already stored in each column.
+    Response is wrapped in <<...>> for downstream NLL evaluation.
     """
-    Build prompt for open-loop centaur generation.
+    participant_condition=timeline['condition'].iloc[0]
+    system_msg = system_message(llm_type='llama', task_type='verbal' if participant_condition in [1,3] else 'numerical')
+    prompt = "\n".join(system_msg)
+    prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{prompt}<|eot_id|>\n"
+    for _, row in timeline.iterrows():
+        #if cues,response,criterium are strings, then lowercase them for better readability
+        cue1 = row['Cue1_English'].lower() if isinstance(row['Cue1_English'], str) else row['Cue1_English']
+        cue2 = row['Cue2_English'].lower() if isinstance(row['Cue2_English'], str) else row['Cue2_English']
+        raw_response = row['response_raw'].lower() if isinstance(row['response_raw'], str) else row['response_raw']
+        criterium = row['Criterium_English'].lower() if isinstance(row['Criterium_English'], str) else row['Criterium_English']
+        condition = row['condition']
+        block=row['Block']
+        prompt += (
+                f"<|start_header_id|>user<|end_header_id|>\n"
+                f"Progladine: {cue1}. Amalydine: {cue2}.<|eot_id|>\n"
+                f"<|start_header_id|>assistant<|end_header_id|>\n{raw_response}.<|eot_id|>\n"
+            )
+        if block<=10:
+            if raw_response == criterium:
+                prompt += f"<|start_header_id|>user<|end_header_id|>\n" f"Correct. The correct concentration of Caldionine is indeed {criterium}.\n"
+            else:
+                prompt += f"<|start_header_id|>user<|end_header_id|>\n" f"Incorrect. The correct concentration of Caldionine is {criterium}.\n"
+        else:
+            prompt += " \n"
+    return prompt
 
-    Args:
-        completed_envs: list of dicts with keys 'x' (options) and 'y' (rewards);
-                        x[0]/y[0] is the initial reveal, x[1:]/y[1:] are choices.
-        current_env_history: dict with 'x' and 'y' lists for the in-progress environment;
-                             x[0]/y[0] = initial reveal, x[1:]/y[1:] = choices so far.
-        scenario: 0 = accumulation, 1 = maximization.
-        horizon: number of choices the model will make in the current environment.
 
-    Returns:
-        Prompt string ending with 'You press <<' to elicit the next choice.
+def build_generate_llama_prompt(timeline: pd.DataFrame) -> str:
+    """Open-loop prompt for generation: past trials with feedback, current trial ends with <<.
+
+    All completed trials (iloc[:-1]) are appended with their responses and feedback.
+    The last row (current trial) contributes only its cues, ending with << so the
+    model can generate its answer.
     """
-    task_type = 'accumulation' if scenario == 0 else 'maximization'
-    sentences = system_message(llm_type='centaur', task_type=task_type)
-    prompt = '\n'.join(sentences)
+    participant_condition = timeline['condition'].iloc[0]
+    task_type = 'verbal' if participant_condition in [1, 3] else 'numerical'
+    system_msg = system_message(llm_type='llama', task_type=task_type)
+    prompt = "\n".join(system_msg)
+    prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{prompt}<|eot_id|>\n"
 
-    # Completed environments
-    for env_idx, env in enumerate(completed_envs):
-        x, y = env['x'], env['y']
-        env_horizon = len(x) - 1
-        prompt += f'\n\nEnvironment number {env_idx + 1}:\n'
-        prompt += f'The value of option {x[0]} is {y[0]}. You have {env_horizon} choices to make in this environment.\n'
-        for i in range(1, len(x)):
-            prompt += f'You press <<{x[i]}>> and receive {y[i]} points.\n'
+    past_trials = timeline.iloc[:-1]
+    current = timeline.iloc[-1]
 
-    # Current in-progress environment
-    env_num = len(completed_envs) + 1
-    x, y = current_env_history['x'], current_env_history['y']
-    prompt += f'\n\nEnvironment number {env_num}:\n'
-    prompt += f'The value of option {x[0]} is {y[0]}. You have {horizon} choices to make in this environment.\n'
-    for i in range(1, len(x)):
-        prompt += f'You press <<{x[i]}>> and receive {y[i]} points.\n'
+    for _, row in past_trials.iterrows():
+        cue1 = row['Cue1_English'].lower() if isinstance(row['Cue1_English'], str) else row['Cue1_English']
+        cue2 = row['Cue2_English'].lower() if isinstance(row['Cue2_English'], str) else row['Cue2_English']
+        raw_response = row['response_raw'].lower() if isinstance(row['response_raw'], str) else row['response_raw']
+        criterium = row['Criterium_English'].lower() if isinstance(row['Criterium_English'], str) else row['Criterium_English']
+        block = row['Block']
 
-    # Elicit next choice
-    prompt += 'You press <<'
+        prompt += (
+                f"<|start_header_id|>user<|end_header_id|>\n"
+                f"Progladine: {cue1}. Amalydine: {cue2}.<|eot_id|>\n"
+                f"<|start_header_id|>assistant<|end_header_id|>\n{raw_response}.<|eot_id|>\n"
+            )
+        if block <= 10:
+            if raw_response == criterium:
+                prompt += f"<|start_header_id|>user<|end_header_id|>\n" f"Correct. The correct concentration of Caldionine is indeed {criterium}.\n"
+            else:
+                prompt += f"<|start_header_id|>user<|end_header_id|>\n" f"Incorrect. The correct concentration of Caldionine is {criterium}.\n"
+        else:
+            prompt += " \n"
+
+    cur_cue1 = current['Cue1_English'].lower() if isinstance(current['Cue1_English'], str) else current['Cue1_English']
+    cur_cue2 = current['Cue2_English'].lower() if isinstance(current['Cue2_English'], str) else current['Cue2_English']
+    prompt += f"<|start_header_id|>user<|end_header_id|>\n" f"Progladine: {cur_cue1}. Amalydine: {cur_cue2}<|eot_id|>\n"
+    prompt+= f"<|start_header_id|>assistant<|end_header_id|>\n"
     return prompt

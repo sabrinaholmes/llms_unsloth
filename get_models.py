@@ -16,6 +16,51 @@ class AllowlistLogitsProcessor(LogitsProcessor):
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
         return scores + self.mask
 
+
+class PrefixTreeLogitsProcessor(LogitsProcessor):
+    """
+    Constrains generation to a finite set of multi-token options via a prefix tree.
+    At each step, only tokens that continue a valid option prefix are allowed.
+    After a complete option is generated, only EOS is allowed (forcing generation to stop).
+    """
+    def __init__(self, allowed_options: list[str], tokenizer, device):
+        vocab_size = len(tokenizer)
+        eos_id = tokenizer.eos_token_id
+
+        # Build prefix tree: prefix_tuple -> set of valid next token IDs
+        prefix_tree: dict[tuple, set] = {}
+        for option in allowed_options:
+            # Leading space ensures correct in-context tokenization (e.g. " low" not "low")
+            token_ids = tokenizer.encode(' ' + option, add_special_tokens=False)
+            for i in range(len(token_ids)):
+                prefix = tuple(token_ids[:i])
+                prefix_tree.setdefault(prefix, set()).add(token_ids[i])
+            # After full option: only EOS allowed -> generation stops
+            prefix_tree.setdefault(tuple(token_ids), set()).add(eos_id)
+
+        # Pre-compute mask tensors (avoids per-call allocation)
+        self.masks: dict[tuple, torch.Tensor] = {}
+        for prefix, allowed_ids in prefix_tree.items():
+            mask = torch.full((vocab_size,), float('-inf'), device=device)
+            for tid in allowed_ids:
+                mask[tid] = 0.0
+            self.masks[prefix] = mask
+
+        self.prompt_length: int | None = None
+
+    def set_prompt_length(self, length: int):
+        self.prompt_length = length
+
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
+        if self.prompt_length is None:
+            generated = ()
+        else:
+            generated = tuple(input_ids[0, self.prompt_length:].tolist())
+        mask = self.masks.get(generated)
+        if mask is None:
+            return scores  # Unknown prefix — allow everything (safety fallback)
+        return scores + mask.unsqueeze(0)
+
 access_token = HfFolder.get_token()
 login(token=access_token)
 
@@ -92,19 +137,33 @@ def create_text_generation_pipeline(model, tokenizer, temperature=1.0, max_new_t
     )
 
 
-def generate(prompt: str, pipe: transformers.pipeline, tokenizer: AutoTokenizer, choice_options: list[str] = None, max_new_tokens: int = 1) -> str:
-    """Generates a response from the model using the provided prompt."""
+def generate(prompt: str, pipe: transformers.pipeline, tokenizer: AutoTokenizer, choice_options: list[str] = None, max_new_tokens: int = 1, processor_type: str = 'prefix_tree') -> str:
+    """Generates a response from the model using the provided prompt.
 
+    Args:
+        processor_type: 'prefix_tree' (default) for multi-token options with stateful prefix
+                        masking, or 'allowlist' for single-token allowlist masking.
+    """
     logits_processor = None
     if choice_options:
-        allowed_ids = pipe.tokenizer.convert_tokens_to_ids(choice_options)
-        allowed_ids = [i for i in allowed_ids if i != pipe.tokenizer.unk_token_id]
-        processor = AllowlistLogitsProcessor(allowed_ids, device=pipe.device)
+        device = next(pipe.model.parameters()).device
+        if processor_type == 'prefix_tree':
+            processor = PrefixTreeLogitsProcessor(choice_options, tokenizer, device)
+            prompt_length = pipe.tokenizer(prompt, return_tensors='pt')['input_ids'].shape[1]
+            processor.set_prompt_length(prompt_length)
+            max_new_tokens = max(
+                len(tokenizer.encode(' ' + opt, add_special_tokens=False))
+                for opt in choice_options
+            )
+        else:  # 'allowlist'
+            allowed_ids = pipe.tokenizer.convert_tokens_to_ids(choice_options)
+            allowed_ids = [i for i in allowed_ids if i != pipe.tokenizer.unk_token_id]
+            processor = AllowlistLogitsProcessor(allowed_ids, device=device)
         logits_processor = LogitsProcessorList([processor])
     return pipe(
         prompt,
         logits_processor=logits_processor,
-        max_new_tokens=max_new_tokens,       # for MCQ, you only need 1 token
+        max_new_tokens=max_new_tokens,
     )[0]['generated_text'][len(prompt):]
 
 
@@ -118,8 +177,8 @@ class ModelWrapper:
         self.model._past = None
         self.pipe = create_text_generation_pipeline(self.model, self.tokenizer, temperature)
 
-    def generate(self, prompt: str, choice_options: list[str] = None, max_new_tokens: int = 1) -> str:
+    def generate(self, prompt: str, choice_options: list[str] = None, max_new_tokens: int = 1, processor_type: str = 'prefix_tree') -> str:
         # AllowlistLogitsProcessor reads the global `tokenizer`, so set it before instantiating
         global tokenizer
         tokenizer = self.tokenizer
-        return generate(prompt, self.pipe, self.tokenizer, choice_options, max_new_tokens)
+        return generate(prompt, self.pipe, self.tokenizer, choice_options, max_new_tokens, processor_type)

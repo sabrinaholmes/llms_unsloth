@@ -1,7 +1,8 @@
 import os
 import sys
 import pandas as pd
-
+import re
+import datasets
 
 def normalize(s):
     return s.strip().replace('\r\n', '\n').replace('\r', '\n')
@@ -9,12 +10,15 @@ def normalize(s):
 
 def load_hf_prompts(experiment_name='wu2018generalisation'):
     df_hf = pd.read_json("hf://datasets/marcelbinz/Psych-101-test/prompts_testing_t1.jsonl", lines=True)
-    df_exp = df_hf[df_hf['experiment'].str.contains(experiment_name, na=False)]
+    # Replace the ö characters with regex wildcards
+    safe_name = re.sub(r'[^\x00-\x7F]+', lambda m: '.' * len(m.group()), experiment_name)
+    df_exp = df_hf[df_hf['experiment'].str.contains(safe_name, na=False, regex=True)]
     return set(normalize(p) for p in df_exp['text'].dropna())
 
 
 def is_prompt_in_test_set(prompt: str, experiment_name: str = 'wu2018generalisation') -> bool:
     hf_prompts = load_hf_prompts(experiment_name)
+    print(f"checking experiment: {experiment_name}, {len(hf_prompts)} prompts in test set")
     local = normalize(prompt)
     if local in hf_prompts:
         return True

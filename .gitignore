@@ -17,6 +17,6 @@ unsloth_compiled_cache/
 #ignore prompts
 prompts/
 #ignore data folders
-data/
+out/
 #ignores figures
 figures/
