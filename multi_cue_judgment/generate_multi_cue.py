@@ -9,7 +9,7 @@ import json
 from multi_cue_prompt import build_generate_centaur_prompt, build_generate_llama_prompt
 
 DATA_IN = 'data/in/timeline_lowercase.csv'
-MODEL = 'llama-8B-adapter'  # Change this to the desired model name
+MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
 RUN_TEST_SET_ONLY = False # Set to True to only run on small number of simulations for test
 ENGLISH_OPTIONS_LOW = [
