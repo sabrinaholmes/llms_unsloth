@@ -24,3 +24,5 @@ figures/
 cli_commands.txt
 # ignore debug of prefix tree code
 debug_prefix_tree.py
+multi_cue_judgment/data/in/combined_df.csv
+multi_cue_judgment/count_unique_answers.py
