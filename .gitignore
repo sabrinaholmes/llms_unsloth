@@ -20,3 +20,7 @@ prompts/
 out/
 #ignores figures
 figures/
+#ignore file with cli command
+cli_commands.txt
+# ignore debug of prefix tree code
+debug_prefix_tree.py

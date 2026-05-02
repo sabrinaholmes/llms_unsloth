@@ -765,6 +765,101 @@ def plot_token_cascade(df, trial_indices=None, participant_id=None, out_png=None
     return fig
 
 
+def plot_generation_step_distributions(df, n_trials=10, participant_id=None, out_png=None):
+    """
+    For each of the first n_trials trials, plot the token probability distribution
+    at every generation step (from the step_distributions column produced by
+    generate_multi_cue.py with generate_with_scores).
+
+    Each row = one trial; each column = one generation step (step 0 = first token,
+    step 1 = second token if the option is multi-token). Orange bar = chosen token.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Output from generate_multi_cue — must have columns trial, choice,
+        criterium, and step_distributions (JSON string).
+    n_trials : int
+        Number of trials to plot (default 10).
+    participant_id : int or None
+        Used only in the figure title.
+    out_png : str or None
+        If given, saves the figure to this path.
+    """
+    rows = df[df['step_distributions'].notna()].head(n_trials).copy()
+    if rows.empty:
+        print("No rows with step_distributions found.")
+        return
+
+    rows['_parsed'] = rows['step_distributions'].apply(
+        lambda v: json.loads(v) if isinstance(v, str) else v
+    )
+    max_steps = rows['_parsed'].apply(len).max()
+    n_rows = len(rows)
+
+    fig, axes = plt.subplots(
+        n_rows, max_steps,
+        figsize=(max_steps * 3.5, n_rows * 3.0),
+        squeeze=False
+    )
+
+    for row_i, (_, row) in enumerate(rows.iterrows()):
+        steps = row['_parsed']
+        choice = str(row.get('choice', ''))
+        criterium = str(row.get('criterium', ''))
+        choice_tokens = choice.lower().split()
+
+        for step_i in range(max_steps):
+            ax = axes[row_i][step_i]
+            if step_i >= len(steps):
+                ax.axis('off')
+                continue
+
+            step = steps[step_i]
+            chosen_token = step['token'].replace('Ġ', ' ').replace('Ċ', '↵').strip()
+            probs_dict = step['probs']
+
+            # Sort by probability descending
+            sorted_items = sorted(probs_dict.items(), key=lambda x: x[1], reverse=True)
+            tokens = [t.replace('Ġ', ' ').replace('Ċ', '↵').strip() for t, _ in sorted_items]
+            probs = [p for _, p in sorted_items]
+
+            bar_colors = ['#D55E00' if t == chosen_token else '#AAAAAA' for t in tokens]
+
+            y = range(len(tokens))
+            bars = ax.barh(list(y), probs, color=bar_colors, edgecolor='black', linewidth=0.4)
+            ax.set_yticks(list(y))
+            ax.set_yticklabels(tokens, fontsize=9)
+            ax.set_xlim(0, 1)
+            ax.set_xlabel('Probability', fontsize=8)
+            ax.invert_yaxis()
+
+            for bar, prob in zip(bars, probs):
+                ax.text(min(prob + 0.02, 0.95), bar.get_y() + bar.get_height() / 2,
+                        f'{prob:.3f}', va='center', fontsize=7.5)
+
+            ax.set_title(f'Step {step_i}', fontsize=9)
+            ax.spines[['top', 'right']].set_visible(False)
+
+        trial_num = int(row.get('trial', row_i + 1))
+        axes[row_i][0].set_ylabel(
+            f'Trial {trial_num}\nChosen: "{choice}"\nCriterium: "{criterium}"',
+            fontsize=8, labelpad=8
+        )
+
+    pid_str = f'Participant {participant_id} — ' if participant_id is not None else ''
+    fig.suptitle(
+        f'{pid_str}Generation step distributions (orange = chosen token)',
+        fontsize=11
+    )
+    plt.tight_layout()
+
+    if out_png:
+        fig.savefig(out_png, dpi=150, bbox_inches='tight')
+        print(f"Saved to {out_png}")
+    return fig
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--base', default='data/out/predictive', help='Base predictive folder containing model subfolders')
@@ -802,6 +897,13 @@ if __name__ == '__main__':
                         help='Base folder for lowercase condition (for --by_participant)')
     parser.add_argument('--by_participant_out', default='figures/nll_by_participant.png',
                         help='Output PNG for --by_participant plot')
+    # generation step distributions flags
+    parser.add_argument('--gen_dist', default=None, metavar='CSV',
+                        help='Path to a participant CSV with step_distributions column')
+    parser.add_argument('--gen_dist_trials', type=int, default=50,
+                        help='Number of trials to plot (default: 50)')
+    parser.add_argument('--gen_dist_out', default='figures/generation_step_distributions.png',
+                        help='Output PNG for --gen_dist plot')
     args = parser.parse_args()
 
     if args.by_participant or (args.underscore and args.lowercase):
@@ -835,6 +937,10 @@ if __name__ == '__main__':
             nll_column='nll',
             out_png=args.compare_out,
         )
+    elif args.gen_dist:
+        df = pd.read_csv(args.gen_dist)
+        pid = int(re.search(r'participant_(\d+)', args.gen_dist).group(1)) if re.search(r'participant_(\d+)', args.gen_dist) else None
+        plot_generation_step_distributions(df, n_trials=args.gen_dist_trials, participant_id=pid, out_png=args.gen_dist_out)
     elif args.cascade:
         df = pd.read_csv(args.cascade)
         pid = int(re.search(r'participant_(\d+)', args.cascade).group(1)) if re.search(r'participant_(\d+)', args.cascade) else None

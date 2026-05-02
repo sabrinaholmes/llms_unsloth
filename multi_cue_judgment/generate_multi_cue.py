@@ -5,12 +5,13 @@ import get_models
 import pandas as pd
 import torch
 import gc
+import json
 from multi_cue_prompt import build_generate_centaur_prompt, build_generate_llama_prompt
 
 DATA_IN = 'data/in/timeline_lowercase.csv'
 MODEL = 'llama-8B-adapter'  # Change this to the desired model name
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
-RUN_TEST_SET_ONLY = True # Set to True to only run on prompts that are in the test set (for analysis purposes)
+RUN_TEST_SET_ONLY = False # Set to True to only run on small number of simulations for test
 ENGLISH_OPTIONS_LOW = [
     'extremely low', 'very low', 'low', 'somewhat low', 'normal',
     'somewhat high', 'high', 'very high', 'extremely high'
@@ -20,7 +21,7 @@ GENERATE_ONE_TOKEN = False  # If True, we will only take the first token of the 
 if DATA_IN.endswith('lowercase.csv'):
     ENGLISH_OPTIONS = ENGLISH_OPTIONS_LOW
     print("Using lowercase English options for tokenization")
-    DATA_FOLDER_OUT = f'data/out/generative_lowercase/{MODEL}/singles'
+    DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
 else:
     ENGLISH_OPTIONS = ENGLISH_OPTIONS_ABB
     print("Using abbreviated English options for tokenization")
@@ -54,7 +55,7 @@ def choice_options_for_participant(participant_df):
         return None  # No masking, allow all choices
 
 
-def simulate_participant(timeline_df, wrapper, participant_id):
+def simulate_participant(timeline_df, wrapper, participant_id,test_mode=False):
     """
     Open-loop simulation: model generates Caldionine estimates trial-by-trial
     using the participant's timeline and all past model responses as context.
@@ -68,46 +69,52 @@ def simulate_participant(timeline_df, wrapper, participant_id):
     results = []
 
     for trial_num, (_, row) in enumerate(timeline_df.iterrows()):
-        # Build incremental timeline: past completed rows + current row (no response yet)
-        if completed_rows:
-            past_df = pd.DataFrame(completed_rows)
-            trial_timeline = pd.concat([past_df, row.to_frame().T], ignore_index=True)
-        else:
-            trial_timeline = row.to_frame().T.reset_index(drop=True)
+        #  if test_mode=True, only run the first 50 trial to quickly check the code works and inspect the prompt and model response
+            if test_mode and trial_num >= 50:
+                break
+            # Build incremental timeline: past completed rows + current row (no response yet)
+            if completed_rows:
+                past_df = pd.DataFrame(completed_rows)
+                trial_timeline = pd.concat([past_df, row.to_frame().T], ignore_index=True)
+            else:
+                trial_timeline = row.to_frame().T.reset_index(drop=True)
 
-        if LLM_TYPE == 'centaur':
-            prompt = build_generate_centaur_prompt(trial_timeline)
-        else:
-            prompt = build_generate_llama_prompt(trial_timeline)
-        if GENERATE_ONE_TOKEN:
-            choice = wrapper.generate(prompt, choice_options=choice_options, max_new_tokens=1)
-            print("generating with max_new_tokens=1 due to GENERATE_ONE_TOKEN=True")
-            choice = choice.strip()
-        else:
-            choice = wrapper.generate(prompt, choice_options=choice_options,max_new_tokens=2)  # Allow up to 2 tokens to be generated, but we will validate against choice_options
-            print("generating with max_new_tokens=2 due to GENERATE_ONE_TOKEN=False")
-            choice = choice.strip().lower()  # Normalize choice for comparison
+            if LLM_TYPE == 'centaur':
+                prompt = build_generate_centaur_prompt(trial_timeline)
+            else:
+                prompt = build_generate_llama_prompt(trial_timeline)
+            if GENERATE_ONE_TOKEN:
+                choice = wrapper.generate(prompt, choice_options=choice_options, max_new_tokens=1,processor_type="original")
+                print("generating with max_new_tokens=1 due to GENERATE_ONE_TOKEN=True")
+                choice = choice.strip()
+                step_dists = None
+            else:
+                #choice, step_dists = wrapper.generate(prompt, choice_options=choice_options)
+                choice = wrapper.generate(prompt, choice_options=choice_options, processor_type="prefix_tree")
+                #print("generating with scores (multi-token) due to GENERATE_ONE_TOKEN=False")
+                choice = choice.strip().lower()  # Normalize choice for comparison
 
-        if choice_options is not None and choice not in choice_options:
-            print(f"⚠️ Trial {trial_num + 1}: invalid choice '{choice}'")
+            if choice_options is not None and choice not in choice_options:
+                print(f"⚠️ Trial {trial_num + 1}: invalid choice '{choice}'")
 
-        # Store model response so future trials can use it as context
-        completed_row = row.copy()
-        completed_row['response_raw'] = choice if choice is not None else ''
-        completed_rows.append(completed_row)
+            # Store model response so future trials can use it as context
+            completed_row = row.copy()
+            completed_row['response_raw'] = choice if choice is not None else ''
+            completed_rows.append(completed_row)
 
-        print(f'Trial {trial_num + 1}: choice={choice}, criterium={row["Criterium_English"]}')
-        results.append({
-            'participant_id': participant_id,
-            'trial': trial_num + 1,
-            'block': row['Block'],
-            'condition': row['condition'],
-            'cue1': row['Cue1_English'],
-            'cue2': row['Cue2_English'],
-            'criterium': row['Criterium_English'],
-            'choice': choice,
-            'prompt': prompt,
-        })
+            print(f'Trial {trial_num + 1}: choice={choice}, criterium={row["Criterium_English"]}')
+            results.append({
+                'participant_id': participant_id,
+                'trial': trial_num + 1,
+                'block': row['Block'],
+                'condition': row['condition'],
+                'cue1': row['Cue1_English'],
+                'cue2': row['Cue2_English'],
+                'criterium': row['Criterium_English'],
+                'choice': choice,
+                'prompt': prompt,
+                #'step_distributions': json.dumps(step_dists) if step_dists is not None else None,
+            })
 
     return results
 
@@ -121,9 +128,9 @@ def main():
 
     participants = timeline['Fp'].unique()
     if RUN_TEST_SET_ONLY:
-        # run first 3 participants with condition 1,3 (English options) and first 3 participants with condition 2,4 (Numeric options)
-        participants = timeline[timeline['condition'].isin([1, 3])]['Fp'].unique()[:2]
-        participants = list(participants) + list(timeline[timeline['condition'].isin([2, 4])]['Fp'].unique()[:2])
+        # run first 1 participants with condition 1,3 (English options) and first 1 participants with condition 2,4 (Numeric options)
+        participants = timeline[timeline['condition'].isin([1, 3])]['Fp'].unique()[:1]
+        participants = list(participants) + list(timeline[timeline['condition'].isin([2, 4])]['Fp'].unique()[:1])
         print(f"Running test set only: participants {participants}")
     all_model_results = []
 
@@ -139,7 +146,7 @@ def main():
         gc.collect()
         torch.cuda.empty_cache()
 
-        results = simulate_participant(participant_timeline, wrapper, participant_id=participant_id)
+        results = simulate_participant(participant_timeline, wrapper, participant_id=participant_id, test_mode=RUN_TEST_SET_ONLY)
         result_df = pd.DataFrame(results)
         result_df.to_csv(out_path, index=False)
         print(f'Results saved to {out_path}')
