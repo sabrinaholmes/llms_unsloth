@@ -1,6 +1,10 @@
 def define_choice_options_from_df(df):
     """ define which choice options were made by participants """
-    return df['choice'].unique().tolist()
+    import ast
+    value = df['choice_options'].iloc[0]
+    if isinstance(value, list):
+        return value
+    return ast.literal_eval(value)
 
 def system_message(choice_options=None, llm_type='llama'):
     """Construct the system message with dynamic choice options.
@@ -12,15 +16,12 @@ def system_message(choice_options=None, llm_type='llama'):
         f"You are participating in multiple games involving two slot machines, labeled {choice_options[0]} and {choice_options[1]}.",
         "The two slot machines are different across different games.",
         "Each time you choose a slot machine, you get some points.",
+        "You choose a slot machine by pressing the corresponding key.",
         "Each slot machine tends to pay out about the same amount of points on average.",
         "Your goal is to choose the slot machines that will give you the most points across the experiment.",
-        "The first 4 trials in each game are INSTRUCTED trials where you will be told which slot machine to choose.",
+        "The first 4 trials in each game are instructed trials where you will be told which slot machine to choose.",
         "After these instructed trials, you will have the freedom to choose for either 1 or 6 trials."
     ]
-
-    if llm_type == 'centaur':
-        # Insert the centaur-specific instruction as the 4th sentence
-        sentences.insert(3, "You choose a slot machine by pressing the corresponding key.")
 
     if llm_type == 'llama':
         sentences.append(f"Respond with exactly ONE character: {choice_options[0]} or {choice_options[1]}. "
@@ -29,62 +30,38 @@ def system_message(choice_options=None, llm_type='llama'):
     return sentences
 
 
-def build_full_prompt(df_participant,choice_options=None):
-    """Return a full concatenated prompt from a participant dataframe.
+def format_single_game_llama(game_id, game_df, is_current_game=False):
+    """Format a single game's block for the llama-style prompt.
 
-    This matches the format used by `horizon_llama.py` (system header, forced blocks,
-    then interleaved assistant/user turns). It isolates assistant choices with a
-    separating space before the eot marker so tokenizers don't join the token
-    with the marker.
+    Game 1 opens a fresh user turn. Games 2+ append into the previous game's
+    last open user reward turn (no redundant user header). Completed games
+    leave their final user reward turn open so the next game can continue it.
     """
-    if choice_options is None:
-        choice_options = define_choice_options_from_df(df_participant)
-    if len(choice_options) < 2:
-        raise ValueError(
-            "`df_participant['choice']` must contain at least two unique choice options; "
-            f"found {len(choice_options)}: {choice_options}"
-        )
-    system_msg_array = system_message(choice_options=choice_options, llm_type='llama')
-    system_msg = " ".join(system_msg_array)
-    block_transcript = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{system_msg}<|eot_id|>"
-
-    df_sorted = df_participant.sort_values(['game', 'trial'])
-
-    for game_id, game_df in df_sorted.groupby('game'):
-        block_transcript += format_single_game_llama(game_id, game_df)
-    block_transcript += "\n <|start_header_id|>assistant<|end_header_id|>\n"
-    return block_transcript
-
-
-def format_single_game_llama(game_id, game_df):
-    """Format a single game's block for the llama-style `build_full_prompt`.
-
-    This mirrors the original inline logic in `build_full_prompt`: it emits
-    the user header with instructed (forced) trials followed by interleaved
-    assistant/user turns for free trials.
-    If `is_current_game` is True, only include free trials before `current_trial`.
-    """
-    def _get_free_df(gdf, is_current_game=False, current_trial=None, trial_col='trial'):
-        if is_current_game:
-            return gdf[(gdf['type'] == 'free') & (gdf[trial_col] < current_trial)].sort_values('trial')
-        return gdf[gdf['type'] == 'free'].sort_values('trial')
-
     forced_df = game_df[game_df['type'] == 'forced'].sort_values('trial')
-    forced_lines = [f"{r['choice']}->{r['reward']} points" for _, r in forced_df.iterrows()]
+    forced_lines = [
+        f"{r['mapped_choice']}: {r['reward']} points."
+        for _, r in forced_df.iterrows()
+    ]
     forced_text = "\n".join(forced_lines)
     total_trials = game_df['trial'].max()
 
-    block = (
-        f"<|start_header_id|>user<|end_header_id|>\n"
-        f"Game {game_id}. There are {total_trials} trials in this game.\n"
-        f"(INSTRUCTED TRIALS):{forced_text}<|eot_id|>"
-    )
-    # Default: include all free trials
+    if game_id == 1:
+        # Open a fresh user turn
+        block = f"\n<|start_header_id|>user<|end_header_id|>\nGame {game_id}. There are {total_trials} trials in this game.\n{forced_text}<|eot_id|>"
+    else:
+        # Continue the previous game's open user reward turn, then close it
+        block = f"\n\nGame {game_id}. There are {total_trials} trials in this game.\n{forced_text}<|eot_id|>"
+
     free_df = game_df[game_df['type'] == 'free'].sort_values('trial')
-    for _, row in free_df.iterrows():
-        block += f"<|start_header_id|>assistant<|end_header_id|>\n{row['choice']}<|eot_id|>"
-        block += f"<|start_header_id|>user<|end_header_id|>\n->{row['reward']} points.<|eot_id|>"
-    
+    free_rows = list(free_df.iterrows())
+    for i, (_, row) in enumerate(free_rows):
+        is_last = (i == len(free_rows) - 1)
+        block += f"<|start_header_id|>assistant<|end_header_id|>\n{row['mapped_choice']}<|eot_id|>"
+        if is_last and not is_current_game:
+            # Leave open so the next game can append into this user turn
+            block += f"<|start_header_id|>user<|end_header_id|>\n{row['reward']} points."
+        else:
+            block += f"<|start_header_id|>user<|end_header_id|>\n{row['reward']} points.<|eot_id|>"
 
     return block
 
@@ -106,8 +83,8 @@ def format_single_game(game_id, game_df, llm_type='centaur', is_current_game=Fal
             # make a copy with filtered free trials
             gdf = game_df.copy()
             gdf = gdf[(gdf['type'] == 'forced') | ((gdf['type'] == 'free') & (gdf[trial_col] < current_trial))]
-            return format_single_game_llama(game_id, gdf)
-        return format_single_game_llama(game_id, game_df)
+            return format_single_game_llama(game_id, gdf, is_current_game=True)
+        return format_single_game_llama(game_id, game_df, is_current_game=False)
     else:
         raise ValueError(f"Unknown llm_type: {llm_type}")
 
@@ -116,14 +93,14 @@ def format_single_game(game_id, game_df, llm_type='centaur', is_current_game=Fal
 def format_single_game_centaur(game_id, game_df, is_current_game=False, current_trial=None,trial_col=None):
     """Formats a single game's header and trials into a block of text."""
     total_trials = game_df[trial_col].max()
-    
     # Header for the game
-    lines = [f"\nGame {game_id}. There are {total_trials} trials in this game."]
+    lines = [f"\n\nGame {game_id}. There are {total_trials} trials in this game."]
     
     # 1. Add Forced Trials (always included)
     forced = game_df[game_df["type"] == "forced"]
+    #print(f"columns: {game_df.columns}")
     for _, row in forced.iterrows():
-        lines.append(f"You are instructed to press {row['choice']} and get {row['reward']} points.")
+        lines.append(f"You are instructed to press {row['mapped_choice']} and get {row['reward']} points.")
     
     # 2. Add Free Trials
     # If it's the current game, only add trials BEFORE the current decision
@@ -133,16 +110,21 @@ def format_single_game_centaur(game_id, game_df, is_current_game=False, current_
         free = game_df[game_df["type"] == "free"]
         
     for _, row in free.iterrows():
-        lines.append(f"You press <<{row['choice']}>> and get {row['reward']} points.")
+        lines.append(f"You press <<{row['mapped_choice']}>> and get {row['reward']} points.")
         
     return "\n".join(lines)
 
-def build_multi_game_prompt(block_df, current_game_id, current_trial, trial_col='trial',choice_options=None,llm_type='centaur'):
+def build_multi_game_prompt(block_df, current_game_id, current_trial, trial_col='trial',choice_options=None,llm_type='centaur',eval=False):
     """Constructs the full prompt history across all games in a block."""
     # Initial Instructions (Only show this once at the very top)
     system_msg = system_message(llm_type=llm_type, choice_options=choice_options)
+    if llm_type =='llama':
+        # For llama, join the system message sentences into a single string with newlines, since the llama prompt format expects a single string for the system message.
+        system_msg = "\n".join(system_msg)
+        full_prompt = f"<|start_header_id|>system<|end_header_id|>\n{system_msg}<|eot_id|>"
+    else:
     # `system_message` returns a list of sentences; join into a string
-    full_prompt = "\n".join(system_msg) if isinstance(system_msg, list) else str(system_msg)
+        full_prompt = "\n".join(system_msg)
 
     # 1. Add all COMPLETED games
     past_games_ids = sorted(block_df[block_df['game'] < current_game_id]['game'].unique())
@@ -160,11 +142,11 @@ def build_multi_game_prompt(block_df, current_game_id, current_trial, trial_col=
         current_trial=current_trial,
         trial_col=trial_col
     )
-
-    if llm_type == 'llama':
-        # 3. Add the final trigger for llama (isolated with a newline and space to prevent token merging)
-        full_prompt += "\n <|start_header_id|>assistant<|end_header_id|>\n"
-    if llm_type == 'centaur':
-        # 3. Add the final trigger for centaur (no extra space needed)
-        full_prompt += "\nYou press <<"
+    if eval:
+        #print(f"trigger will be added at the end of this prompt: \n{full_prompt[-500:]}")
+        if llm_type == 'centaur':
+            full_prompt+="\nYou press <<"
+            #print(f"full prompt with trigger added: \n{full_prompt[-500:]}")
+        elif llm_type == 'llama':
+            full_prompt += "<|start_header_id|>assistant<|end_header_id|>\n"
     return full_prompt

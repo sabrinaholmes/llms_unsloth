@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import argparse
 import json
 
+PARTICIPANTS_TO_PLOT = None  # None means plot all; set to a list of IDs to restrict, e.g. [1, 2, 3]
 def read_data_from_folder(folder_path):
     dfs = pd.DataFrame()
     # join without a leading slash — a leading '/' makes os.path.join return '/singles'
@@ -296,7 +297,7 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=(12, 6), nll_co
                     textcoords="offset points",
                     ha='center', va='bottom')
 
-    chance_nll = -np.log(0.5)
+    chance_nll = -np.log(1/30)
     ax.axhline(chance_nll, ls='--', c='grey', lw=1.2)
     adjustment_term = figsize[0] * 0.04
     ax.text(xpos[-1] - adjustment_term, chance_nll, 'Random guessing',
@@ -338,7 +339,7 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=(12, 6), nll_co
     return fig
 
 
-def load_and_plot(base_path='predictive', out_png='loglikelihood_bars.png',nll_column='log_likelihood'):
+def load_and_plot(base_path='predictive', out_png='loglikelihood_bars.png', nll_column='log_likelihood', include_participants=None):
     # Load all models in base_path
     model_dfs = {}
     for model_name in os.listdir(base_path):
@@ -370,6 +371,21 @@ def load_and_plot(base_path='predictive', out_png='loglikelihood_bars.png',nll_c
                 print(f"Loaded RW metrics from {rw_json_path}: mean={mean}, sem={sem}, size_label=RW")
         except Exception as e:
             print(f"Warning: failed to load RW metrics from {rw_json_path}: {e}")
+    # Keep only specified participants from all models before plotting
+    if include_participants is not None:
+        include_set = set(include_participants)
+        for model_name in list(model_dfs.keys()):
+            df = model_dfs[model_name]
+            id_col = next((c for c in ('model_id', 'participant_id') if c in df.columns), None)
+            if id_col is not None:
+                before = df[id_col].nunique()
+                model_dfs[model_name] = df[df[id_col].isin(include_set)]
+                after = model_dfs[model_name][id_col].nunique()
+                if before != after:
+                    print(f"Kept participants {include_set & set(df[id_col].unique())} from {model_name} ({before} -> {after})")
+        # Rebuild family_mapping after filtering
+        family_mapping = identify_model_families(model_dfs)
+
     fig = plot_loglikelihood_bars_dynamic(family_mapping=family_mapping, nll_column=nll_column, figsize=(12,10))
     print({k: len(v) for k, v in family_mapping.items()})
     fig.savefig(out_png, dpi=300)
@@ -378,7 +394,9 @@ def load_and_plot(base_path='predictive', out_png='loglikelihood_bars.png',nll_c
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--base', default='predictive', help='Base predictive folder containing model subfolders')
-    parser.add_argument('--out', default='loglikelihood_bars.png', help='Output PNG filename')
+    parser.add_argument('--base', default='data/out/predictive_accum', help='Base predictive folder containing model subfolders')
+    parser.add_argument('--out', default='figures/loglikelihood_bars.png', help='Output PNG filename')
+    parser.add_argument('--include_participants', type=int, nargs='+', default=PARTICIPANTS_TO_PLOT,
+                        help='List of participant IDs to plot (default: None = plot all)')
     args = parser.parse_args()
-    load_and_plot(base_path=args.base, out_png=args.out, nll_column='raw_nll')
+    load_and_plot(base_path=args.base, out_png=args.out, nll_column='nll', include_participants=args.include_participants)
