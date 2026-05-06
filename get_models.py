@@ -38,8 +38,7 @@ class PrefixTreeLogitsProcessor(LogitsProcessor):
         eos_id = tokenizer.eos_token_id
 
         # Build prefix tree: prefix_tuple -> set of valid next token IDs
-        # Each option is added twice: with and without leading space, so both
-        # " low" and "low" (different token IDs) are valid paths to the same option.
+        # Each option is added twice: with and without leading space, so both " low" and "low" (different token IDs) are valid paths to the same option.
         prefix_tree: dict[tuple, set] = {}
         for option in allowed_options:
             # Add both spaced (" low") and unspaced ("low") encodings so the model
@@ -87,6 +86,7 @@ MODEL_PATHS = {
     'llama-70B-adapter': 'unsloth/Meta-Llama-3.1-70B-Instruct-bnb-4bit',
     'llama-8B': 'meta-llama/Meta-Llama-3.1-8B-Instruct',
     'llama-8B-adapter': 'unsloth/Meta-Llama-3.1-8B-Instruct-bnb-4bit',
+    'llama-8B-base-adapter': 'unsloth/Llama-3.1-8B-unsloth-bnb-4bit',
     'llama-3-8B': 'meta-llama/Meta-Llama-3-8B-Instruct',
     'llama-3-70B': 'meta-llama/Meta-Llama-3-70B-Instruct' # Added for completeness
 }

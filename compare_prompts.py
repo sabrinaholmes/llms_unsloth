@@ -13,6 +13,8 @@ def load_hf_prompts(experiment_name='wu2018generalisation'):
     # Replace the ö characters with regex wildcards
     safe_name = re.sub(r'[^\x00-\x7F]+', lambda m: '.' * len(m.group()), experiment_name)
     df_exp = df_hf[df_hf['experiment'].str.contains(safe_name, na=False, regex=True)]
+    # save to local for debugging
+    #df_exp.to_csv(f"filtered_prompts_{experiment_name}.csv", index=False)
     return set(normalize(p) for p in df_exp['text'].dropna())
 
 
