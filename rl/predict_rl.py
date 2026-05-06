@@ -9,37 +9,23 @@ import random
 import torch
 import torch.nn.functional as F
 import os
+from rl_prompt import build_llama_prompt, build_centaur_prompt
 
-DATA_IN_TEST = 'data/in/test_data.csv'
-
-MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
+MODEL = 'centaur-8B-adapter'  # Change this to the desired model name
+SIMULATION_NUMBER = 32 # Number of simulated participants
+LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
 DATA_FOLDER_OUT = f'data/out/predictive/{MODEL}/singles'
-
-def build_rl_prompt(past_trials: list) -> str:
-    """Builds the prompt for the current trial with past trial data."""
-    recent_trials = past_trials
-    instructions = [
-        "In this task, you have to repeatedly choose between two slot machines labeled U and P.",
-        "You can choose a slot machine by pressing its corresponding key.",
-        "When you select one of the machines, you will win 1 or 0 points.",
-        "Your goal is to choose the slot machines that will give you the most points.",
-        "You will receive feedback about the outcome after making a choice.",
-        "The environment may change unpredictably; past success does not guarantee future results.",
-        "You will play 1 game in total, consisting of 100 trials.\n",
-        "Game 1:"
-    ]
-    
-    prompt = "\n".join(instructions)
-    # join instruction with \n
-    # Add history of past trials to the prompt
-    for past_trial in recent_trials:
-        prompt += f"You press <<{past_trial['choice']}>> and get {past_trial['reward']} points.\n"
-
-    # Add the current choice prompt
-    prompt += f"You press <<"
-    return prompt
+DATA_IN_TEST = 'data/in/test_data_randomized_choices.csv'  # This should be the test set created by create_test_df.py
 
 def predict_participant(df_participant, model, tokenizer):
+    """
+    Simulates a participant by processing the entire game history in ONE forward pass.
+    Calculates NLL, Top-2 probabilities, and aligns model predictions with human choices.
+    """
+    all_results = []
+    participant_id = df_participant['model_id'].iloc[0]
+    #reate random choice options from all capital letters
+    choice_options = df_participant['choice_mapped'].unique().tolist()
     history = []
     cumulative_reward = 0
     total_trials = len(df_participant)
@@ -52,66 +38,85 @@ def predict_participant(df_participant, model, tokenizer):
         past_trials.append({
             "trial": row['trial'],
             "choice": row['choice'],
+            "choice_mapped": row['choice_mapped'],
             "reward": row['reward'],
             "cumulative_reward": df_participant.iloc[:trial+1]['reward'].sum()
         })
+    if LLM_TYPE == 'centaur':
+        prompt = build_centaur_prompt(past_trials, choice_options=choice_options)
+        trigger_pattern = r'You press <<([^>]+)>>'
+    elif LLM_TYPE == 'llama':
+        prompt = build_llama_prompt(past_trials, choice_options=choice_options)
+        trigger_pattern = r'<\|start_header_id\|>assistant<\|end_header_id\|>\n([A-Z])'
     
-    prompt = build_rl_prompt(past_trials)
-
     # 2. Tokenize ONCE and keep the BatchEncoding object
     encoding = tokenizer(prompt, return_tensors="pt", truncation=True)
     input_ids = encoding['input_ids'].to(model.device)
+    
+    # 3. Pre-compute valid choice token IDs (if provided)
+    if choice_options:
+        choice_token_ids = tokenizer.convert_tokens_to_ids(choice_options)
+        choice_token_ids = [tok_id for tok_id in choice_token_ids if tok_id != tokenizer.unk_token_id]
+    else:
+        choice_token_ids = None
 
     with torch.no_grad():
         # 3. Single Forward Pass
         outputs = model(input_ids)
-        logits = outputs.logits[0]  # [seq_len, vocab_size]
+        all_logits = outputs.logits[0]  # Shape: [seq_len, vocab_size]
 
-        per_trial_results = []
-        
-        # 4. Find choice positions using Regex
-        choice_pattern = r'You press <<([^>]+)>>'
-        matches = list(re.finditer(choice_pattern, prompt))
+        # 4. Use Regex to find every "choice trigger" in the prompt
+        matches = list(re.finditer(trigger_pattern, prompt))
 
-        for choice_idx, match in enumerate(matches):
+        for trial_idx, match in enumerate(matches):
             choice_char = match.group(1)
-            char_start = match.start(1)
-
-            # Fast mapping from character index to token index
-            token_idx = encoding.char_to_token(0, char_start)
-
-            if token_idx is None:
-                continue
-
-            # LOGIC: Logits at [token_idx - 1] predict the token at [token_idx]
-            target_logits = logits[token_idx - 1]
+            char_pos = match.start(1)
             
-            # Probability calculations
-            log_probs = torch.nn.functional.log_softmax(target_logits, dim=-1)
+            # Map character position to token index
+            token_idx = encoding.char_to_token(0, char_pos)
+            if token_idx is None: continue
+
+            # ALIGNMENT: The logit predicting the choice is at [token_idx - 1]
+            logits = all_logits[token_idx - 1]
+            
+            # 6. Mask invalid choices if choice_options were provided
+            if choice_token_ids is not None:
+                mask = torch.full(logits.shape, float("-inf"), device=logits.device)
+                mask[choice_token_ids] = 0.0
+                logits = logits + mask
+            
+            # Calculate Probabilities
+            log_probs = torch.nn.functional.log_softmax(logits, dim=-1)
             probs = torch.exp(log_probs)
-            
+
+            # Get NLL for the actual human choice
             actual_token_id = input_ids[0, token_idx]
             nll = -log_probs[actual_token_id].item()
-            #6. Get Top-2 for analysis
+            
+            # 6. Get Top-2 for analysis
             top2_probs, top2_indices = torch.topk(log_probs, 2)
             top2_tokens = tokenizer.convert_ids_to_tokens(top2_indices)
             top2_probs = top2_probs.exp().tolist()
 
-            per_trial_results.append({
-                'trial_index': choice_idx,
-                'ground_truth': choice_char,
-                'nll': nll,
+            # Extract trial-specific metadata from the original DF
+            # This ensures we match the correct reward/horizon for this trial
+
+            all_results.append({
+                "participant_id": participant_id,
+                "trial_index": trial_idx+1,
+                "ground_truth": choice_char,
+                "nll": nll,
                 'top2': list(zip(top2_tokens, top2_probs))
             })
-
-    # Summary
-    valid_trial_nlls = [r['nll'] for r in per_trial_results if r['nll'] != float('inf')]
+    
+    # Compute summary statistics
+    valid_trial_nlls = [r['nll'] for r in all_results if r['nll'] != float('inf')]
     overall_nll = sum(valid_trial_nlls) / len(valid_trial_nlls) if valid_trial_nlls else float('inf')
 
     print(f"✅ Simulation complete")
     print(f"🎯 Overall NLL: {overall_nll:.4f}")
 
-    return per_trial_results, overall_nll,prompt
+    return all_results, overall_nll, prompt
 
 
 def main():
@@ -121,7 +126,6 @@ def main():
 
     model, tokenizer = get_models.get_model_no_pipe_unsloth(MODEL)
     timeline = pd.read_csv(DATA_IN_TEST)
-    timeline['choice'] = timeline['choice'].map({0: 'U', 1: 'P'})
     model_ids = timeline['model_id'].unique()
 
 

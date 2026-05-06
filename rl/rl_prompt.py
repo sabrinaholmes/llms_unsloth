@@ -18,9 +18,6 @@ def system_message(choice_options=None, llm_type='llama'):
         "You will play 1 game in total, consisting of 100 trials.",
     ]
 
-    if llm_type == 'centaur':
-        # Insert the centaur-specific instruction as the 2nd sentence
-        sentences.insert(1, "You choose a slot machine by pressing the corresponding key.")
 
     if llm_type == 'llama':
         sentences.append(f"Respond with exactly ONE character: {choice_options[0]} or {choice_options[1]}. "
@@ -28,13 +25,13 @@ def system_message(choice_options=None, llm_type='llama'):
 
     return sentences
 
-def build_llama_prompt(current_trial: int, past_trials: list, total_trials: int) -> str:
+def build_llama_prompt(past_trials: list,choice_options: list) -> str:
     """
     Builds a multi-turn llama-style prompt where each past choice is an 'assistant' message
     and each reward is a 'user' message.
     """
-    system_msg=system_message(choice_options=['U', 'P'], llm_type='llama')
-    system_text = "".join(system_msg)
+    system_msg=system_message(choice_options=choice_options, llm_type='llama')
+    system_text = "\n".join(system_msg)
     prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{system_text}<|eot_id|>"
     prompt += f"<|start_header_id|>user<|end_header_id|>\nGame 1."
 
@@ -42,20 +39,20 @@ def build_llama_prompt(current_trial: int, past_trials: list, total_trials: int)
         prompt += "No trials completed yet."
     else:
         for trial in past_trials:
-            prompt += f"<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n{trial['choice']}<|eot_id|>"
-            prompt += f"<|start_header_id|>user<|end_header_id|>\n->{trial['reward']} points."
+            prompt += f"<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n{trial['choice_mapped']}<|eot_id|>"
+            prompt += f"<|start_header_id|>user<|end_header_id|>\n{trial['reward']} points."
 
     prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n"
     return prompt
 
 
-def build_rl_prompt(past_trials: list) -> str:
+def build_centaur_prompt(past_trials: list, choice_options: list) -> str:
     """Builds the centaur-style prompt for the current trial with past trial data."""
-    system_msg=system_message(choice_options=['U', 'P'], llm_type='centaur')
+    system_msg=system_message(choice_options=choice_options, llm_type='centaur')
     prompt = "\n".join(system_msg)
     prompt += "\nGame 1."
     for past_trial in past_trials:
-        prompt += f"You press <<{past_trial['choice']}>> and get {past_trial['reward']} points.\n"
+        prompt += f"You press <<{past_trial['choice_mapped']}>> and get {past_trial['reward']} points.\n"
 
     prompt += f"You press <<"
     return prompt

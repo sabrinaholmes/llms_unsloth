@@ -8,11 +8,24 @@ import random
 import torch
 import os
 import gc
+from rl_prompt import build_llama_prompt, build_centaur_prompt
+import hashlib
+import gzip
 
 
-MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
+MODEL = 'llama-8B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
-SIMULATION_NUMBER = 32
+PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
+SIMULATION_NUMBER = 32 # Number of simulated participants
+LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
+
+def save_prompt(prompt: str) -> str:
+    h = hashlib.sha256(prompt.encode()).hexdigest()
+    path = os.path.join(PROMPT_DIR, f"{h}.txt.gz")
+    if not os.path.exists(path):
+        with gzip.open(path, 'wt', encoding='utf-8') as f:
+            f.write(prompt)
+    return h
 
 
 def generate_timeline(num_trials=100, seed=42):
@@ -51,74 +64,64 @@ def generate_timeline(num_trials=100, seed=42):
     return timeline
     
 
-def build_rl_prompt(past_trials: list) -> str:
-    """Builds the prompt for the current trial with past trial data."""
-    recent_trials = past_trials
-    instructions = [
-        "In this task, you have to repeatedly choose between two slot machines labeled U and P.",
-        "You can choose a slot machine by pressing its corresponding key.",
-        "When you select one of the machines, you will win 1 or 0 points.",
-        "Your goal is to choose the slot machines that will give you the most points.",
-        "You will receive feedback about the outcome after making a choice.",
-        "The environment may change unpredictably, and past success does not guarantee future results.",
-        "You’ll need to adapt to these changes to keep finding the better machine."
-        "You will play 1 game in total, consisting of 100 trials.\n",
-        "Game 1:"
-    ]
-    
-    prompt = "\n".join(instructions)
-    # join instruction with \n
-    # Add history of past trials to the prompt
-    for past_trial in recent_trials:
-        prompt += f"You press <<{past_trial['choice']}>> and get {past_trial['reward']} points.\n"
-
-    # Add the current choice prompt
-    prompt += f"You press <<"
-    return prompt
-
 def simulate_participant(timeline: list, wrapper) -> pd.DataFrame:
     """Simulates a participant with log-likelihood tracking"""
+    #reate random choice options from all capital letters
+    choice_options = random.sample(
+        [chr(i) for i in range(65, 91)], 2
+    )
+
     history = []
     cumulative_reward = 0
     total_trials = 100
-
-
     for trial in range(1,total_trials+1):
         current_trial_data = timeline[trial - 1]  # Ensure `timeline` is defined
-        prompt_model = build_rl_prompt(history)
+        if LLM_TYPE == 'centaur':
+            prompt_model = build_centaur_prompt(history, choice_options=choice_options)
+        elif LLM_TYPE == 'llama':
+            prompt_model = build_llama_prompt(history, choice_options=choice_options)
         bandit_1_value = current_trial_data["bandit_1"]["value"]
         bandit_2_value = current_trial_data["bandit_2"]["value"]
-        #print(f"this is {prompt_model}")
-        model_choice = wrapper.generate(prompt_model)
-        #print(f"this is choice raw {choice_raw}")
+        model_choice = wrapper.generate(prompt_model, choice_options=choice_options, max_new_tokens=1, processor_type="prefix_tree")
         print(f"this is model choice {model_choice}")
 
-        # Determine reward
-        reward = bandit_1_value if model_choice == 'U' else (bandit_2_value if model_choice == 'P' else 0)
+        # Map letter back to bandit index (1 or 2); 0 if unrecognized
+        if model_choice == choice_options[0]:
+            chosen_bandit = 1
+            reward = bandit_1_value
+        elif model_choice == choice_options[1]:
+            chosen_bandit = 2
+            reward = bandit_2_value
+        else:
+            chosen_bandit = 0
+            reward = 0
         cumulative_reward += reward
-        #outputs=generate_test(prompt_model,pipe)
-        #print(f"this is whole output {outputs}")
 
         print(f"Trial {trial}: "
-              f"Choice {model_choice}, "
+              f"Choice {model_choice} (bandit {chosen_bandit}), "
               f"Reward {reward}, "
               f"Total {cumulative_reward}")
 
         history.append({
             "trial_index": trial,
-            "choice": model_choice,
+            "choice_mapped": model_choice,
+            "choice": chosen_bandit,
+            "choice_option_1": choice_options[0],
+            "choice_option_2": choice_options[1],
             "reward": reward,
             "cumulative_reward": cumulative_reward,
-            "prompt": prompt_model
+            "prompt_hash": save_prompt(prompt_model)
         })
 
 
 
     return pd.DataFrame(history)
+
 def main():
 
     if not os.path.exists(DATA_FOLDER_OUT):
         os.makedirs(DATA_FOLDER_OUT)
+    os.makedirs(PROMPT_DIR, exist_ok=True)
     # generate the timeline once
     timeline = generate_timeline(num_trials=100)
     # Initialize model
