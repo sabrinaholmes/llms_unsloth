@@ -14,12 +14,12 @@ from compare_prompts import is_prompt_in_test_set
 
 
 DATA_IN_TEST = 'data/in/test/test_df.csv'  # This should be the test set created by create_test_df.py
-MODEL = 'llama-70B-adapter'  # Change this to the desired model name
-DATA_FOLDER_OUT = f'data/out/predictive_accum/{MODEL}_no_space_2/singles'
-RUN_TEST_SET_ONLY = False  # Set to True to only run on prompts that are in the test set (for analysis purposes)
-TASK_TYPE = 'accumulation'  # Set to 'accumulation' or 'maximization' based on the scenario
-
+MODEL = 'llama-8B-base-adapter'  # Change this to the desired model name
+DATA_FOLDER_OUT = f'data/out/predictive/{MODEL}/singles'
+TASK_TYPE = 'accumulation' # Set to 'accumulation' or 'maximization' based on the scenario
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
+RUN_TEST_SET_ONLY = True if LLM_TYPE == 'centaur' else False  # Set to True to only run on prompts that are in the test set (for analysis purposes)
+
 
 def predict_participant(participant_df, model, tokenizer,choice_options=None):
     """
@@ -143,13 +143,16 @@ def main():
         # Run simulation with model and tokenizer passed
         model_data = timeline[timeline['id'] == p]
 
-        if RUN_TEST_SET_ONLY and LLM_TYPE == 'centaur':
+        if RUN_TEST_SET_ONLY:
             full_prompt = build_predict_centaur_prompt(model_data, task_type=TASK_TYPE)
             if not is_prompt_in_test_set(full_prompt):
                 print(f"Participant {p} not in test set. Skipping...")
                 continue
 
-        results, overall_nll, prompt = predict_participant(model_data, model, tokenizer)
+        results, overall_nll, prompt = predict_participant(
+            model_data, model, tokenizer,
+            choice_options=[str(i) for i in range(1, 31)]
+        )
         result = pd.DataFrame(results)
 
         # Save the results for this model

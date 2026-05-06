@@ -15,15 +15,23 @@ from spatially_correlated_prompt import build_generate_prompt_centaur,build_gene
 
 
 DATA_IN_ = 'data/in/scaled_kernels'
-MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
+MODEL = 'llama-8B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
 NUMBER_OF_PARTICIPANTS = 81
 NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1 = 45  # For scenario 1 (accumulation), we have 45 participants, which is more than half of the total participants. The remaining 36 participants will be assigned to scenario 2 (maximization).
 NUMBER_OF_PARTICIPANTS_PER_SCENARIO_2 = NUMBER_OF_PARTICIPANTS - NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1
+RUN_TEST_MODE = True if '8B' in MODEL else False  # Set to True to only run on small number of simulations for test
 
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
 choice_options = [str(i) for i in range(1, 31)]  # Model generates just the number after 'You press <<'
+def save_prompt(prompt: str) -> str:
+    h = hashlib.sha256(prompt.encode()).hexdigest()
+    path = os.path.join(PROMPT_DIR, f"{h}.txt.gz")
+    if not os.path.exists(path):
+        with gzip.open(path, 'wt', encoding='utf-8') as f:
+            f.write(prompt)
+    return h
 
 def simulate_participant(timeline_df, wrapper, participant_id, scenario=0, n_envs=16, kernel_type='rough', seed=None):
     """
@@ -86,7 +94,7 @@ def simulate_participant(timeline_df, wrapper, participant_id, scenario=0, n_env
                 prompt = build_generate_prompt_llama(
                     completed_envs, current_env, scenario, env_horizon
                 )
-            choice = wrapper.generate(prompt, choice_options=choice_options)
+            choice = wrapper.generate(prompt, choice_options=choice_options,processor_type='prefix_tree')
             if choice is not None:
                 choice = choice.strip()  # Remove any leading/trailing whitespace
             if choice is not None and choice != 'None':
@@ -116,7 +124,7 @@ def simulate_participant(timeline_df, wrapper, participant_id, scenario=0, n_env
                 'horizon': env_horizon,
                 'init_reward': init_reward,
                 'reward': reward,
-                'prompt':prompt,
+                'prompt_hash': save_prompt(prompt),
                 'random_seed': random_seed,
             })
             print(f'  Choice={choice}, Reward={reward}, Number of invalid choices so far: {sum(1 for r in results if r["choice"] is None)}')
@@ -138,6 +146,11 @@ def main():
     torch.cuda.empty_cache()
     all_model_results = []
     for scenario in [0, 1]:
+        if RUN_TEST_MODE:
+            print(f"Running test mode for scenario {scenario} only with 2 participants (2 per kernel type)")
+            NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1 = 2
+            NUMBER_OF_PARTICIPANTS_PER_SCENARIO_2 = 2
+
         num_participants= NUMBER_OF_PARTICIPANTS_PER_SCENARIO_1 if scenario == 0 else NUMBER_OF_PARTICIPANTS_PER_SCENARIO_2
         # for each scenario(maximization or accumulation), sample half rough and half smooth kernels for the participants
         #number of participants per kernel type
