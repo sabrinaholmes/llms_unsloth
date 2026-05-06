@@ -1,6 +1,6 @@
 import json
 import pandas as pd
-def system_message(llm_type='llama', task_type='verbal'):
+def system_message(task_type='verbal',exp_mixed=False,):
     sentences = [
         "Your task is to estimate the blood concentration of the hormone Caldionine based on information about the amount of two other hormones, Progladine and Amalydine, in multiple individuals' urine.",
         # ← removed hardcoded numerical lines here
@@ -8,15 +8,20 @@ def system_message(llm_type='llama', task_type='verbal'):
         "You will receive feedback about the actual concentration after making your estimate.",
         "This feedback will stop at some point.\n"
     ]
-
-    if task_type == 'verbal':
-        sentences.insert(1, "Both Progladine and Amalydine can take five values (very little, a little, average, a lot, very much).\nCaldionine can take nine values (extremely low, very low, low, somewhat low, normal, somewhat high, high, very high, extremely high).")
-    elif task_type == 'numerical':
-        sentences.insert(1, "Both Progladine and Amalydine can take five values (1, 2, 3, 4, 5).\nCaldionine can take nine values (10, 20, 30, 40, 50, 60, 70, 80, 90).")
+    if exp_mixed:
+        if task_type == 'verbal':
+            sentences.insert(1, "Both Progladine and Amalydine can take five values (1, 2, 3, 4, 5).\nCaldionine can take nine values (extremely low, very low, low, somewhat low, normal, somewhat high, high, very high, extremely high).")
+        elif task_type == 'numerical':
+            sentences.insert(1, "Both Progladine and Amalydine can take five values (very little, a little, average, a lot, very much).\nCaldionine can take nine values (10, 20, 30, 40, 50, 60, 70, 80, 90).")
+    else:
+        if task_type == 'verbal':
+            sentences.insert(1, "Both Progladine and Amalydine can take five values (very little, a little, average, a lot, very much).\nCaldionine can take nine values (extremely low, very low, low, somewhat low, normal, somewhat high, high, very high, extremely high).")
+        elif task_type == 'numerical':
+            sentences.insert(1, "Both Progladine and Amalydine can take five values (1, 2, 3, 4, 5).\nCaldionine can take nine values (10, 20, 30, 40, 50, 60, 70, 80, 90).")
 
     return sentences
 
-def build_predict_centaur_prompt(timeline: pd.DataFrame) -> str:
+def build_predict_centaur_prompt(timeline: pd.DataFrame,exp_mixed=False,limited_train=False) -> str:
     """Builds the multi-cue prediction prompt from all trials in the timeline.
 
     Iterates through each trial. For condition 1 or 3 (English cues/responses),
@@ -25,7 +30,8 @@ def build_predict_centaur_prompt(timeline: pd.DataFrame) -> str:
     Response is wrapped in <<...>> for downstream NLL evaluation.
     """
     participant_condition=timeline['condition'].iloc[0]
-    system_msg = system_message(llm_type='centaur', task_type='verbal' if participant_condition in [1,3] else 'numerical')
+    print(f"Building prompt for participant with condition {participant_condition}")
+    system_msg = system_message(task_type='verbal' if participant_condition in [1,3] else 'numerical',exp_mixed=exp_mixed)
     prompt = "\n".join(system_msg)+"\n"
     for _, row in timeline.iterrows():
         #if cues,response,criterium are strings, then lowercase them for better readability
@@ -39,7 +45,13 @@ def build_predict_centaur_prompt(timeline: pd.DataFrame) -> str:
                 f"Progladine: {cue1}. Amalydine: {cue2}. "
                 f"You say that the Caldionine concentration is <<{raw_response}>>."
             )
-        if block<=10:
+        if limited_train:
+            train_blocks=6
+        else:            
+            train_blocks=10
+
+        
+        if block<=train_blocks:
             if raw_response == criterium:
                 prompt += f" That is correct. The correct concentration of Caldionine is indeed {criterium}.\n"
             else:
@@ -97,7 +109,7 @@ def build_predict_llama_prompt(timeline: pd.DataFrame) -> str:
     Response is wrapped in <<...>> for downstream NLL evaluation.
     """
     participant_condition=timeline['condition'].iloc[0]
-    system_msg = system_message(llm_type='llama', task_type='verbal' if participant_condition in [1,3] else 'numerical')
+    system_msg = system_message(task_type='verbal' if participant_condition in [1,3] else 'numerical')
     prompt = "\n".join(system_msg)
     prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{prompt}<|eot_id|>\n"
     for _, row in timeline.iterrows():
@@ -111,7 +123,7 @@ def build_predict_llama_prompt(timeline: pd.DataFrame) -> str:
         prompt += (
                 f"<|start_header_id|>user<|end_header_id|>\n"
                 f"Progladine: {cue1}. Amalydine: {cue2}.<|eot_id|>\n"
-                f"<|start_header_id|>assistant<|end_header_id|>\n{raw_response}.<|eot_id|>\n"
+                f"<|start_header_id|>assistant<|end_header_id|>\n{raw_response}<|eot_id|>\n"
             )
         if block<=10:
             if raw_response == criterium:

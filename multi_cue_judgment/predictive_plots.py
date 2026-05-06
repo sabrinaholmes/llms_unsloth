@@ -860,6 +860,230 @@ def plot_generation_step_distributions(df, n_trials=10, participant_id=None, out
     return fig
 
 
+def plot_top5_steps(df, n_trials=None, trial_indices=None, participant_id=None, out_png=None):
+    """
+    For each English trial, plot the masked top-5 token distributions at step 1
+    and step 2 side-by-side. Orange bar = the actual ground-truth token at that step.
+    Confirms that masking is working: only valid vocabulary tokens should appear.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Output CSV from predict_multi_cue — must have top5_step1_tok*/prob* columns.
+    n_trials : int or None
+        Cap on number of trials to plot (applied before trial_indices filter).
+    trial_indices : list[int] or None
+        1-based trial indices to include; None = all.
+    participant_id : int or None
+        Used only in the figure title.
+    out_png : str or None
+        If given, saves the figure here.
+    """
+    sep = '_' if any('_' in str(v) for v in df['ground_truth'].dropna()) else ' '
+
+    # Keep only rows that have step 1 data (English trials)
+    rows = df[df['top5_step1_tok1'].notna()].copy()
+    if trial_indices is not None:
+        rows = rows[rows['trial_index'].isin(trial_indices)]
+    if n_trials is not None:
+        rows = rows.head(n_trials)
+    if rows.empty:
+        print("No rows with top5_step1 data found.")
+        return None
+
+    n_rows = len(rows)
+    fig, axes = plt.subplots(n_rows, 2, figsize=(9, n_rows * 2.8), squeeze=False)
+
+    for row_i, (_, row) in enumerate(rows.iterrows()):
+        ground_truth = str(row['ground_truth'])
+        parts = ground_truth.split(sep)
+        actual_step1 = parts[0] if parts else None
+        actual_step2 = parts[1] if len(parts) > 1 else None
+
+        for step, actual_tok, col_prefix, ax in [
+            (1, actual_step1, 'top5_step1', axes[row_i][0]),
+            (2, actual_step2, 'top5_step2', axes[row_i][1]),
+        ]:
+            tok_cols  = [f'{col_prefix}_tok{r}'  for r in range(1, 6)]
+            prob_cols = [f'{col_prefix}_prob{r}' for r in range(1, 6)]
+
+            present = [c for c in tok_cols if c in row.index and pd.notna(row[c])]
+            if not present:
+                ax.axis('off')
+                if step == 2 and actual_step2 is None:
+                    ax.text(0.5, 0.5, '(single-token option)', ha='center', va='center',
+                            fontsize=8, color='grey', transform=ax.transAxes)
+                continue
+
+            tokens = [str(row[c]).replace('▁', ' ').strip() for c in tok_cols if c in row.index and pd.notna(row[c])]
+            probs  = [float(row[c]) for c in prob_cols if c in row.index and pd.notna(row[c])]
+
+            bar_colors = [
+                '#D55E00' if actual_tok and t.lower() == actual_tok.lower() else '#AAAAAA'
+                for t in tokens
+            ]
+
+            y = range(len(tokens))
+            bars = ax.barh(list(y), probs, color=bar_colors, edgecolor='black', linewidth=0.4)
+            ax.set_yticks(list(y))
+            ax.set_yticklabels(tokens, fontsize=9)
+            ax.set_xlim(0, max(probs) * 1.25 if probs else 1)
+            ax.invert_yaxis()
+            ax.set_title(f'Step {step} (masked)', fontsize=9)
+            ax.spines[['top', 'right']].set_visible(False)
+
+            for bar, prob in zip(bars, probs):
+                ax.text(prob + max(probs) * 0.02, bar.get_y() + bar.get_height() / 2,
+                        f'{prob:.3f}', va='center', fontsize=7.5)
+
+        nll = row.get('nll', float('nan'))
+        axes[row_i][0].set_ylabel(
+            f'Trial {int(row["trial_index"])}\nGT: "{ground_truth}"\nNLL: {nll:.3f}',
+            fontsize=8, labelpad=8
+        )
+
+    pid_str = f'Participant {participant_id} — ' if participant_id is not None else ''
+    fig.suptitle(f'{pid_str}Masked top-5 tokens per step (orange = ground truth)', fontsize=11)
+    plt.tight_layout()
+
+    if out_png:
+        os.makedirs(os.path.dirname(out_png) or '.', exist_ok=True)
+        fig.savefig(out_png, dpi=150, bbox_inches='tight')
+        print(f"Saved to {out_png}")
+    return fig
+
+
+def plot_predictive_step_distributions(
+    steps_csv,
+    trial_indices=None,
+    n_trials=None,
+    participant_id=None,
+    out_png=None,
+):
+    """
+    Plot the masked token probability distribution at every answer step for each
+    trial, reading from the *_steps.csv produced by predict_multi_cue.py.
+
+    Rows = trials, columns = steps (step 1 = first token, step 2 = second token).
+    Orange bar = ground-truth token at that step (gt_prob).
+
+    Parameters
+    ----------
+    steps_csv : str or pd.DataFrame
+        Path to the _steps.csv file, or a DataFrame already loaded from it.
+        Expected columns: trial_index, ground_truth, step, prefix, gt_prob, distribution.
+    trial_indices : list[int] or None
+        1-based trial indices to include; None = all.
+    n_trials : int or None
+        Cap on number of trials after filtering.
+    participant_id : int or None
+        Used only in the figure title.
+    out_png : str or None
+        If given, saves the figure here.
+    """
+    import ast
+
+    df = pd.read_csv(steps_csv) if isinstance(steps_csv, str) else steps_csv.copy()
+
+    if trial_indices is not None:
+        df = df[df['trial_index'].isin(trial_indices)]
+
+    trials = sorted(df['trial_index'].unique())
+    if n_trials is not None:
+        trials = trials[:n_trials]
+    df = df[df['trial_index'].isin(trials)]
+
+    if df.empty:
+        print("No rows found after filtering.")
+        return None
+
+    max_steps = int(df['step'].max())
+    n_rows = len(trials)
+
+    fig, axes = plt.subplots(
+        n_rows, max_steps,
+        figsize=(max_steps * 3.5, n_rows * 3.0),
+        squeeze=False,
+    )
+
+    for row_i, tid in enumerate(trials):
+        trial_df = df[df['trial_index'] == tid].sort_values('step')
+        ground_truth = str(trial_df['ground_truth'].iloc[0])
+
+        # Compute total NLL from per-step gt_probs
+        gt_probs_all = trial_df['gt_prob'].dropna()
+        nll = float(-np.log(gt_probs_all.clip(lower=1e-30)).sum()) if len(gt_probs_all) else float('nan')
+
+        for step_i in range(max_steps):
+            ax = axes[row_i][step_i]
+            step_row = trial_df[trial_df['step'] == step_i + 1]
+
+            if step_row.empty:
+                ax.axis('off')
+                continue
+
+            step_row = step_row.iloc[0]
+            dist_raw = step_row['distribution']
+            gt_prob  = float(step_row['gt_prob']) if pd.notna(step_row.get('gt_prob')) else None
+            prefix   = step_row.get('prefix', 'start')
+
+            try:
+                dist = ast.literal_eval(dist_raw) if isinstance(dist_raw, str) else dist_raw
+            except Exception:
+                ax.axis('off')
+                continue
+
+            tokens = [t.replace('Ġ', ' ').replace('▁', ' ').replace('Ċ', '↵').strip()
+                      for t, _ in dist]
+            probs  = [p for _, p in dist]
+
+            # Identify ground-truth bar by closest probability to gt_prob.
+            # This is robust regardless of how sub-tokens are named (avoids
+            # word-fragment mismatches when options tokenize to >1 sub-token).
+            if gt_prob is not None and probs:
+                gt_idx = min(range(len(probs)), key=lambda i: abs(probs[i] - gt_prob))
+            else:
+                gt_idx = -1
+            bar_colors = ['#D55E00' if i == gt_idx else '#AAAAAA' for i in range(len(probs))]
+
+            y = range(len(tokens))
+            bars = ax.barh(list(y), probs, color=bar_colors, edgecolor='black', linewidth=0.4)
+            ax.set_yticks(list(y))
+            ax.set_yticklabels(tokens, fontsize=9)
+            ax.set_xlim(0, max(probs) * 1.25 if probs else 1)
+            ax.invert_yaxis()
+            ax.set_xlabel('Probability', fontsize=8)
+            gt_prob_str = f'  gt_prob={gt_prob:.3f}' if gt_prob is not None else ''
+            ax.set_title(f'Step {step_i + 1} (after {prefix}){gt_prob_str}', fontsize=8)
+            ax.spines[['top', 'right']].set_visible(False)
+
+            for bar, prob in zip(bars, probs):
+                ax.text(
+                    prob + max(probs) * 0.02,
+                    bar.get_y() + bar.get_height() / 2,
+                    f'{prob:.3f}', va='center', fontsize=7.5,
+                )
+
+        nll_str = f'{nll:.3f}' if np.isfinite(nll) else 'inf'
+        axes[row_i][0].set_ylabel(
+            f'Trial {tid}\nGT: "{ground_truth}"\nNLL: {nll_str}',
+            fontsize=8, labelpad=8,
+        )
+
+    pid_str = f'Participant {participant_id} — ' if participant_id is not None else ''
+    fig.suptitle(
+        f'{pid_str}Predictive step distributions (orange = ground truth token)',
+        fontsize=11,
+    )
+    plt.tight_layout()
+
+    if out_png:
+        os.makedirs(os.path.dirname(out_png) or '.', exist_ok=True)
+        fig.savefig(out_png, dpi=150, bbox_inches='tight')
+        print(f"Saved to {out_png}")
+    return fig
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--base', default='data/out/predictive', help='Base predictive folder containing model subfolders')
@@ -897,6 +1121,15 @@ if __name__ == '__main__':
                         help='Base folder for lowercase condition (for --by_participant)')
     parser.add_argument('--by_participant_out', default='figures/nll_by_participant.png',
                         help='Output PNG for --by_participant plot')
+    # top-5 step distributions flags
+    parser.add_argument('--top5_steps', default=None, metavar='CSV',
+                        help='Path to a participant CSV with top5_step1/step2 columns')
+    parser.add_argument('--top5_trials', type=int, nargs='+', default=None,
+                        help='Trial indices to include in top5 plot (default: all)')
+    parser.add_argument('--top5_n', type=int, default=None,
+                        help='Max number of trials to plot (default: all)')
+    parser.add_argument('--top5_out', default='figures/top5_steps.png',
+                        help='Output PNG for --top5_steps plot')
     # generation step distributions flags
     parser.add_argument('--gen_dist', default=None, metavar='CSV',
                         help='Path to a participant CSV with step_distributions column')
@@ -904,6 +1137,15 @@ if __name__ == '__main__':
                         help='Number of trials to plot (default: 50)')
     parser.add_argument('--gen_dist_out', default='figures/generation_step_distributions.png',
                         help='Output PNG for --gen_dist plot')
+    # predictive step distributions from _steps.csv
+    parser.add_argument('--pred_steps', default=None, metavar='CSV',
+                        help='Path to a _steps.csv with distribution/gt_prob columns')
+    parser.add_argument('--pred_steps_trials', type=int, nargs='+', default=None,
+                        help='Trial indices to include (default: all)')
+    parser.add_argument('--pred_steps_n', type=int, default=None,
+                        help='Max number of trials to plot (default: all)')
+    parser.add_argument('--pred_steps_out', default='figures/predictive_step_distributions.png',
+                        help='Output PNG for --pred_steps plot')
     args = parser.parse_args()
 
     if args.by_participant or (args.underscore and args.lowercase):
@@ -937,10 +1179,23 @@ if __name__ == '__main__':
             nll_column='nll',
             out_png=args.compare_out,
         )
+    elif args.top5_steps:
+        df = pd.read_csv(args.top5_steps)
+        pid = int(re.search(r'participant_(\d+)', args.top5_steps).group(1)) if re.search(r'participant_(\d+)', args.top5_steps) else None
+        plot_top5_steps(df, n_trials=args.top5_n, trial_indices=args.top5_trials, participant_id=pid, out_png=args.top5_out)
     elif args.gen_dist:
         df = pd.read_csv(args.gen_dist)
         pid = int(re.search(r'participant_(\d+)', args.gen_dist).group(1)) if re.search(r'participant_(\d+)', args.gen_dist) else None
         plot_generation_step_distributions(df, n_trials=args.gen_dist_trials, participant_id=pid, out_png=args.gen_dist_out)
+    elif args.pred_steps:
+        pid = int(re.search(r'participant_(\d+)', args.pred_steps).group(1)) if re.search(r'participant_(\d+)', args.pred_steps) else None
+        plot_predictive_step_distributions(
+            args.pred_steps,
+            trial_indices=args.pred_steps_trials,
+            n_trials=args.pred_steps_n,
+            participant_id=pid,
+            out_png=args.pred_steps_out,
+        )
     elif args.cascade:
         df = pd.read_csv(args.cascade)
         pid = int(re.search(r'participant_(\d+)', args.cascade).group(1)) if re.search(r'participant_(\d+)', args.cascade) else None

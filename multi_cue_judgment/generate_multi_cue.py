@@ -7,11 +7,13 @@ import torch
 import gc
 import json
 from multi_cue_prompt import build_generate_centaur_prompt, build_generate_llama_prompt
+import hashlib
+import gzip
 
 DATA_IN = 'data/in/timeline_lowercase.csv'
-MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
+MODEL = 'centaur-8B-adapter'  # Change this to the desired model name
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
-RUN_TEST_SET_ONLY = False # Set to True to only run on small number of simulations for test
+RUN_TEST_MODE = True if '8B' in MODEL else False  # Set to True to only run on small 8B models for faster testing
 ENGLISH_OPTIONS_LOW = [
     'extremely low', 'very low', 'low', 'somewhat low', 'normal',
     'somewhat high', 'high', 'very high', 'extremely high'
@@ -32,6 +34,13 @@ else:
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
 NUMERIC_OPTIONS = ['10', '20', '30', '40', '50', '60', '70', '80', '90']
 
+def save_prompt(prompt: str) -> str:
+    h = hashlib.sha256(prompt.encode()).hexdigest()
+    path = os.path.join(PROMPT_DIR, f"{h}.txt.gz")
+    if not os.path.exists(path):
+        with gzip.open(path, 'wt', encoding='utf-8') as f:
+            f.write(prompt)
+    return h
 
 def choice_options_for_participant(participant_df):
     """
@@ -112,7 +121,7 @@ def simulate_participant(timeline_df, wrapper, participant_id,test_mode=False):
                 'cue2': row['Cue2_English'],
                 'criterium': row['Criterium_English'],
                 'choice': choice,
-                'prompt': prompt,
+                'prompt_hash': save_prompt(prompt),
                 #'step_distributions': json.dumps(step_dists) if step_dists is not None else None,
             })
 
@@ -127,11 +136,11 @@ def main():
     torch.cuda.empty_cache()
 
     participants = timeline['Fp'].unique()
-    if RUN_TEST_SET_ONLY:
+    if RUN_TEST_MODE:
         # run first 1 participants with condition 1,3 (English options) and first 1 participants with condition 2,4 (Numeric options)
         participants = timeline[timeline['condition'].isin([1, 3])]['Fp'].unique()[:1]
         participants = list(participants) + list(timeline[timeline['condition'].isin([2, 4])]['Fp'].unique()[:1])
-        print(f"Running test set only: participants {participants}")
+        print(f"Running test mode only: participants {participants}")
     all_model_results = []
 
     for participant_id in participants:
@@ -146,7 +155,7 @@ def main():
         gc.collect()
         torch.cuda.empty_cache()
 
-        results = simulate_participant(participant_timeline, wrapper, participant_id=participant_id, test_mode=RUN_TEST_SET_ONLY)
+        results = simulate_participant(participant_timeline, wrapper, participant_id=participant_id, test_mode=RUN_TEST_MODE)
         result_df = pd.DataFrame(results)
         result_df.to_csv(out_path, index=False)
         print(f'Results saved to {out_path}')
