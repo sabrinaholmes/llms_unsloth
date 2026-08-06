@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import binomtest
 import os
 import re
+import sys
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 
@@ -15,12 +16,19 @@ from matplotlib.patches import Rectangle
 from matplotlib.patches import Patch
 from matplotlib.legend_handler import HandlerBase
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+import plotting_utils
+
+FIGSIZE = (8, 6)
+BASE_FONT = 24
+
 # Allow overriding the base data folder via CLI or environment
 default_path = os.path.join(os.path.dirname(__file__), 'data', 'out', 'generative')
+figures_save_path = os.path.join(os.path.dirname(__file__), 'figures')
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument('--base-dir', dest='base_dir', default=default_path,
                     help='Base folder for model data (overrides default PATH)')
-parser.add_argument('--save-dir', dest='save_dir', default=default_path,
+parser.add_argument('--save-dir', dest='save_dir', default=figures_save_path,
                     help='If provided, save all generated figures to this folder')
 parser.add_argument('--show', dest='show', action='store_true',
                     help='If provided, show figures (default is notebook behavior)')
@@ -36,6 +44,10 @@ parser.add_argument('--llm-size', dest='llm_size', default=None,
                     help='If provided, only plot LLMs of this size (e.g., "8b" or "70b")')
 args, _unknown = parser.parse_known_args()
 PATH = args.base_dir
+
+# Toggle: "orange" or "lila" — controls which shades Centaur is drawn in
+# across every plot in this file (flows through plotting_utils.define_colors_for_families).
+CENTAUR_COLOR_MODE = "orange"
 
 def read_data_from_folder(folder_path):
     dfs = pd.DataFrame()
@@ -132,8 +144,15 @@ def normalize_generative_df(df, participant_id, timeline_df):
     if 'trial_num' in df.columns and 'trial' not in df.columns:
         df = df.rename(columns={'trial_num': 'trial'})
 
-    # Map choice H/I → 1/2
-    df['choice'] = df.apply(map_choices_to_numeric, axis=1)
+    # Drop any pre-existing m1/m2 so we always use values from the timeline
+    df = df.drop(columns=[c for c in ['m1', 'm2'] if c in df.columns])
+
+    # choice_numeric is already 1/2 for free trials; choice has the value for forced trials.
+    # Combine: prefer choice_numeric, fall back to choice (forced arms).
+    if 'choice_numeric' in df.columns:
+        df['choice'] = df['choice_numeric'].combine_first(df['choice'])
+    elif df['choice'].dtype == object:
+        df['choice'] = df.apply(map_choices_to_numeric, axis=1)
     
 
     # Merge to add game metadata
@@ -193,7 +212,7 @@ def load_models(base_path=None, timeline_df=None):
             continue
 
         # Enrich bare generative CSVs (they lack m1, m2, info_condition, block)
-        if timeline_df is not None and 'horizon' in df.columns and 'm1' not in df.columns:
+        if timeline_df is not None and 'horizon' in df.columns:
             enriched_parts = []
             for mid in df['model_id'].unique():
                 part = df[df['model_id'] == mid].copy()
@@ -261,38 +280,7 @@ def identify_model_families(model_dfs):
 
 
 def define_colors_for_families(family_mapping):
-    """
-    Define a color mapping for each model family.
-    
-    Parameters
-    ----------
-    family_mapping : dict
-        A dictionary mapping family names to lists of (model_name, DataFrame) tuples.
-    
-    Returns
-    -------
-    dict
-        A dictionary mapping family names to colors.
-    """
-    color_map = {
-        'centaur': ['#D55E00','#E69F00'],  # Two shades for Centaur variants
-        'llama':  ['#0072B2','#56B4E9'],  # Two shades for LLaMA variants
-        'domain-specific': ['#CC79A7','#999999'],  # Purple for domain-specific (RW), gray for any other domain-specific models
-    }
-    
-    family_colors = {family: color_map.get(family, ['#000000']) for family in family_mapping.keys()}
-    return family_colors
-
-def set_dynamic_fontsize(fig_size, base_font=20):
-    scale = fig_size[1] / 6
-    plt.rcParams.update({
-        'font.size': base_font * scale * 0.8,
-        'axes.titlesize': base_font * scale * 1.2,
-        'axes.labelsize': base_font * scale * 0.9,
-        'xtick.labelsize': base_font * scale * 0.9,
-        'ytick.labelsize': base_font * scale * 0.9,
-        'legend.fontsize': base_font * scale,
-    })
+    return plotting_utils.define_colors_for_families(family_mapping, centaur_color_mode=CENTAUR_COLOR_MODE)
 
 
 def read_original_data(PATH_TO_ORIGINAL_DATA):
@@ -520,14 +508,14 @@ def plot_choice_curves_v2(ax, subjects, bin_edges, RTmin, RTmax, AZblue='black',
     ax1.set_ylabel('probability of choosing\nmore informative option')
     ax1.set_xlim([-35, 35])
     ax1.set_ylim([0, 1])
-    ax1.grid(False)
+    plotting_utils.style_y_gridlines(ax1)
     ax2.errorbar(X, m_22_1, yerr=s_22_1, fmt='.', color=AZblue, markersize=10, linestyle='--', label='Horizon 1')
     ax2.errorbar(X, m_22_6, yerr=s_22_6, fmt='.', color=AZred, markersize=10, linestyle='-', label='Horizon 6')
     ax2.set_xlabel('difference in means between\nleft and right option')
     ax2.set_ylabel('probability of choosing\noption on the right')
     ax2.set_xlim([-35, 35])
     ax2.set_ylim([0, 1])
-    ax2.grid(False)
+    plotting_utils.style_y_gridlines(ax2)
 
     return [ax1, ax2]
 
@@ -610,14 +598,14 @@ def plot_choice_curves_v2_h6(ax, subjects, bin_edges, RTmin, RTmax, AZblue='blac
     ax1.set_ylabel('probability of choosing\nmore informative option')
     ax1.set_xlim([-35, 35])
     ax1.set_ylim([0, 1])
-    ax1.grid(False)
+    plotting_utils.style_y_gridlines(ax1)
     #ax2.errorbar(X, m_22_1, yerr=s_22_1, fmt='.', color=AZblue, markersize=10, linestyle='none', label='Horizon 1')
     ax2.errorbar(X, m_22_6, yerr=s_22_6, fmt='.', color=AZred, markersize=10, linestyle='none', label='Horizon 6')
     ax2.set_xlabel('difference in means between\nleft and right option')
     ax2.set_ylabel('probability of choosing\noption on the right')
     ax2.set_xlim([-35, 35])
     ax2.set_ylim([0, 1])
-    ax2.grid(False)
+    plotting_utils.style_y_gridlines(ax2)
 
     return [ax1, ax2]
 
@@ -945,7 +933,7 @@ def plot_trial_accuracy(df, title,ylim=(0.65, 0.95)):
     plt.title(f"Learning Curve by Free-Choice Trial Number for {title}")
     plt.ylim(ylim)
     plt.legend()
-    plt.grid(True)
+    plotting_utils.style_y_gridlines(plt.gca())
     plt.tight_layout()
     plt.show()
 
@@ -1056,7 +1044,7 @@ def plot_trial_accuracy_with_centaur(human_df, centaur_df, title, ylim=(0.4, 1.0
     plt.title(f"Learning Curve: {title}")
     plt.ylim(ylim)
     plt.legend(loc='upper left')
-    plt.grid(False)
+    plotting_utils.style_y_gridlines(plt.gca())
     plt.tight_layout()
     plt.show()
 
@@ -1111,7 +1099,7 @@ def plot_trial_accuracy_with_centaur_margin(human_df, centaur_df, title, ylim=(0
     ax.set_title(f"Learning Curve (Horizon 6): {title}")
     ax.set_ylim(ylim)
     ax.legend()
-    ax.grid(False)
+    plotting_utils.style_y_gridlines(ax)
     fig.tight_layout()
     plt.show()
 
@@ -1149,9 +1137,10 @@ class HandlerErrorbar(HandlerBase):
 
 
 def plot_trial_accuracy_with_multiple_centaur_models(human_df, centaur_dfs=None, labels=None,
-                                                      title=None, ylim=(0.4, 1.0),
+                                                      title=None, ylim=(0.65, 0.9),
                                                       centaur_colors=None,
-                                                      yticks=None, xticks=None):
+                                                      yticks=None, xticks=None,
+                                                      show_legend=False, legend_labels=[ 'Human (H6)','Centaur-70B(H6)', 'Llama-Instruct-3.1-70B(H6)']):
     """
     Plots human trial accuracy for Horizon 6 with overlay of multiple Centaur models.
 
@@ -1161,26 +1150,21 @@ def plot_trial_accuracy_with_multiple_centaur_models(human_df, centaur_dfs=None,
         labels (list of str): List of labels for each Centaur model.
         title (str): Title of the plot.
         ylim (tuple): Y-axis range.
-        AZred (str): Color for Human Horizon 6.
         centaur_colors (list of str): List of colors for Centaur models.
+        show_legend (bool): Whether to draw legend below the plot. Legend figure always saved.
+        legend_labels (list of str): Custom legend labels; if None, uses auto-detected labels.
     """
-    fig, ax = plt.subplots(figsize=(12, 10))
-    set_dynamic_fontsize((12,10),22)
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    plotting_utils.set_dynamic_fontsize(fig_width=FIGSIZE[0], base_font=BASE_FONT)
     bar_w = 0.25
     # take first 100 games from human df
     human_df = human_df[human_df['game'] <= 100]
-    human_h1 = human_df[human_df['horizon'] == 1]
-    acc_h1 = trial_accuracy(human_h1)
-    print(f"Human Horizon 1 accuracy: {acc_h1['accuracy'].values}")
-    ax.errorbar(range(1, len(acc_h1) + 1), acc_h1['accuracy'], yerr=acc_h1['se'], capsize=10, markersize=15,
-                 fmt='s', label='Human',
-                                 color=centaur_colors[0], alpha=0.5, zorder=1)
 
     # --- Human Data: Horizon 6 ---
     human_h6 = human_df[human_df['horizon'] == 6]
     acc_h6 = trial_accuracy(human_h6)
     ax.plot(range(1, len(acc_h6) + 1), acc_h6['accuracy'], linestyle='-',
-                 color=centaur_colors[0], alpha=0.5, zorder=1)
+                 label='Human (H6)', color=centaur_colors[0], alpha=0.5, zorder=1)
     ax.fill_between(range(1, len(acc_h6) + 1),
                          acc_h6['accuracy'] - acc_h6['se'],
                          acc_h6['accuracy'] + acc_h6['se'],
@@ -1196,48 +1180,55 @@ def plot_trial_accuracy_with_multiple_centaur_models(human_df, centaur_dfs=None,
             print(f"Mapped to Nan in {label}: {(df['choice'].isna()).sum()}")
             # what percentages of choices are None
             print(f"Percentages of None choices in {label}: {(df['choice'].isna()).sum() / len(df) * 100:.2f}%")
-            df_h1 = df[df['horizon'] == 1]
-            acc_h1 = trial_accuracy(df_h1)
-            print(f"{label} Horizon 1 accuracy: {acc_h1['accuracy'].values}")
             df_h6 = df[df['horizon'] == 6]
             acc_h6 = trial_accuracy(df_h6)
             print(f"{label} Horizon 6 accuracy: {acc_h6['accuracy'].values}")
             ax.plot(range(1, len(acc_h6) + 1), acc_h6['accuracy'], linestyle='-',
-                    color=color, alpha=1, label=f'{label}', zorder=2)
+                    color=color, alpha=1, label=f'{label} (H6)', zorder=2)
             ax.fill_between(range(1, len(acc_h6) + 1),
                             acc_h6['accuracy'] - acc_h6['se'],
                             acc_h6['accuracy'] + acc_h6['se'],
                             color=color, alpha=0.2)
-            ax.errorbar(range(1, len(acc_h1) + 1), acc_h1['accuracy'],yerr=acc_h1['se'],marker='s', capsize=15, markersize=10,
-                    color=color, alpha=1, label=f'{label}', zorder=2)
 
     # --- Plot Decoration ---
-    ax.set_xlabel("Free-choice Trial",labelpad=10)
-    ax.set_ylabel("Accuracy")
+    ax.set_xlabel("Trial",labelpad=10)
+    ax.set_ylabel("Accuracy rate")
     if xticks is not None:
         ax.set_xticks(xticks)
-    if yticks is not None:
-        ax.set_yticks(yticks)
+    ax.set_yticks(yticks if yticks is not None else [0.6, 0.7, 0.8, 0.9, 1.0])
+    ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
     #ax.set_title(f"{title}")
     ax.set_ylim(ylim)
     transform=ax.get_xaxis_transform()
     ax.tick_params(axis='x', which='major', pad=15)
+    ax.spines[['top', 'right']].set_visible(False)
+    ax.spines[['left', 'bottom']].set_visible(True)
+    plotting_utils.style_y_gridlines(ax)
     #plt.legend(loc='upper left', bbox_to_anchor=(1.02, 1))
     # Horizon 6 line with shaded margin
 
-    # Collect handles and labels from actual plotted models
-    handles, labels_legend = ax.get_legend_handles_labels()
+    # --- Legend below x-axis label (2 per row) ---
+    handles, auto_labels = ax.get_legend_handles_labels()
+    display_labels = legend_labels if legend_labels is not None else auto_labels
 
+    if show_legend:
+        leg = ax.legend(handles, display_labels,
+                        loc='upper center', bbox_to_anchor=(0.5, -0.12),
+                        ncols=2, frameon=False)
+        for line in leg.get_lines():
+            line.set_linewidth(4)
+
+    # --- Legend figure saved separately (always) ---
     legend_fig = plt.figure(figsize=(6, 2))
     legend_ax = legend_fig.add_subplot(111)
     legend_ax.axis("off")
-    legend_ax.legend(handles, labels_legend, loc='center', frameon=False,
-                    )
+    if show_legend:
+        leg2 = legend_ax.legend(handles, display_labels, loc='center', ncols=2, frameon=False)
+        for line in leg2.get_lines():
+            line.set_linewidth(4)
 
     ax.margins(x=0.04)
-
-    #plt.tight_layout()
-    # plt.show() # Remove plt.show() here
+    plt.tight_layout()
     return fig, legend_fig
 
 
@@ -1246,43 +1237,50 @@ def plot_fifth_trial_accuracy_bar(dfs, labels=None, colors=None,
                                    title="Accuracy on Trial 5 (Horizon 1 vs 6)"):
     n = len(dfs)
     w = 0.5  # bar width
-    gap_in  = 0.05
+    gap_in  = 0.2
     gap_out = 0.5
 
     xpos = []
     current_pos = 0
     for i in range(n):
         xpos.append(current_pos)
-        if i in [0, 2, 4]:
-            current_pos += w*2 + gap_out
-        else:
-            current_pos += w*2 + gap_in
+        current_pos += w*2 + gap_in
 
     acc_h1_vals, acc_h1_se = [], []
     acc_h6_vals, acc_h6_se = [], []
 
     for df in dfs:
+        model_id = 'participant_id' if 'participant_id' in df.columns else 'subjectNumber'
         h1 = df[(df['horizon'] == 1) & (df['trial'] == 5)]
         h6 = df[(df['horizon'] == 6) & (df['trial'] == 5)]
-        acc_h1_vals.append(h1['co'].mean())
-        acc_h1_se.append(h1['co'].std() / np.sqrt(len(h1)))
-        acc_h6_vals.append(h6['co'].mean())
-        acc_h6_se.append(h6['co'].std() / np.sqrt(len(h6)))
+        h1_subj = h1.groupby(model_id)['co'].mean()
+        h6_subj = h6.groupby(model_id)['co'].mean()
+        acc_h1_vals.append(h1_subj.mean())
+        acc_h1_se.append(h1_subj.sem())
+        acc_h6_vals.append(h6_subj.mean())
+        acc_h6_se.append(h6_subj.sem())
+        lbl = labels[len(acc_h1_vals)-1] if labels else len(acc_h1_vals)-1
+        print(f"{lbl} | H1: n={len(h1_subj)}, mean={h1_subj.mean():.4f}, sem={h1_subj.sem():.4f} | H6: n={len(h6_subj)}, mean={h6_subj.mean():.4f}, sem={h6_subj.sem():.4f}")
 
-    fig, ax = plt.subplots(figsize=(12, 10))
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    plotting_utils.set_dynamic_fontsize(fig_width=FIGSIZE[0], base_font=BASE_FONT)
 
     xpos = np.array(xpos)
 
     ax.bar(xpos - w/2, acc_h1_vals, w, yerr=acc_h1_se,
-           label='Horizon 1', color=colors, hatch='//', capsize=5, alpha=0.6)
+           label='Horizon 1', color=colors, capsize=5)
     ax.bar(xpos + w/2, acc_h6_vals, w, yerr=acc_h6_se,
-           label='Horizon 6', color=colors, capsize=5)
+           label='Horizon 6', color=colors, capsize=5,hatch='//',alpha=0.6)
 
-    ax.set_ylabel('Accuracy (Optimal Choice Rate)')
-    ax.set_ylim(0, 1.05)
+    ax.set_ylabel('Accuracy rate on trial 1')
+    ax.set_ylim(0.65, 0.85)
+    # set y-ticks from 0 to 1 with step of 0.1
+    ax.set_yticks(np.arange(0.6, 0.85, 0.1))
+    ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
     #ax.set_title(title, pad=20)
     ax.set_xticks(xpos)
-    ax.set_xticklabels(labels)
+    ax.set_xticklabels([])
+    #ax.set_xticklabels(labels)
     for i, family_slice in enumerate(family_slices):
         if isinstance(family_slice, tuple):
             i0, i1 = family_slice
@@ -1297,10 +1295,16 @@ def plot_fifth_trial_accuracy_bar(dfs, labels=None, colors=None,
     for i, family_slice in enumerate(family_slices[:-1]):
         if isinstance(family_slice, tuple):
             i0, i1 = family_slice
-            ax.axvline(xpos[i1] + w/2 + gap_out/2, color='grey', lw=1)
-        else:
-            ax.axvline(xpos[family_slice] + w/2 + gap_out/2, color='grey', lw=1)
-    ax.legend()
+    
+    #change legend color to white
+    legend_handles = [
+        Patch(facecolor='white', alpha=0.9, label='Horizon 1', edgecolor='black', linewidth=0.8),
+        Patch(facecolor='white', alpha=0.9, hatch='//', label='Horizon 5', edgecolor='black', linewidth=0.8),
+    ]
+    ax.legend(handles=legend_handles, loc='upper right', ncol=1, frameon=False,
+              columnspacing=1.2, handletextpad=0.5)
+    plotting_utils.remove_bar_frame(ax)
+    plotting_utils.style_y_gridlines(ax)
     plt.tight_layout()
     return fig
 
@@ -1752,7 +1756,7 @@ for mname, msubjects in model_subjects.items():
     color = model_color_map.get(mname, '#000000')
     label = mname.replace('_', '-')
     fig_m, ax_m = plt.subplots(1, 2, figsize=(24, 8))
-    set_dynamic_fontsize((24, 8), 20)
+    plotting_utils.set_dynamic_fontsize(fig_width=8, base_font=20)
     plot_choice_curves_v2(ax_m, subjects_pilot, bin_edges, RTmin, RTmax,
                           AZblue=human_color, AZred=human_color)
     plot_model_lines(ax_m, msubjects, bin_edges,
@@ -1799,6 +1803,18 @@ fig_acc, leg_acc = plot_trial_accuracy_with_multiple_centaur_models(
     labels=model_labels,
     title='Free-Trial Accuracy (All Models)',
     centaur_colors=model_plot_colors,
+)
+
+# ── Trial-5 accuracy bar chart ───────────────────────────────────────────────
+all_dfs    = [human_free] + model_free_dfs
+all_labels = ['Human'] + model_labels
+all_colors = model_plot_colors[:len(all_dfs)]
+fig_t5 = plot_fifth_trial_accuracy_bar(
+    dfs=all_dfs,
+    labels=['Human','Centaur-70B','Llama-Instruct\n-3.1-70B',],
+    colors=all_colors,
+    family_labels=['' for _ in all_dfs],
+    family_slices=list(range(len(all_dfs))),
 )
 
 # ── Save figures ──────────────────────────────────────────────────────────────

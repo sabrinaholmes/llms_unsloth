@@ -14,11 +14,11 @@ from compare_prompts import is_prompt_in_test_set
 
 
 DATA_IN_TEST = 'data/in/test/test_df.csv'  # This should be the test set created by create_test_df.py
-MODEL = 'llama-8B-base-adapter'  # Change this to the desired model name
-DATA_FOLDER_OUT = f'data/out/predictive/{MODEL}/singles'
+MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
+DATA_FOLDER_OUT = f'data/out/predictive_fixed/{MODEL}/singles'
 TASK_TYPE = 'accumulation' # Set to 'accumulation' or 'maximization' based on the scenario
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
-RUN_TEST_SET_ONLY = True if LLM_TYPE == 'centaur' else False  # Set to True to only run on prompts that are in the test set (for analysis purposes)
+RUN_TEST_SET_ONLY = False if LLM_TYPE == 'centaur' else False  # Set to True to only run on prompts that are in the test set (for analysis purposes)
 
 
 def predict_participant(participant_df, model, tokenizer,choice_options=None):

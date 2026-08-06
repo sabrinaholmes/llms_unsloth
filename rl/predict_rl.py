@@ -9,13 +9,14 @@ import random
 import torch
 import torch.nn.functional as F
 import os
-from rl_prompt import build_llama_prompt, build_centaur_prompt
+from rl_prompt import build_llama_prompt, build_centaur_prompt, build_llama_prompt_no_rewards, build_centaur_prompt_no_rewards
 
-MODEL = 'centaur-8B-adapter'  # Change this to the desired model name
+MODEL = 'llama-70B-adapter'  # Change this to the desired model name
 SIMULATION_NUMBER = 32 # Number of simulated participants
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
-DATA_FOLDER_OUT = f'data/out/predictive/{MODEL}/singles'
-DATA_IN_TEST = 'data/in/test_data_randomized_choices.csv'  # This should be the test set created by create_test_df.py
+DATA_FOLDER_OUT = f'data/out/predictive_no_rewards/{MODEL}/singles'
+DATA_IN_TEST = 'data/in/test_data_randomized_choices_flipped_rewards.csv'  # This should be the test set created by create_test_df.py
+NO_REWARDS = True  # Set to True to use prompts that do not include reward information
 
 def predict_participant(df_participant, model, tokenizer):
     """
@@ -43,10 +44,16 @@ def predict_participant(df_participant, model, tokenizer):
             "cumulative_reward": df_participant.iloc[:trial+1]['reward'].sum()
         })
     if LLM_TYPE == 'centaur':
-        prompt = build_centaur_prompt(past_trials, choice_options=choice_options)
+        if NO_REWARDS:
+            prompt = build_centaur_prompt_no_rewards(past_trials, choice_options=choice_options)
+        else:
+            prompt = build_centaur_prompt(past_trials, choice_options=choice_options)
         trigger_pattern = r'You press <<([^>]+)>>'
     elif LLM_TYPE == 'llama':
-        prompt = build_llama_prompt(past_trials, choice_options=choice_options)
+        if NO_REWARDS:
+            prompt = build_llama_prompt_no_rewards(past_trials, choice_options=choice_options)
+        else:
+            prompt = build_llama_prompt(past_trials, choice_options=choice_options)
         trigger_pattern = r'<\|start_header_id\|>assistant<\|end_header_id\|>\n([A-Z])'
     
     # 2. Tokenize ONCE and keep the BatchEncoding object

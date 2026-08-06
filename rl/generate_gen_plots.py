@@ -1,10 +1,16 @@
 import os
 import re
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
 import json
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+import plotting_utils
+
+LEGEND=True
 
 def read_data_from_folder(folder_path):
     dfs = pd.DataFrame()
@@ -106,40 +112,6 @@ def identify_model_families(model_dfs):
     return family_mapping
 
 
-def define_colors_for_families(family_mapping):
-    """
-    Define a color mapping for each model family.
-    
-    Parameters
-    ----------
-    family_mapping : dict
-        A dictionary mapping family names to lists of (model_name, DataFrame) tuples.
-    
-    Returns
-    -------
-    dict
-        A dictionary mapping family names to colors.
-    """
-    color_map = {
-        'centaur': ['#D55E00','#E69F00'],  # Two shades for Centaur variants
-        'llama':  ['#0072B2','#56B4E9'],  # Two shades for LLaMA variants
-        'domain-specific': ['#CC79A7','#999999'],  # Purple for domain-specific (RW), gray for any other domain-specific models
-    }
-    
-    family_colors = {family: color_map.get(family, ['#000000']) for family in family_mapping.keys()}
-    return family_colors
-
-def set_dynamic_fontsize(fig_width=12, base_font=20):
-    scale = fig_width / 6  # 6 is your baseline width, adjust as needed
-    plt.rcParams.update({
-        'font.size': base_font * scale * 0.65,
-        'axes.titlesize': base_font * scale * 1.2,
-        'axes.labelsize': base_font * scale * 0.9,
-        'xtick.labelsize': base_font * scale * 0.9,
-        'ytick.labelsize': base_font * scale * 0.9,
-        'legend.fontsize': base_font * scale,
-    })
-
 def bandit_1_prop(df,choice):
   df_copy = df.copy()
   # Determine comparison value depending on column dtype and provided `choice`.
@@ -165,9 +137,9 @@ def bandit_1_prop(df,choice):
 
 def plot_bandit_choice_trends_single_axis(human_df=None, df_rep=None, dfs=None, labels=None, colors=None,
                                           trial_col="trial_num", bandit_avg_col="bandit_1_avg",
-                                          reversal_trials=[14, 50], timeline=None,
+                                          reversal_trials=[50], timeline=None,
                                           xlim=(0, 100), margins=True, legend_anchor=(0.5, 0.5),
-                                          fig_size=(14, 9)):
+                                          fig_size=(14, 9), show_legend=True, legend_labels=None):
     """
     Plots bandit 1 choice trends (no reward probability subplot). Overlays human and model predictions.
 
@@ -184,10 +156,11 @@ def plot_bandit_choice_trends_single_axis(human_df=None, df_rep=None, dfs=None, 
         xlim (tuple): Trial range to plot.
         margins (bool): Whether to plot confidence intervals.
         legend_anchor (tuple): Anchor position for external legend.
+        show_legend (bool): Whether to draw the legend on the plot. Legend figure is always saved.
+        legend_labels (list of str): Custom legend labels; if None, uses labels from plotted lines.
     """
+    plotting_utils.set_dynamic_fontsize(fig_width=fig_size[0], base_font=20)
     fig, ax = plt.subplots(figsize=fig_size)
-
-    set_dynamic_fontsize(fig_width=fig_size[0], base_font=20)
 
     # --- Human Data ---
     if human_df is not None:
@@ -238,19 +211,30 @@ def plot_bandit_choice_trends_single_axis(human_df=None, df_rep=None, dfs=None, 
 
     # --- Formatting ---
     ax.set_xlabel("Trial Number",labelpad=pad_value)
-    ax.set_ylabel("Bandit 1 Choice Rate",labelpad=20)
+    ax.set_ylabel("Choice Rate (Preferred Arm)",labelpad=20)
     ax.set_xlim(xlim)
     ax.set_ylim(-0.05, 1.05)
-    ax.grid(False)
+    plotting_utils.style_y_gridlines(ax)
     ax.margins(x=0.04)
 
-    # --- Legend saved separately ---
-    handles, labels_legend = ax.get_legend_handles_labels()
+    # --- Legend below x-axis label (2 per row) ---
+    handles, auto_labels = ax.get_legend_handles_labels()
+    display_labels = legend_labels if legend_labels is not None else auto_labels
+
+    if show_legend:
+        leg=ax.legend(handles, display_labels,
+                  loc='upper center', bbox_to_anchor=(0.5, -0.22),
+                  ncols=3, frameon=False)
+        for line in leg.get_lines():
+            line.set_linewidth(5)
+
+    # --- Legend figure saved separately (always) ---
     legend_fig = plt.figure(figsize=(6, 2))
     legend_ax = legend_fig.add_subplot(111)
     legend_ax.axis("off")
-    legend_ax.legend(handles, labels_legend, loc='center', frameon=False)
-    ax.margins(x=0.04)
+    if show_legend:
+        legend_ax.legend(handles, display_labels, loc='center', ncols=3, frameon=False)
+
     plt.tight_layout()
     return fig, legend_fig
 
@@ -297,7 +281,7 @@ def bandit_choice_trends(base_path='./llms_unsloth/rl/data/out/generative', choi
 
     # Identify families and sizes
     family_mapping = identify_model_families(model_dfs)
-    family_colors = define_colors_for_families(family_mapping)
+    family_colors = plotting_utils.define_colors_for_families(family_mapping)
 
     # Create mapping of model -> color by using family's color list cycling through variants
     model_color_map = {}
@@ -332,7 +316,7 @@ def bandit_choice_trends(base_path='./llms_unsloth/rl/data/out/generative', choi
                                                            dfs=dfs, labels=labels, colors=colors,
                                                            trial_col='trial_num', bandit_avg_col='bandit_1_avg',
                                                            xlim=(1, max_trial), margins=True,
-                                                           fig_size=(12, 10))
+                                                           fig_size=(12, 10), legend_labels=['Centaur-70B', 'Llama-Instruct-3.1-70B', 'Rescorla-Wagner Agent'])
 
     out_fig = os.path.join(save_dir, f'bandit_choice_trends_choice_{choice}.png')
     out_legend = os.path.join(save_dir, f'bandit_choice_trends_legend_choice_{choice}.png')

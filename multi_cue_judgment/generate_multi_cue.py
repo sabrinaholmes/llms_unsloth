@@ -11,7 +11,7 @@ import hashlib
 import gzip
 
 DATA_IN = 'data/in/timeline_lowercase.csv'
-MODEL = 'centaur-8B-adapter'  # Change this to the desired model name
+MODEL = 'llama-70B-adapter'  # Change this to the desired model name
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
 RUN_TEST_MODE = True if '8B' in MODEL else False  # Set to True to only run on small 8B models for faster testing
 ENGLISH_OPTIONS_LOW = [
@@ -134,6 +134,7 @@ def main():
     timeline = pd.read_csv(DATA_IN)
     wrapper = get_models.ModelWrapper(MODEL, use_unsloth=True, temperature=1.0)
     torch.cuda.empty_cache()
+    print(f"this is llm type {LLM_TYPE}")
 
     participants = timeline['Fp'].unique()
     if RUN_TEST_MODE:

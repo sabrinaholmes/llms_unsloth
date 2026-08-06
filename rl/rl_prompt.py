@@ -56,3 +56,32 @@ def build_centaur_prompt(past_trials: list, choice_options: list) -> str:
 
     prompt += f"You press <<"
     return prompt
+
+def build_llama_prompt_no_rewards(past_trials: list, choice_options: list) -> str:
+    """Builds a llama-style prompt without including reward information."""
+    system_msg=system_message(choice_options=choice_options, llm_type='llama')
+    system_text = "\n".join(system_msg)
+    prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{system_text}<|eot_id|>"
+    prompt += f"<|start_header_id|>user<|end_header_id|>\nGame 1."
+
+    if not past_trials:
+        prompt += "No trials completed yet."
+    else:
+        for trial in past_trials:
+            prompt += f"<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n{trial['choice_mapped']}<|eot_id|>"
+            prompt += f"<|start_header_id|>user<|end_header_id|>\n"
+
+    prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n"
+    return prompt
+
+
+def build_centaur_prompt_no_rewards(past_trials: list, choice_options: list) -> str:
+    """Builds a centaur-style prompt without including reward information."""
+    system_msg=system_message(choice_options=choice_options, llm_type='centaur')
+    prompt = "\n".join(system_msg)
+    prompt += "\nGame 1."
+    for past_trial in past_trials:
+        prompt += f"You press <<{past_trial['choice_mapped']}>>.\n"
+
+    prompt += f"You press <<"
+    return prompt

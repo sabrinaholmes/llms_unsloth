@@ -53,11 +53,12 @@ def build_predict_centaur_prompt(timeline_df,task_type=None) -> str:
         y = search_history['ycollectScaled'][env]
         horizon=len(x)-1
         # First element is the initial revealed option
-        prompt += f"The value of option {x[0]} is {y[0]}. You have {horizon} choices to make in this environment.\n"
+        #temporary fix to avoid 0
+        prompt += f"The value of option {x[0]+1} is {y[0]}. You have {horizon} choices to make in this environment.\n"
 
         # Remaining elements are the participant's actual choices
         for trial in range(1, len(x)):
-            prompt += f"You press <<{x[trial]}>> and receive {y[trial]} points.\n"
+            prompt += f"You press <<{x[trial]+1}>> and receive {y[trial]} points.\n"
 
     return prompt
 
@@ -86,17 +87,17 @@ def build_generate_prompt_centaur(completed_envs, current_env_history, scenario,
         x, y = env['x'], env['y']
         env_horizon = len(x) - 1
         prompt += f'\nEnvironment number {env_idx + 1}:\n'
-        prompt += f'The value of option {x[0]} is {y[0]}. You have {env_horizon} choices to make in this environment.\n'
+        prompt += f'The value of option {x[0]+1} is {y[0]}. You have {env_horizon} choices to make in this environment.\n'
         for i in range(1, len(x)):
-            prompt += f'You press <<{x[i]}>> and receive {y[i]} points.\n'
+            prompt += f'You press <<{x[i]+1}>> and receive {y[i]} points.\n'
 
     # Current in-progress environment
     env_num = len(completed_envs) + 1
     x, y = current_env_history['x'], current_env_history['y']
     prompt += f'\nEnvironment number {env_num}:\n'
-    prompt += f'The value of option {x[0]} is {y[0]}. You have {horizon} choices to make in this environment.\n'
+    prompt += f'The value of option {x[0]+1} is {y[0]}. You have {horizon} choices to make in this environment.\n'
     for i in range(1, len(x)):
-        prompt += f'You press <<{x[i]}>> and receive {y[i]} points.\n'
+        prompt += f'You press <<{x[i]+1}>> and receive {y[i]} points.\n'
 
     # Elicit next choice
     prompt += 'You press <<'
@@ -128,11 +129,11 @@ def build_predict_llama_prompt(timeline_df,task_type=None) -> str:
         y = search_history['ycollectScaled'][env]
         horizon=len(x)-1
         # First element is the initial revealed option
-        prompt += f"The value of option {x[0]} is {y[0]}. You have {horizon} choices to make in this environment.<|eot_id|>\n"
+        prompt += f"The value of option {x[0]+1} is {y[0]}. You have {horizon} choices to make in this environment.<|eot_id|>\n"
 
         # Remaining elements are the participant's actual choices
         for trial in range(1, len(x)):
-            prompt += f"<|start_header_id|>assistant<|end_header_id|>\n{x[trial]}<|eot_id|>\n"
+            prompt += f"<|start_header_id|>assistant<|end_header_id|>\n{x[trial]+1}<|eot_id|>\n"
             prompt += f"<|start_header_id|>user<|end_header_id|>\n{y[trial]} points.<|eot_id|>\n"
         prompt += "<|start_header_id|>assistant<|end_header_id|>"
 
@@ -164,18 +165,18 @@ def build_generate_prompt_llama(completed_envs, current_env_history, scenario, h
         x, y = env['x'], env['y']
         env_horizon = len(x) - 1
         prompt += f'<|start_header_id|>user<|end_header_id|>\nEnvironment number {env_idx + 1}:\n'
-        prompt += f'The value of option {x[0]} is {y[0]}. You have {env_horizon} choices to make in this environment.\n<|eot_id|>'
+        prompt += f'The value of option {x[0]+1} is {y[0]}. You have {env_horizon} choices to make in this environment.\n<|eot_id|>'
         for i in range(1, len(x)):
-            prompt += f'<|start_header_id|>assistant<|end_header_id|>\n{x[i]}<|eot_id|>\n'
+            prompt += f'<|start_header_id|>assistant<|end_header_id|>\n{x[i]+1}<|eot_id|>\n'
             prompt += f'<|start_header_id|>user<|end_header_id|>\n{y[i]} points.<|eot_id|>\n'
 
     # Current in-progress environment
     env_num = len(completed_envs) + 1
     x, y = current_env_history['x'], current_env_history['y']
     prompt += f'<|start_header_id|>user<|end_header_id|>\nEnvironment number {env_num}:\n'
-    prompt += f'The value of option {x[0]} is {y[0]}. You have {horizon} choices to make in this environment.\n<|eot_id|>'
+    prompt += f'The value of option {x[0]+1} is {y[0]}. You have {horizon} choices to make in this environment.\n<|eot_id|>'
     for i in range(1, len(x)):
-        prompt += f'<|start_header_id|>assistant<|end_header_id|>\n{x[i]}<|eot_id|>\n'
+        prompt += f'<|start_header_id|>assistant<|end_header_id|>\n{x[i]+1}<|eot_id|>\n'
         prompt += f'<|start_header_id|>user<|end_header_id|>\n{y[i]} points.\n<|eot_id|>\n'
 
     # Elicit next choice

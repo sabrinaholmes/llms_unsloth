@@ -8,16 +8,18 @@ import random
 import torch
 import os
 import gc
-from rl_prompt import build_llama_prompt, build_centaur_prompt
+from rl_prompt import build_llama_prompt, build_centaur_prompt,build_llama_prompt_no_rewards, build_centaur_prompt_no_rewards
 import hashlib
 import gzip
 
 
-MODEL = 'llama-8B-adapter'  # Change this to the desired model name
-DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
+MODEL = 'llama-70B-adapter'  # Change this to the desired model name
+DATA_FOLDER_OUT = f'data/out/generative_no_rewards/{MODEL}/singles'
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
 SIMULATION_NUMBER = 32 # Number of simulated participants
 LLM_TYPE='llama' if 'llama' in MODEL else 'centaur'
+NO_REWARDS = True  # Set to True to use prompts that do not include reward information
+
 
 def save_prompt(prompt: str) -> str:
     h = hashlib.sha256(prompt.encode()).hexdigest()
@@ -77,9 +79,15 @@ def simulate_participant(timeline: list, wrapper) -> pd.DataFrame:
     for trial in range(1,total_trials+1):
         current_trial_data = timeline[trial - 1]  # Ensure `timeline` is defined
         if LLM_TYPE == 'centaur':
-            prompt_model = build_centaur_prompt(history, choice_options=choice_options)
+            if NO_REWARDS:
+                prompt_model = build_centaur_prompt_no_rewards(history, choice_options=choice_options)
+            else:
+                prompt_model = build_centaur_prompt(history, choice_options=choice_options)
         elif LLM_TYPE == 'llama':
-            prompt_model = build_llama_prompt(history, choice_options=choice_options)
+            if NO_REWARDS:
+                prompt_model = build_llama_prompt_no_rewards(history, choice_options=choice_options)
+            else:
+                prompt_model = build_llama_prompt(history, choice_options=choice_options)
         bandit_1_value = current_trial_data["bandit_1"]["value"]
         bandit_2_value = current_trial_data["bandit_2"]["value"]
         model_choice = wrapper.generate(prompt_model, choice_options=choice_options, max_new_tokens=1, processor_type="prefix_tree")

@@ -69,7 +69,7 @@ def build_generate_centaur_prompt(timeline: pd.DataFrame) -> str:
     """
     participant_condition = timeline['condition'].iloc[0]
     task_type = 'verbal' if participant_condition in [1, 3] else 'numerical'
-    system_msg = system_message(llm_type='centaur', task_type=task_type)
+    system_msg = system_message(task_type=task_type)
     prompt = "\n".join(system_msg) + "\n"
 
     past_trials = timeline.iloc[:-1]
@@ -144,7 +144,7 @@ def build_generate_llama_prompt(timeline: pd.DataFrame) -> str:
     """
     participant_condition = timeline['condition'].iloc[0]
     task_type = 'verbal' if participant_condition in [1, 3] else 'numerical'
-    system_msg = system_message(llm_type='llama', task_type=task_type)
+    system_msg = system_message(task_type=task_type)
     prompt = "\n".join(system_msg)
     prompt = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{prompt}<|eot_id|>\n"
 

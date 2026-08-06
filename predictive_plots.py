@@ -1,11 +1,30 @@
 import os
 import re
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
 import json
 
+sys.path.insert(0, os.path.dirname(__file__))
+import plotting_utils
+
+PARTICIPANTS_TO_PLOT = None  # None means plot all; set to a list of IDs to restrict, e.g. [1, 2, 3]
+
+# Number of discrete choices per task, used for the "random guessing" reference
+# line (chance_nll = -log(1/num_choices)). Was previously hardcoded separately
+# in each task's own copy of this script.
+TASK_NUM_CHOICES = {
+    'rl': 2,
+    'horizon': 2,
+    'spatially_correlated': 30,
+    'multi_cue_judgment': 9,
+    'rl_waltmann': 2,
+}
+
+FIGSIZE=(8,6)
+BASE_FONT=24
 def read_data_from_folder(folder_path):
     dfs = pd.DataFrame()
     # join without a leading slash — a leading '/' makes os.path.join return '/singles'
@@ -17,8 +36,8 @@ def read_data_from_folder(folder_path):
     # Regex to extract the number after "participant_" or "model_".
     # Be flexible about the file extension/casing and match the digits part only.
     participant_id_regex = re.compile(r'(?:model|participant)_(\d+)')
-    
-    for filename in os.listdir(folder_path):
+
+    for filename in sorted(os.listdir(folder_path)):
         if filename.endswith('.csv') and participant_id_regex.search(filename.lower()):
             file_path = os.path.join(folder_path, filename)
             df = pd.read_csv(file_path)
@@ -43,136 +62,15 @@ def load_models(base_path="predictive"):
     """
     Load one CSV per model folder and create separate DataFrame variables
     named <model_name>_df in the global namespace.
+
+    Parameters
+    ----------
+    base_path : str
+        Path to the 'predictive' folder.
     """
-        if df is None or df.empty:
-            print("No data available for normalization count.")
-            return 0
-        if 'nll' not in df.columns or 'raw_nll' not in df.columns:
-            print("Required columns 'nll' and 'raw_nll' not found in DataFrame.")
-            return 0
-        normalized_series = df['nll'] != df['raw_nll']
-        num_normalized = int(normalized_series.sum())
-        total = len(df)
-        pct = num_normalized / total if total > 0 else 0.0
-        print(f"Number of normalized NLL: {num_normalized} out of {total} ({pct:.2%})")
-        return num_normalized
-
-
-    def normalization_stats_and_plots(df, raw_col='raw_nll', norm_col='nll', out_prefix='normalization'):
-        """Compute normalization stats and save visualization files.
-
-        Produces:
-        - {out_prefix}_hist_diff.png : histogram of (raw - normalized) differences
-        - {out_prefix}_absdiff_hist.png : histogram of absolute differences
-        - {out_prefix}_scatter_raw_vs_norm.png : scatter of raw vs normalized with y=x line
-        - {out_prefix}_box_by_model.png : boxplot of differences per `model_id` (if present)
-
-        Returns a stats dict summarizing counts and summary statistics.
-        """
-        stats = {}
-        if df is None or df.empty:
-            print("No data to compute normalization stats.")
-            return stats
-        if raw_col not in df.columns or norm_col not in df.columns:
-            print(f"Columns {raw_col} or {norm_col} not found, skipping stats/plots.")
-            return stats
-
-        sub = df[[raw_col, norm_col]].dropna()
-        if sub.empty:
-            print("No non-NA pairs of raw/norm values to analyze.")
-            return stats
-
-        raw = sub[raw_col].astype(float)
-        norm = sub[norm_col].astype(float)
-        diff = raw - norm
-        absdiff = diff.abs()
-        # relative change where raw != 0
-        with np.errstate(divide='ignore', invalid='ignore'):
-            rel_change = diff / raw.replace(0, np.nan)
-
-        num_total = len(sub)
-        num_normalized = int((raw != norm).sum())
-        pct_normalized = num_normalized / num_total if num_total > 0 else 0.0
-
-        stats.update({
-            'n_total': num_total,
-            'n_normalized': num_normalized,
-            'pct_normalized': pct_normalized,
-            'mean_diff': float(diff.mean()),
-            'median_diff': float(diff.median()),
-            'std_diff': float(diff.std(ddof=1)),
-            'mean_absdiff': float(absdiff.mean()),
-            'median_absdiff': float(absdiff.median()),
-            'quantiles_diff': diff.quantile([0.0, 0.25, 0.5, 0.75, 1.0]).to_dict(),
-        })
-
-        # Create plots
-        try:
-            # Histogram of signed differences
-            fig, ax = plt.subplots(figsize=(6, 4))
-            ax.hist(diff, bins=50, color='#56B4E9', edgecolor='k')
-            ax.axvline(0, color='k', lw=1)
-            ax.set_title('Signed difference: raw_nll - nll')
-            ax.set_xlabel('Difference')
-            ax.set_ylabel('Count')
-            fig.tight_layout()
-            hist_path = f"{out_prefix}_hist_diff.png"
-            fig.savefig(hist_path, dpi=200)
-            plt.close(fig)
-
-            # Histogram of absolute differences
-            fig, ax = plt.subplots(figsize=(6, 4))
-            ax.hist(absdiff, bins=50, color='#D55E00', edgecolor='k')
-            ax.set_title('Absolute difference: |raw_nll - nll|')
-            ax.set_xlabel('Absolute difference')
-            ax.set_ylabel('Count')
-            fig.tight_layout()
-            abs_hist_path = f"{out_prefix}_absdiff_hist.png"
-            fig.savefig(abs_hist_path, dpi=200)
-            plt.close(fig)
-
-            # Scatter raw vs normalized
-            fig, ax = plt.subplots(figsize=(6, 6))
-            ax.scatter(raw, norm, s=8, alpha=0.6)
-            mn = min(raw.min(), norm.min())
-            mx = max(raw.max(), norm.max())
-            ax.plot([mn, mx], [mn, mx], color='k', linestyle='--', linewidth=1)
-            ax.set_xlabel('raw_nll')
-            ax.set_ylabel('nll')
-            ax.set_title('raw_nll vs nll')
-            fig.tight_layout()
-            sc_path = f"{out_prefix}_scatter_raw_vs_norm.png"
-            fig.savefig(sc_path, dpi=200)
-            plt.close(fig)
-
-            # Boxplot by model_id if available
-            if 'model_id' in df.columns:
-                tmp = df[[raw_col, norm_col, 'model_id']].dropna()
-                tmp['diff'] = tmp[raw_col] - tmp[norm_col]
-                grouped = tmp.groupby('model_id')['diff'].apply(list)
-                if not grouped.empty:
-                    fig, ax = plt.subplots(figsize=(8, 4))
-                    ax.boxplot(grouped.tolist(), labels=[str(x) for x in grouped.index], vert=True)
-                    ax.set_xlabel('model_id')
-                    ax.set_ylabel('raw_nll - nll')
-                    ax.set_title('Per-model normalization differences')
-                    fig.tight_layout()
-                    box_path = f"{out_prefix}_box_by_model.png"
-                    fig.savefig(box_path, dpi=200)
-                    plt.close(fig)
-                    stats['boxplot_path'] = box_path
-
-            stats['hist_path'] = hist_path
-            stats['abs_hist_path'] = abs_hist_path
-            stats['scatter_path'] = sc_path
-            print(f"Saved normalization plots with prefix '{out_prefix}_*.png'")
-        except Exception as e:
-            print(f"Failed to create/save normalization plots: {e}")
-
-        return stats
+    for model_name in sorted(os.listdir(base_path)):
         model_path = os.path.join(base_path, model_name)
-        #print(f"Loading model: {model_name} from {model_path}")
-        
+
         if os.path.isdir(model_path):
             # Read data from the model folder
             df = read_data_from_folder(model_path)
@@ -180,7 +78,7 @@ def load_models(base_path="predictive"):
             model_name = model_name.replace("-", "_")
             globals()[f"{model_name}_df"] = df
             print(f"Loaded {model_name}_df with shape {df.shape}")
-    
+
 
 
 def identify_model_families(model_dfs):
@@ -207,30 +105,6 @@ def identify_model_families(model_dfs):
             size_label = f"{m.group(1)}B" if m else None
         family_mapping.setdefault(fam, []).append((model_name, df, size_label))
     return family_mapping
-
-
-def define_colors_for_families(family_mapping):
-    """
-    Define a color mapping for each model family.
-    
-    Parameters
-    ----------
-    family_mapping : dict
-        A dictionary mapping family names to lists of (model_name, DataFrame) tuples.
-    
-    Returns
-    -------
-    dict
-        A dictionary mapping family names to colors.
-    """
-    color_map = {
-        'centaur': ['#D55E00','#E69F00'],  # Two shades for Centaur variants
-        'llama':  ['#0072B2','#56B4E9'],  # Two shades for LLaMA variants
-        'domain-specific': ['#CC79A7','#999999'],  # Purple for domain-specific (RW), gray for any other domain-specific models
-    }
-    
-    family_colors = {family: color_map.get(family, ['#000000']) for family in family_mapping.keys()}
-    return family_colors
 
 
 def calculate_negative_log_likelihood_stats(df, column_name='nll'):
@@ -271,25 +145,31 @@ def calculate_negative_log_likelihood_stats(df, column_name='nll'):
         mean = float(vals.mean())
         sem = float(vals.std(ddof=1) / np.sqrt(len(vals))) if len(vals) > 1 else float(vals.sem())
         return mean, sem
-    
 
-def set_dynamic_fontsize(fig_width=12, base_font=20):
-    scale = fig_width / 6  # 6 is your baseline width, adjust as needed
-    plt.rcParams.update({
-        'font.size': base_font * scale * 0.65,
-        'axes.titlesize': base_font * scale * 1.2,
-        'axes.labelsize': base_font * scale * 0.9,
-        'xtick.labelsize': base_font * scale * 0.9,
-        'ytick.labelsize': base_font * scale * 0.9,
-        'legend.fontsize': base_font * scale,
-    })
 
-def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=(12, 6), nll_column='nll'):
+def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=FIGSIZE, nll_column='nll', num_choices=2,
+                                     ax=None, show_xticklabels=False, show_bars=True):
     """Plot mean NLL by family.
 
     family_mapping: dict family -> list of (model_name, df) OR list of (mean, sem)
+    num_choices: number of discrete choices in the task, used for the
+        "random guessing" reference line (chance_nll = -log(1/num_choices)).
+    ax: existing Axes to draw into (e.g. one panel of a larger composite figure).
+        When None (default), a standalone figure is created as before. When
+        provided, global font-size/layout calls that assume this is the whole
+        figure (set_dynamic_fontsize, tight_layout) are skipped so embedding
+        this panel doesn't disturb the rest of the composite.
+    show_xticklabels: when True, label each bar with its size/condition tag
+        (e.g. 'Baseline'/'Partial') and each family group with its name (e.g.
+        'Centaur'/'Llama') instead of leaving the x-axis unlabeled. Off by
+        default to preserve the existing look of the 4-panel composite and
+        other standalone callers.
+    show_bars: when False, skip drawing the bars (and their value annotations)
+        while keeping the chance-guessing line, axes, and labels. On by default.
     """
-    set_dynamic_fontsize(fig_width=figsize[0], base_font=20)
+    standalone = ax is None
+    if standalone:
+        plotting_utils.set_dynamic_fontsize(fig_width=figsize[0], base_font=BASE_FONT)
     # If caller didn't provide mapping, build from globals
     if family_mapping is None:
         family_mapping = identify_model_families({k: v for k, v in globals().items() if k.endswith('_df')})
@@ -331,7 +211,10 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=(12, 6), nll_co
 
     if not numeric_family:
         print("No valid family statistics found to plot.")
-        fig, ax = plt.subplots(figsize=figsize)
+        if standalone:
+            fig, ax = plt.subplots(figsize=figsize)
+        else:
+            fig = ax.figure
         ax.text(0.5, 0.5, 'No data', ha='center', va='center')
         return fig
 
@@ -365,7 +248,10 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=(12, 6), nll_co
 
     # If nothing collected, return empty figure
     if not means:
-        fig, ax = plt.subplots(figsize=figsize)
+        if standalone:
+            fig, ax = plt.subplots(figsize=figsize)
+        else:
+            fig = ax.figure
         ax.text(0.5, 0.5, 'No data', ha='center', va='center')
         return fig
 
@@ -391,40 +277,63 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=(12, 6), nll_co
             xpos.append(xpos[-1] + w + gap_in)
     xpos = np.array(xpos)
 
-    fig, ax = plt.subplots(figsize=figsize)
-    # Use color scheme from define_colors_for_families if possible
-    family_colors = define_colors_for_families(numeric_family)
-    # build color list matching means length
+    if standalone:
+        fig, ax = plt.subplots(figsize=figsize)
+    else:
+        fig = ax.figure
+    # Use color scheme from plotting_utils.define_colors_for_families
+    family_colors = plotting_utils.define_colors_for_families(numeric_family)
+    # build color list matching means length. Each family's color list is
+    # dark/light shades meant to distinguish its models by position (e.g. two
+    # model sizes, or a baseline/partial condition pair) -- cycle through it by
+    # index rather than repeating the same (dark) shade for every model in the
+    # family.
     colors = []
     for family, models in numeric_family.items():
         c = family_colors.get(family)
         if isinstance(c, (list, tuple)):
-            colors += [c[0]] * len(models)
+            colors += [c[i % len(c)] for i in range(len(models))]
         else:
             colors += [c] * len(models)
     if len(colors) < len(means):
         colors += ['#CC79A7'] * (len(means) - len(colors))
 
-    bars = ax.bar(xpos, means, w, yerr=errs,
-                  color=colors[:len(means)], edgecolor='black', linewidth=0.3)
+    if show_bars:
+        bars = ax.bar(xpos, means, w, yerr=errs,
+                      color=colors[:len(means)])
 
-    for bar in bars:
-        height = bar.get_height()
-        ax.annotate(f'{height:.4f}',
-                    xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0, 3),
-                    textcoords="offset points",
-                    ha='center', va='bottom')
+        for bar in bars:
+            height = bar.get_height()
+            ax.annotate(f'{height:.4f}',
+                        xy=(bar.get_x() + bar.get_width() / 2, height),
+                        xytext=(0, 3),
+                        textcoords="offset points",
+                        ha='center', va='bottom')
 
-    chance_nll = -np.log(0.5)
-    ax.axhline(chance_nll, ls='--', c='grey', lw=1.2)
-    adjustment_term = figsize[0] * 0.04
-    ax.text(xpos[-1] - adjustment_term, chance_nll, 'Random guessing',
-            va='bottom', ha='left')
+    chance_nll = -np.log(1 / num_choices)
+    ax.axhline(chance_nll, ls='--', c='grey', lw=1.2, alpha=0.45)
+    # Placed just outside the axes' right spine (x=1.02 in axes-fraction, blended
+    # with data-coordinate y) so it never overlaps the bars, instead of a
+    # magic-number position inside the plotting grid. clip_on=False is required
+    # here -- the label is deliberately outside the axes' data extent, so
+    # clip_on=True would clip it to invisibility. That does mean it can bleed
+    # into a neighboring panel if this axes is narrow/embedded in a composite
+    # figure; revisit with a fixed offset in points (constrained by the
+    # figure's own bbox) if that happens.
+    # va='center' straddles the chance line itself. (Previously va='top' which
+    # sat entirely below the line; va='bottom' would grow upward and had
+    # nowhere to go when the line sat near the autoscaled top of the axis --
+    # not a concern now that the label lives outside the axes' data extent.)
+    #rotate text to 90 degrees to avoid overlapping with the bars
+    ax.text(1.01, chance_nll, 'Random\nguessing',
+            va='center', ha='left', alpha=0.45, rotation=90, clip_on=False,
+            transform=ax.get_yaxis_transform())
 
     ax.set_xticks(xpos)
-    ax.set_xticklabels(used_labels, ha='center')
-
+    if show_xticklabels:
+        ax.set_xticklabels(used_labels, ha='center')
+    else:
+        ax.set_xticklabels([])
     # family centers for secondary axis
     family_centers = [
         (xpos[fslice[0]] + xpos[fslice[1]]) / 2 if isinstance(fslice, tuple) else xpos[fslice]
@@ -433,10 +342,28 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=(12, 6), nll_co
 
     ax2 = ax.secondary_xaxis('bottom')
     ax2.set_xticks(family_centers)
-    ax2.set_xticklabels([f.capitalize() for f in numeric_family.keys()])
+    if show_xticklabels:
+        ax2.set_xticklabels([f.capitalize() for f in numeric_family.keys()])
+    else:
+        ax2.set_xticklabels([])
     ax2.spines['bottom'].set_visible(False)
     ax2.xaxis.set_label_position('bottom')
-    pad_value = figsize[1] * 4
+    # figsize is a plain default parameter, never overridden by embedded callers, so this
+    # would otherwise always evaluate to the standalone-sized pad (24pt) even when ax_a is
+    # a small embedded subplot -- inflating this axes' tight bbox disproportionately.
+    # The embedded case must still clear the *actual* rendered height of the primary
+    # tick labels (used_labels, e.g. '70B') below it -- a flat 8pt was smaller than
+    # that text's own line height, so the two label rows overlapped into each other
+    # (e.g. 'Centaur' + '70B' rendering as 'CentBur'). Scale the pad off the real
+    # tick fontsize instead of a constant.
+    primary_tick_fontsize = ax.xaxis.get_majorticklabels()[0].get_fontsize() if ax.xaxis.get_majorticklabels() else plt.rcParams['xtick.labelsize']
+    # used_labels can be multi-line (e.g. 'Full\nprompt'); the base pad above was
+    # only ever tuned for a single line, so a 2-line label's second line pushed
+    # up into the family label below it (e.g. 'Full prompt' colliding with
+    # 'Centaur'). Add extra pad per extra line, scaled off the tick fontsize.
+    max_label_lines = max((lbl.count('\n') + 1.5 for lbl in used_labels), default=1)
+    base_pad = figsize[1] * 4 if standalone else primary_tick_fontsize * 1.6
+    pad_value = base_pad + (max_label_lines - 1) * primary_tick_fontsize * 1.4
     ax2.tick_params(axis='x', pad=pad_value, length=0)
 
     for i in range(len(family_slices) - 1):
@@ -446,22 +373,33 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=(12, 6), nll_co
             divider_pos = xpos[i1] + w / 2 + gap_out / 2
         else:
             divider_pos = xpos[fslice] + w / 2 + gap_out / 2
-        ax.axvline(divider_pos, color='grey', lw=1)
 
-    ax.set_ylabel('Negative Log-Likelihood (NLL)', labelpad=20)
-    ax.yaxis.set_label_coords(-0.12, 0.4)
-    ax.spines[['top', 'right', 'left', 'bottom']].set_visible(True)
-    ax.grid(False)
+    ax.set_ylabel('Negative log-likelihood (NLL)', labelpad=(20 if standalone else 6),
+               fontsize=plotting_utils.get_dynamic_fontsize(multiplier=1.3, fig_width=figsize[0], base_font=BASE_FONT))
+    #ax.yaxis.set_label_coords(-0.12, 0.4)
+    ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
+    plotting_utils.remove_bar_frame(ax)
+    #plotting_utils.style_y_gridlines(ax)
     ax.margins(x=0.04)
-    ax.set_ylim(0, 0.75)
-    plt.tight_layout()
+    #ax.set_ylim(0, 0.75)
+    if standalone:
+        plt.tight_layout()
     return fig
 
 
-def load_and_plot(base_path='predictive', out_png='loglikelihood_bars.png',nll_column='log_likelihood'):
-    # Load all models in base_path
+def build_family_mapping(base_path='predictive', nll_column='log_likelihood', include_participants=None):
+    """
+    Load every model folder under base_path, keep only models that have
+    nll_column, fold in RW's separate JSON metrics (if present), optionally
+    restrict to a fixed set of participant/model ids, and return the resulting
+    family_mapping -- the same structure plot_loglikelihood_bars_dynamic expects.
+
+    Factored out of load_and_plot so other callers (e.g. a composite figure
+    assembling multiple panels) can get the data without also triggering a
+    standalone save-to-disk plot.
+    """
     model_dfs = {}
-    for model_name in os.listdir(base_path):
+    for model_name in sorted(os.listdir(base_path)):
         model_path = os.path.join(base_path, model_name)
         if not os.path.isdir(model_path):
             continue
@@ -490,33 +428,74 @@ def load_and_plot(base_path='predictive', out_png='loglikelihood_bars.png',nll_c
                 print(f"Loaded RW metrics from {rw_json_path}: mean={mean}, sem={sem}, size_label=RW")
         except Exception as e:
             print(f"Warning: failed to load RW metrics from {rw_json_path}: {e}")
-    fig = plot_loglikelihood_bars_dynamic(family_mapping=family_mapping, nll_column=nll_column, figsize=(12,10))
+    # Keep only specified participants from all models before plotting
+    if include_participants is not None:
+        include_set = set(include_participants)
+        for model_name in list(model_dfs.keys()):
+            df = model_dfs[model_name]
+            id_col = next((c for c in ('model_id', 'participant_id') if c in df.columns), None)
+            if id_col is not None:
+                before = df[id_col].nunique()
+                model_dfs[model_name] = df[df[id_col].isin(include_set)]
+                after = model_dfs[model_name][id_col].nunique()
+                if before != after:
+                    print(f"Kept participants {include_set & set(df[id_col].unique())} from {model_name} ({before} -> {after})")
+        # Rebuild family_mapping after filtering
+        family_mapping = identify_model_families(model_dfs)
+
+    return family_mapping
+
+
+def load_and_plot(base_path='predictive', out_png='loglikelihood_bars.png', nll_column='log_likelihood',
+                   include_participants=None, num_choices=2, show_bars=True):
+    family_mapping = build_family_mapping(base_path, nll_column=nll_column,
+                                          include_participants=include_participants)
+
+    fig = plot_loglikelihood_bars_dynamic(family_mapping=family_mapping, nll_column=nll_column,
+                                           figsize=FIGSIZE, num_choices=num_choices, show_bars=show_bars)
     print({k: len(v) for k, v in family_mapping.items()})
     fig.savefig(out_png, dpi=300)
     print(f"Saved plot to {out_png}")
 
-# function to tell how many nll were normalized
-def count_normalized_nll(df):
-    # how many nll different from raw nll
-    df['normalized'] = df['nll'] != df['raw_nll']
-    num_normalized = df['normalized'].sum()
-    total = len(df)
-    print(f"Number of normalized NLL: {num_normalized} out of {total} ({num_normalized/total:.2%})")
-    # what percentage of nll were normalized
-    print(f"Percentage of normalized NLL: {num_normalized/total:.2%}")
-    return num_normalized
+
+def _rl_waltmann_test_participants():
+    """rl_waltmann's RW model (rescorla_wagner.py) is fit on 50 train
+    participants and evaluated on 6 held-out test participants; read that
+    split so this task's bars can be restricted to the same 6, matching what
+    RW was actually scored on. Task-specific (not a generic mechanism), since
+    no other task currently has this train/test split."""
+    split_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               'rl_waltmann', 'data', 'out', 'rw', 'train_test_split.json')
+    with open(split_path) as f:
+        return json.load(f)['test']
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--base', default='predictive', help='Base predictive folder containing model subfolders')
-    parser.add_argument('--out', default='loglikelihood_bars.png', help='Output PNG filename')
+    parser.add_argument('--include_participants', type=int, nargs='+', default=PARTICIPANTS_TO_PLOT,
+                        help='List of participant IDs to plot (default: None = plot all, '
+                             'except rl_waltmann which defaults to its 6 RW test participants)')
+    parser.add_argument('--task', choices=sorted(TASK_NUM_CHOICES), required=True,
+                        help="Task name; base_path defaults to '<task>/data/out/predictive' "
+                             "(resolved relative to this script) and sets --num_choices from a known task")
+    parser.add_argument('--num_choices', type=int, default=None,
+                        help='Number of discrete choices for the "random guessing" reference line '
+                             '(overrides --task if both are given; default 2 if neither is given)')
+    parser.add_argument('--out', default=None,
+                        help='Output PNG path (default: loglikelihood_bars_<task>.png)')
+    parser.add_argument('--no_bars', dest='show_bars', action='store_false',
+                        help='Skip drawing the log-likelihood bars (keeps the chance-guessing '
+                             'line, axes, and labels)')
     args = parser.parse_args()
-    load_and_plot(base_path=args.base, out_png=args.out, nll_column='raw_nll')
-    # Provide counts and plots for common families if present
-    for name in ('llama', 'centaur'):
-        df = globals().get(f"{name}_df", pd.DataFrame())
-        print(f"\nSummary for {name} (if available):")
-        count_normalized_nll(df)
-        stats = normalization_stats_and_plots(df, out_prefix=f"{name}_normalization")
-        if stats:
-            print(f"Normalization stats for {name}: {stats}")
+
+    include_participants = args.include_participants
+    if args.task == 'rl_waltmann' and include_participants is None:
+        include_participants = _rl_waltmann_test_participants()
+        print(f"rl_waltmann: restricting to RW's {len(include_participants)} test participants: {include_participants}")
+
+    base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), args.task, 'data', 'out', 'predictive')
+    out_png = args.out or f'nll_bars_{args.task}.png'
+    num_choices = args.num_choices or TASK_NUM_CHOICES.get(args.task, 2)
+    load_and_plot(base_path=base_path, out_png=out_png, nll_column='nll',
+                  include_participants=include_participants, num_choices=num_choices,
+                  show_bars=args.show_bars)

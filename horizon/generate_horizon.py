@@ -14,7 +14,7 @@ import horizon_prompt
 from horizon_prompt import build_multi_game_prompt, define_choice_options_from_df
 
 DATA_IN_ = 'data/in/timeline_structure_mapped.csv'
-MODEL = 'llama-8B-adapter'  # Change this to the desired model name
+MODEL = 'llama-70B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/generative/{MODEL}/singles'
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
 RUN_TEST_MODE = True if '8B' in MODEL else False  # If True, restricts simulations to first 20 games for faster testing

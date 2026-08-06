@@ -15,7 +15,7 @@ from compare_prompts import is_prompt_in_test_set
 
 DATA_IN_TEST = 'data/in/test_horizon_all_experiments_choice_mapped.csv'
 
-MODEL = 'centaur-8B-adapter'  # Change this to the desired model name
+MODEL = 'centaur-70B-adapter'  # Change this to the desired model name
 DATA_FOLDER_OUT = f'data/out/predictive/{MODEL}/singles'
 PROMPT_DIR = os.path.join(DATA_FOLDER_OUT, "prompts")
 LLM_TYPE="llama" if 'llama' in MODEL.lower() else "centaur"

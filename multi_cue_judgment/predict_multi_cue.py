@@ -12,7 +12,7 @@ from compare_prompts import is_prompt_in_test_set
 
 
 DATA_IN_TEST = 'data/in/test/full_test_data_multi_cue.csv'
-MODEL = 'llama-8B-base-adapter'
+MODEL = 'llama-70B-adapter'
 DATA_FOLDER_OUT = f'data/out/predictive_steps/{MODEL}/singles'
 LLM_TYPE = 'llama' if 'llama' in MODEL else 'centaur'
 RUN_TEST_SET_ONLY = True if LLM_TYPE == 'centaur' else False
