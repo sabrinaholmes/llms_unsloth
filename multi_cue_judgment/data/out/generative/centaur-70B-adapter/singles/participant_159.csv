@@ -1,0 +1,281 @@
+participant_id,trial,block,condition,cue1,cue2,criterium,choice,prompt_hash
+159,1,1,3,very little,a lot,low,normal,9ea0b6b361403cc3d4d998aa0842319037ee028106f5b24735428b0b79c179d2
+159,2,1,3,average,very little,normal,somewhat high,1200d58780b36b6925c674b04fe00ee47c68ab6041d0afda1ad1f5b2c3763220
+159,3,1,3,a lot,a lot,somewhat high,extremely high,98dd0084f5924665737b1cd423cc525826b50620a75a328cf4d3b1e94a99846d
+159,4,1,3,a little,very little,high,very high,51d40ad3cfcbda58dcb098ee2f555671be440f4e8c04ce21cab7e1908cee1a29
+159,5,1,3,a little,average,normal,somewhat high,2f60739f87c7abea61c1b31017fb379fe8dc84a5745cbd87839269044089ec85
+159,6,1,3,a lot,a little,somewhat low,very high,e97692b7a189f9d7ac0ef5e0b1580174f92ed61c60963db25c03c5aa005be88d
+159,7,1,3,very much,a lot,high,very high,877ea2f014ec70d78c12350b5af9bd4953c0a245c803e9ebdcdcf5d9e1120d9e
+159,8,1,3,a little,a little,somewhat high,normal,c1da8bd6e0dc8dc5a112dc39c2fe959bfe2039236fabe434df89844457ee11f9
+159,9,1,3,very little,a little,high,high,0c31ccce3b5515d004dadf609a76097fc397a0033081765163fc398e913eb43f
+159,10,1,3,average,a little,normal,normal,89d044bf2f65f134c5f91e6461b8962152ab71766bae8a77ca5ee4be2c6bcfc6
+159,11,1,3,very much,average,normal,somewhat low,e2d5736a3651c2b511e9c7edfaea4716420478c7dbbeac56f55cbd8cf8802ab6
+159,12,1,3,average,average,normal,somewhat high,6db9a89a8f0f95af22339092ddeabbb4e5be6d7bec12c3c18c83b5554beb8691
+159,13,1,3,very little,very much,extremely low,high,8f365de6b87c536dc0d22e1eb4eabae8e15b9dc7567076698fc8447a9b6225bb
+159,14,1,3,very much,a little,low,very low,89caf81f93fcdcf7d8e048ae0e225214dbc5e874ba4497c5be581c01b44cf6d2
+159,15,1,3,average,very much,normal,very high,d6d5cc86000110c4f40d00bb3f9e844d213585b73e09880d144a2d8047d2168d
+159,16,1,3,a little,a lot,somewhat low,high,1982746d555c794f76056015b3acc69b3cf072ce1e85321db5b110b5ea7ad946
+159,17,1,3,a lot,very little,low,normal,02a873a83542fbdfb5c9bde48753b25f18c980f367e1c38f17fc17852460a157
+159,18,1,3,very little,average,normal,high,6ce403cacbbc7ff143e56455a1b1789f543b824765ce0453bd28667eeaae61ba
+159,19,1,3,a lot,average,normal,high,009dac75216ef82373e182083190fe9c0f50f626ab27f6126d647a336abdaf9e
+159,20,1,3,very much,very much,extremely high,very high,4e41450b6bfcf871ad7448047d600b6f11e6c8961b947cc8e2b592e3ed818eea
+159,21,1,3,average,a lot,normal,normal,fceec8dab633b6fc35eff234c515b9a3b7e99aa2b95b67951e503cb850efc5f8
+159,22,1,3,a lot,very much,high,high,5c7c0e9d0c98d0e1cc7e52e5f02554dc6e9f5f34678f452f2e9d7eaa6b2fd715
+159,23,1,3,a little,very much,low,somewhat high,fcb93471d5944e77cd633e59221d7b28fd80ffbf5c6ec10a587c6a21c6532b1f
+159,24,2,3,a lot,average,normal,high,5e08bf271a854e25c2c2954f50ec0901d3761a1eef08d17e408311529096d2c3
+159,25,2,3,a little,a little,somewhat high,very high,39e93d4e76d7bceb65fa3e1f3c6996c383a4a939b836abfa2e7ed9eafbddfba1
+159,26,2,3,a little,average,normal,normal,4322dc28f68fd69f22017f71d64e50a3279e3584c48ce43e509bcc226f34875f
+159,27,2,3,very much,a lot,high,somewhat high,a97990e03c9ba49f6c77a8c962f6cf20c16c8f7caded2bbb602fbf93b720f3fd
+159,28,2,3,average,very much,normal,very high,693fa4149d74bbf60b9a0f3a329711baa1707b3b6added6354adbc7edd4ab132
+159,29,2,3,very little,a lot,low,low,d8b537d111b70c473bd216e7fa689a7c74f3aa3dcfd47d3f63d54564dbf2dfdd
+159,30,2,3,a lot,a little,somewhat low,very low,7f53743f3295d946a57287f1e3c3d94768836fd1adebe57fa61c014d32ee0910
+159,31,2,3,very much,very much,extremely high,somewhat high,8b690b5172da5b4323e5eafb629c445b7224867f7e5c9cb24fcb9bd6a7ac888a
+159,32,2,3,a little,very much,low,low,39926b7ee868a8ab21f0cce371cc51cf963f27c1bfaa2d4deb829e03ad83c540
+159,33,2,3,a little,a lot,somewhat low,very low,f660424a3781e7c2ed3d2b2f7ccd27e784b9754295abd533eee97db0cfaca0f7
+159,34,2,3,very little,very much,extremely low,low,46793d4fa3ab6e39265cc855ec9a7955dd11bb0a9cf94e79cea13e3e33c182ac
+159,35,2,3,a little,very little,high,very low,d57b7bc5d090ed7ce32f54db81a550507e812b0b8d88a38c8a427d40aef172a0
+159,36,2,3,average,a little,normal,somewhat high,246186633165fcde473c48f2f6f38349a762d55acce7d83d9d1fa0971486f9c2
+159,37,2,3,average,very little,normal,normal,dc32058a188bc752e3bd3da1e4ad5f6674dc6b13e8deb1a694988e5a93654560
+159,38,2,3,very much,average,normal,very high,7c3716e01eb529f2c8c692e97b517cd1a924abb8460839e2f0b7171e35b1c0ef
+159,39,2,3,average,a lot,normal,somewhat low,032cc5985328b582ff9d9e4b456d0edf75163e736a819a11b3d7f13f9bf9e3c7
+159,40,2,3,a lot,very little,low,low,5ffd64f1a48617be20174909623ae8db273ca33da178cdbe136b5409317ab341
+159,41,2,3,a lot,a lot,somewhat high,very high,27088f0715f8f49fd5ac52d7cdc4c01ead6b33b67653aed9ca022112efe7a199
+159,42,2,3,average,average,normal,somewhat high,5666ed7573dac870311cabe21af9201be46aca5439239ccdfc140cf7b2301559
+159,43,2,3,very little,average,normal,somewhat high,985e807f5a79a949d37a8b630445f4f1bc52b9a6547ce3865ffd3b9eebaef28b
+159,44,2,3,a lot,very much,high,very high,4da55a858da17009f292df2a42fe45ed35e776bded0ef89a08f2806e4ff9feca
+159,45,2,3,very much,a little,low,somewhat high,f64adfc6d318e3002ef0c40863f8ed8d2c206e8fd608afff8fbca715ba8aa3e6
+159,46,2,3,very little,a little,high,somewhat high,7654784953b1f452370f8bd0ca54c5f46eb0d206dc9f4199eab88038f0e64350
+159,47,3,3,very little,a lot,low,somewhat low,9c9939f7f1a8684c6590c6f9c0a04717f99836b6984cb4aad35b7aacbf45b922
+159,48,3,3,a little,very much,low,somewhat low,dbc984e892a8ef40c8bd1f962654d3bc9c2387b26922634c3b847729427c7808
+159,49,3,3,a little,very little,high,somewhat high,06b6f027873acbcddff578e454fb6dce439c497cc9e9ab4bac4cf559cd7befc2
+159,50,3,3,very little,very much,extremely low,low,270ec106ed78cbe79fdc59426ec7a43bdde03d9724f0b87e2baa7abd23fd6b55
+159,51,3,3,a lot,a little,somewhat low,somewhat low,6f82932a398f4a143b609f83881f7319017bc0cbb64c6c3bfd7a37891ca071f6
+159,52,3,3,very much,a lot,high,very high,3466bb091954d2ae019e0dc88264d7eef40358dcbfa7d73ea05448996ae03d42
+159,53,3,3,very little,average,normal,normal,1a662babde468d2c7b102d90e060e0ab0d61128a6fc552bb37ba95b6eaa7699c
+159,54,3,3,a little,average,normal,somewhat high,6212d266d76587032397260c800721f82aceef73a0dfefcac5080ee72d97db19
+159,55,3,3,a lot,average,normal,normal,326f85c6fd5e9fa175e8062f37988fd36c70e36f49530127591c48d7947563c4
+159,56,3,3,average,a little,normal,somewhat high,ce7f73ccc63fdbffccb2caf6f4c90b32c07c269be6a9c8bc8c85f6b682f2efd8
+159,57,3,3,a lot,very little,low,low,cb3e3e6ce7af3c18f5afeeff0f5a86a00b98fbcd44198ed66552d120b941fdf2
+159,58,3,3,very much,average,normal,very high,10eec8d24f2f00d75b74d94bf1003494399e0282d518684309d9077c3f81a62f
+159,59,3,3,a little,a little,somewhat high,very high,c8512cdf54fe4169d14eea5a354f8b74bccb26695b92d4d7ceb1f39ff9186dd0
+159,60,3,3,very much,very much,extremely high,very high,ca327c5557ab0ec91023a201d9a7a39a03c0eb5c8c7aa08f2a2a777178d444aa
+159,61,3,3,average,very little,normal,normal,a9625b63ebd15b2de31db8b4ee7f344658c24bcb969d1a4f4196121916f00175
+159,62,3,3,average,average,normal,somewhat high,5f934f3fa7c85d11ec51ff7b7e1c2868f848061efb9f5a743ddd828875e166ea
+159,63,3,3,a little,a lot,somewhat low,somewhat low,fbd586fb31033ecada9b41f115246d1b061dd8acabb325334e182494ea1e2f27
+159,64,3,3,a lot,a lot,somewhat high,very high,662d7b384cdec1d3695b5f5f26fac9bdec506320a4656298d4bb711a34898fda
+159,65,3,3,average,very much,normal,somewhat high,9e4c73f27a9924cb1e138baa5a5c945e6267ac39184cc6f8a15f7872466fd159
+159,66,3,3,a lot,very much,high,very high,a0b563c5a66fcdb1325498e75754d16fa40946e7cdac0c251f1ba43487e52214
+159,67,3,3,very little,a little,high,very high,14ffdf9de2999374a3b4e3d80be08639a6ea4904205d664af466c67cf4b3e942
+159,68,3,3,average,a lot,normal,somewhat low,da3596c8b76538b6b481435caa6af17a740288c2b2f8d1067fd032a9c3d770d7
+159,69,3,3,very much,a little,low,somewhat high,63b9be5947bf2062569a05102284db5fb98e61c26b16693ef93dde2bf3fd59af
+159,70,4,3,average,very much,normal,somewhat high,f1ce252771b78d7940bb13636d9f289be9f09d31afc16308ef3585f80b6d26af
+159,71,4,3,very much,a lot,high,very high,523296c0ea936f4c7e7ff4dec7cca109fde647e223fdb79a25869694ec3e0059
+159,72,4,3,a little,a lot,somewhat low,low,6f11336d046b4fdd720802ac4d858401459da6370a70c78a966c3b549539e95d
+159,73,4,3,a little,very little,high,somewhat high,5f4e0ebcdc6de3cf20d4c390c4b4c48c03caff38f45f9b039b7ea928602bd943
+159,74,4,3,very much,very much,extremely high,somewhat high,f177db79cb5100a7796e34df81ad832c2c333ed162a59109b82d25f1eca8979a
+159,75,4,3,average,a lot,normal,normal,680eb52a2a1d56c048f0d59d6eabd46d7388fc07360c6fbe5ffa29c9a7d9b6d0
+159,76,4,3,average,average,normal,somewhat high,5dd7230a4d64e838ebb8b1f5dd421ba275b33992fef7a840cc0e3956f944a7e6
+159,77,4,3,very little,very much,extremely low,extremely low,ad120108f567727cbc113c30ecb772ac92f71a212c9d0b9681470e7451e2bb55
+159,78,4,3,a lot,a little,somewhat low,somewhat low,a1cad440b3284812b6fb59ac83d74bfb922125be55ddfacfd33cb3ade4158e8c
+159,79,4,3,a little,average,normal,normal,2b3fc2391e94c63fe67b652c45fa6beca35c55327fddb91ac9730ebf63f22cf3
+159,80,4,3,a little,very much,low,somewhat low,1217488cdbadd340c49cdb9f68a0737fc1db19413502460f2c2bef09fc485063
+159,81,4,3,very little,a lot,low,somewhat low,98953a13eed06860163ca95520aacaef0e995498bd821de49840ca04cdc99667
+159,82,4,3,very little,average,normal,normal,fba187a4980d6dcb8034fd43177435bad6419a5283a8140a323f1bb9103df22f
+159,83,4,3,a lot,a lot,somewhat high,very high,0b3a30894e21211e0ea1fd509737f8a5d3d0772ce557d17fca1688b63324175d
+159,84,4,3,a lot,very little,low,low,9bcf94ab434154d55b1c97060338b6b182d576ef49b527e83c6eecad8632623a
+159,85,4,3,average,very little,normal,normal,619e9816851c343d08cabe293463d1aaf7bccc74325b85c752ff96d520ce0267
+159,86,4,3,very much,a little,low,low,968b01c7b127f0cec8c8fd91cd242cbef2826ab9fe3ffc7a7bddee13b5fc6cdb
+159,87,4,3,average,a little,normal,somewhat high,b45a06fe625f4345fc635fdaed04834f786c2f71bae6715a4c0c82e125ab0de1
+159,88,4,3,very little,a little,high,very high,836df53964bb15b27219b872a18330f4e5bbb448d4ca4411f2d9236880d4b0d4
+159,89,4,3,a little,a little,somewhat high,somewhat high,524b46b1393dbc553341f5dc0447cd660f6e90c897df5a03d0b6a3c2e49891ce
+159,90,4,3,a lot,very much,high,very high,78f70f660d1f2b494f823d1549cd2a3a1cfa7b22c2f6a56d0c485614f983d6e0
+159,91,4,3,very much,average,normal,somewhat high,575f189a719bf6d7fb6cdf0e230fe2844c6c8a42f3eca66fbd0fb2c4dce1ccf0
+159,92,4,3,a lot,average,normal,normal,1e1c93996f640ae4977ff2fdf48024f37241380cebfe1e39b9fbe9d4612b8ee2
+159,93,5,3,a little,very much,low,low,d859b2bbf9979dadd541a54cefdb40ed187cceb2480b5a34526ef0b466899f9f
+159,94,5,3,very much,average,normal,very high,59b3d8424e9e7b6ebadec01ad01a540aa99868e04d808ab1a20bc38ba763ae52
+159,95,5,3,average,a lot,normal,normal,8d1a56ce2bdc16c12cb4f7a2145511cecc0897fe5025dffa2c3b7aee84beb712
+159,96,5,3,a little,a little,somewhat high,somewhat high,63b2d5b7f48a90c705bb83af21b3f84a5547564b0d7f76a6f27aea2c8ecbc0a9
+159,97,5,3,a lot,very little,low,somewhat low,7ee335bc0b5842af252326fcc80e5c20128c8c7bd79e715c4dae9d03c531dc4b
+159,98,5,3,a lot,very much,high,very high,9eea0b2850171ca03f91af3bc14c343dd682cee23514a7587faccf54cc8180f1
+159,99,5,3,a little,a lot,somewhat low,somewhat low,558ef757529dc6808a0bd2ab37b21411618c59713ce82e4900a738cb78260963
+159,100,5,3,a lot,average,normal,normal,7238cbe0cf19bddbb288df368eb667e5320d55564aae57046fb8a1b1018ded49
+159,101,5,3,a little,very little,high,high,1bb4cf76ba40272decc0e4f3db76adb31124f9928fe9522655a1a862028d6862
+159,102,5,3,average,very much,normal,very high,e0687687b8000f2521b3e956a8d33e9806bb4de23bc3246c51bc0a72633ae088
+159,103,5,3,very little,average,normal,normal,0625aadfc1b55c27ab25e2d9ffd6f5d1cbcfc4247b431df4f3107b3aeca6ee44
+159,104,5,3,very much,a little,low,somewhat low,779bd6a65b56902560abc77239b928aef69a1fd05442df9ed860d1816410b77e
+159,105,5,3,average,average,normal,somewhat high,29d518edb6789799259186c1bd277c75e1889e0bbdadc7bf91a256fa75088ba3
+159,106,5,3,average,a little,normal,somewhat high,4a6427d7689e4c8ca278be3795dbc52f60b09ef41b8b9a5d7042fd9524179084
+159,107,5,3,very little,a little,high,high,21688e5497decf57a203643ba3e3a7d5fb1892ed75a05720ba741a2796f30871
+159,108,5,3,very little,very much,extremely low,extremely low,2d1cb17255f3469696bb80eac872d4e986964d7d1172397e38916c6e5bb780af
+159,109,5,3,very much,a lot,high,very high,a16b0f59a6c5f71820ee5452ac1e3327d1e0d9489c76c945955af2023af687b4
+159,110,5,3,a lot,a lot,somewhat high,very high,33c3d2ab4dc1dfa79c8867c79bcdb24e684b1e74f7430a30acb64c32d54140bc
+159,111,5,3,a lot,a little,somewhat low,low,ffbed83905220ef40dc5f9e0637adcce8dd241b4231426972b17a9e7d6ee40dd
+159,112,5,3,very little,a lot,low,somewhat low,0ff8c935637e2f98e57ddff13fefadc4d39ae6930211f5d363820bc91f2726e7
+159,113,5,3,a little,average,normal,normal,8b4855a3da283137547d141c4ff3568112844ba9bc5f51baf7037ec354d65cb5
+159,114,5,3,very much,very much,extremely high,very high,07d5d8dc50303966f3c6d95da4f9b55a9d91898d968dad9d431a781c7fba3779
+159,115,5,3,average,very little,normal,normal,52cbdac03864da6f38fa231f464c09f0364ca3d939fcb1ddba9c0a690ecef52b
+159,116,6,3,a lot,very much,high,very high,b44c2b93eab3fb2fbfd186a6f7ce3fa2b468ae8f6be5ebdd5bd1c564b372e30b
+159,117,6,3,average,very little,normal,normal,f900d237c705d1557a0eba8d949b5fc8b692ddc2b411fb7ed4385bad690ca2d6
+159,118,6,3,very much,average,normal,very high,5eee773196533c82716304ab5d437a8dbad99809ed701e1ad73b4afbec16d0d4
+159,119,6,3,average,very much,normal,somewhat high,8748164da1b2b3fef82c4b45dd718e01916ca4b660b931df06f801f6daeb2f00
+159,120,6,3,a lot,a lot,somewhat high,very high,bac52c9eb219a332123af2991eea359b2b047a5889f276346f36d87114275d74
+159,121,6,3,a little,very little,high,high,45eac1112ed7c70bbcd76bbf7399f2d539d87355f7d3375921435b1e2b8169a9
+159,122,6,3,very little,a lot,low,low,32a6a180a35d5e492a5882e35f41aee72bdc7b5af94b2561ae13050c67b4c8df
+159,123,6,3,very little,a little,high,high,756b2137e147f86eca02692a8b10549deea803bb73546387bbb336f53612a396
+159,124,6,3,very little,average,normal,normal,eb6737205697cad8ebc21a6d54e9ecddca2af0ba2156543ea8f57e95a7c26577
+159,125,6,3,very much,a lot,high,very high,aff8be86c951925cc79d765da14841a539f3dfbdf986c440c9cc316c83abba2a
+159,126,6,3,a little,a little,somewhat high,somewhat high,2918fb1afb75ac3fb08f999e732a7962cb28ea95e0a3282e92f613f1c9c34ac3
+159,127,6,3,very much,a little,low,somewhat low,ff85537eb57daacae80c38a6b5d57fdce4ae436f6832d53a7fdfd34f335dd89e
+159,128,6,3,a lot,a little,somewhat low,somewhat low,ad13d67ec510849df171be9a85e315e2dd6eb0117b865c09cafab7d20254dde2
+159,129,6,3,a lot,very little,low,low,995e824469f70349bc8408803cfd980df53069eba8314717d7f533c8922721ca
+159,130,6,3,very little,very much,extremely low,extremely low,e6ba1e09c4d16b92a3f92e27862f08fd4814f505c2085c654bfe7ef9419455fc
+159,131,6,3,average,a lot,normal,normal,a7049e047173dbdc0ce9fabd67406b42ecf8d2bacc636db0790a3523810afd80
+159,132,6,3,average,a little,normal,normal,a99d3acadc23e6f2c786dfeadc9562da3740c19b99b8fb99306f38e01460755f
+159,133,6,3,a little,a lot,somewhat low,low,31f12e641456c35b98eecfacc273d0664a4e1ff18a528f80bb0aa10e7b4cb1c6
+159,134,6,3,a lot,average,normal,normal,2c75f6aa9878216b237387f5e7d5ab45a5cb206a91cfe237a89909cf9b001b93
+159,135,6,3,a little,average,normal,normal,089e2313ecfebeb4b2b97a177f2795233ac4f3ca909863ee751d20a062e6d816
+159,136,6,3,very much,very much,extremely high,very high,dc240e4ca44b216fc64a29dad19f5d56fb21e4b331b46bd68a41855a431a0aaa
+159,137,6,3,average,average,normal,somewhat high,4f9a805c8e868d2ae356b1fc029dbbc139b4817a2a5dfd9761288f2029ed2ecc
+159,138,6,3,a little,very much,low,low,7a2b2ec51b6d4a6317efb9e180ef87aeb97f2742bf4d4ae21d4b06ef379c6e84
+159,139,7,3,a little,a little,somewhat high,somewhat high,a8902a3aff7eb0ef02b9f7683e6f9ba342ae203985b1060f2e842008e61c484a
+159,140,7,3,very much,a little,low,low,9ebace055c5d9f791cbbeaab3baaaa3f27739190cc7452fe15f986408635f797
+159,141,7,3,very much,very much,extremely high,extremely high,372a58808403776068b948d117f568eed2162ecc183f1ce59fdb8935f58b9770
+159,142,7,3,a lot,a lot,somewhat high,very high,5d5d79ad0cac0657ba1fe0e2215c114d96876c7884e27957d8d19f5eaff98b6d
+159,143,7,3,very little,average,normal,normal,49e3a44265a2e967275f371a6fde264fa0136fff4c0c3908306fb8c6ef615ce6
+159,144,7,3,average,a lot,normal,normal,619124d58919a705277cb566451ae958d6c1b2b77525a062c7344e311e713299
+159,145,7,3,a lot,average,normal,normal,80b2355742f0346252ddb9153a963eed3aec750638b836c43411581c2b654f31
+159,146,7,3,a little,a lot,somewhat low,somewhat low,47b07844c9876669eeaf1dfbeebf8de9962e1eaba7ca74c0802dc1b77217fe4f
+159,147,7,3,very little,a lot,low,low,0eae162e165f1f39872268ffceaeff67a874a1dfd29febfcb7fd608b4f45ad29
+159,148,7,3,average,average,normal,somewhat high,600486b1c560529b2d4be63fdc8f17a8dbe573777c9cc0d1b4459fbdb87f1dc9
+159,149,7,3,a lot,very little,low,somewhat low,ae0128a6ed843326834a4a4277dc0bd3e1f88592401cab52e94b73641a77c972
+159,150,7,3,a little,very little,high,high,324042ab42fb1b74acdd79e19053e4e63ac720e2e5b02ec1e20f9c55ddb37952
+159,151,7,3,very much,a lot,high,very high,1097ea9e03423851e28cf2b3effb719dff84b27342b33f7418797d207c5131b2
+159,152,7,3,very little,a little,high,high,a6ea3371dff0336a71198c047fe2ef0fcad1a686a31df7b4fc240da4726b6036
+159,153,7,3,a lot,a little,somewhat low,somewhat low,905ba3bdf643457234c1a23500047087e6b6af4055951d2e51a252975f910fee
+159,154,7,3,a lot,very much,high,very high,b7d4107a852c299463e3bbf2b932fe4c97ac4ecc7fad1b7cbcf2d72031e90c7a
+159,155,7,3,very much,average,normal,somewhat high,225bcf1d5d6fe81f2a252ec210b7ed40d30acfe87340f3cefd82bb8037081519
+159,156,7,3,a little,average,normal,normal,e0123c268321d16145f0e284bea520d50f12c90281add88886044db987c09b27
+159,157,7,3,a little,very much,low,low,783d771c0e88a4797870189e7ba1a8df1e2a304fbe9c8521b7c3342048d80612
+159,158,7,3,very little,very much,extremely low,extremely low,5c725b4e86fb976ded3b4ef221ca31f4602bde53194291906b3a8f7d17dfe680
+159,159,7,3,average,very little,normal,normal,1033c7c5643fe34b276698c3dfac01df69cfab160a6b0f29e49b1b1b477701ee
+159,160,7,3,average,very much,normal,somewhat high,0da5bd85e35f7904a928323d3fbf9a9efbf607d84c6632f8dcd6461593a55844
+159,161,7,3,average,a little,normal,normal,797fda0a2a5e22a1df83c8d558d9d8fc89645a6a2c5cccd81dac0ea809664ade
+159,162,8,3,a little,very little,high,high,31fc9befd89fe4bbcfafb8bbdedbc69d777d0e360d39bda2be6a292f463db391
+159,163,8,3,very little,average,normal,normal,00d2b123cacb453153ae455c6f875edc5d8820f387c55095c1102420676b2c5b
+159,164,8,3,a lot,very little,low,low,cf96d18122285f30c67cf052f493a9c4c648a5becb6d9180e796e321fd02ba8e
+159,165,8,3,average,very much,normal,somewhat high,4efac61db1e0833d559c10888da047d15235cb7da2f0c39cc1b9e422d84762b8
+159,166,8,3,average,a lot,normal,normal,8edf0ebc724db79d0e1f658c306ec12d37fdf5a68e5271077d31dd058b0f8141
+159,167,8,3,average,very little,normal,normal,9a950cd80dca41fdd3c6238204248427a5a66e458c639b0bb8ad2e4b10f1375d
+159,168,8,3,a little,average,normal,normal,da475adcc87f5839a0934978a52a8075636ab210abf009950a300b172f63e9f1
+159,169,8,3,a little,a lot,somewhat low,somewhat low,c0d787cabcfcae85c7428ea35171651090961d26f77b8010c04e44f4573d985c
+159,170,8,3,average,average,normal,somewhat high,dcabaad7fccbe56b58f7e33bffd110e3ed5fb39866f830b7572c61087ef24114
+159,171,8,3,a lot,a lot,somewhat high,somewhat high,dab6430c260342bfcfb00d284e98c3c7477bd2a5502703802b62ff22c6e51584
+159,172,8,3,very little,very much,extremely low,extremely low,b299ad1855ca3d3690061757e76dba279f828b68dd7c75ee69dbb3a6c7dcf7cf
+159,173,8,3,a lot,average,normal,normal,cf9630fe4dfc03b8a372e329f85a5dda37654acd2b37ca18e96d6bcac0d04d39
+159,174,8,3,a little,a little,somewhat high,somewhat high,fa05cd9aa12a54c2ae9a04ca946a725cc78ead3ac33bf63a4e6a5f94597d3207
+159,175,8,3,a lot,very much,high,very high,8786d595dc8d0ceb4419757e323857ecca215843e0abc017fbb3c35bb5de2c63
+159,176,8,3,average,a little,normal,normal,bfae043d818598fba12b6d0e82883afe62ce9f2f78f4b06dfd75c6ba148655d1
+159,177,8,3,very little,a lot,low,low,14e2bb995923a05512344e5e379222e6fb305d35959bc91abfeb416e1850ae9c
+159,178,8,3,very much,a lot,high,very high,063b0c424cde0fbc61e8c59d5faf6f807ca774b426be76d4de7076bf1cd7d03f
+159,179,8,3,a little,very much,low,low,42f7b3c7c0ee4f9071697923f6810c8d5fed47d0c0440275bf99df0b62af801e
+159,180,8,3,very much,a little,low,low,08a4159d4d2ba10bba29697f4d36f061d6c46bacf5413f8a8fc999eafc4b3ec3
+159,181,8,3,very much,average,normal,normal,74ed70b611947ed7e77b0bdc9d58b06b15ad9a38ee399c8a118bd6a1bcc7d021
+159,182,8,3,a lot,a little,somewhat low,somewhat low,2db65044d7f5f9c81e7be23ca92d080814e5f7ab78d594a9eef83ac99189af25
+159,183,8,3,very little,a little,high,high,43c468f851cefc51be386610b30c8cc0df07add979c8ea5bb3203f2b9b3fc995
+159,184,8,3,very much,very much,extremely high,very high,a33ed992d27d431cd463f23dcca9a542f476bdb60f5ef4eae0e10f1afde67f3e
+159,185,9,3,very much,a little,low,low,c8a456d8b04227bc2aed74921952cbeb1b1ab513aa1ab0caff9f317e5adf5adb
+159,186,9,3,average,average,normal,somewhat high,c87e68f8b724f600fc5338ed253d4b2928b4da8b6312f0d20aff2ee62800f5a1
+159,187,9,3,very little,average,normal,normal,dabdd8f311070f798c5064c7c38a840204376f8302543f64c422c8b6df529084
+159,188,9,3,a little,very much,low,low,9ec60b7ba09745ba45a261efe579a18fd2ef2b3c2562c39e722ef4242b02cdf8
+159,189,9,3,very little,very much,extremely low,extremely low,7f34b9f355c304330cb7a97d4ae106a36a255948c02b33294fea38a19e525339
+159,190,9,3,a lot,a little,somewhat low,somewhat low,69d7549b78ecf19f19debfb4d84eed74200084efc61975e53689f2939929177f
+159,191,9,3,very little,a little,high,high,1b5cffba531587a36553e8a3635912c138604a20dc26688a9aee56ed037c829e
+159,192,9,3,very much,a lot,high,high,ee79584764e23c9472300e30b0d3cde3569ef33240aecf4751d088fa5bb01c0e
+159,193,9,3,a lot,a lot,somewhat high,somewhat high,590d93e60effd783a105f925fffa704b9db4b50b9682f6725285d1aa78049580
+159,194,9,3,a lot,very little,low,low,52003e6ca06ef3779b02af6ce986c29824bf3b6655c9b0b5a03b71d91dad694b
+159,195,9,3,a little,average,normal,normal,6ca7be4688a4ab4372949ec70b622c2eb3d6c94ac1e7a7dd46ca42209dc0f7fe
+159,196,9,3,very much,very much,extremely high,very high,0ed9851ff6839ea1044b1db5ed0110214d9bf5f66494f5b9727f34ef78a40482
+159,197,9,3,average,very little,normal,normal,963b411daf868d39be088056681757c075fe2d5d883a5a6feb111de07f0ca754
+159,198,9,3,average,very much,normal,somewhat high,3f01e9bc2a6fb7b8a8ce5bd59888dc041d3606c9d99e1ad9a64f75a21c7e1e9e
+159,199,9,3,a little,very little,high,high,f514b0e762b3599fe6a78baaa47b8550dcf33065ec953b0219db992731f61fd0
+159,200,9,3,a little,a little,somewhat high,somewhat high,d494d697d31ed4588681a02b7453c9591529d0aaf43bd27b2fa304f4ce4139cd
+159,201,9,3,a lot,very much,high,very high,d1c6c92428c567667685aeb2089104648eeb23f2dd9d6a1abde8d2876bcf9474
+159,202,9,3,average,a lot,normal,normal,74bb702b1259781526157ed0e5302abdd79a574372abc91f5173f7f9ca07e6c6
+159,203,9,3,average,a little,normal,normal,b27c4bcfa8015cd015fff8e9e96ce62ce0a1d9c8a7b993f2380121be56f3be16
+159,204,9,3,very little,a lot,low,low,55be36f372f2182195b6b9b7d1026798345ede67503f6ef3a6fde432fe0f8d04
+159,205,9,3,a lot,average,normal,normal,39c120c0d4155c817dc9e739b4bc7d494e1f327ff3340749bc195c33652db081
+159,206,9,3,very much,average,normal,normal,516f6ac6083149d58f7353f0720807f61615e40ed09efe8384cdf73dcc90a046
+159,207,9,3,a little,a lot,somewhat low,somewhat low,fe9b188228649330cc68b2ec5381dde8009070c05665f3cca1f1fb494063c344
+159,208,10,3,very little,very much,extremely low,extremely low,5447c41f17c065d8985c88485474507834ac77a925e106120480fda6730e8fd5
+159,209,10,3,average,very little,normal,normal,5a19e89fd3821bb673f085457d370aaeca1eccf6145c2d817debd78622fe64a1
+159,210,10,3,very little,a lot,low,low,2650c2b11b9647344f9f2520de04d409a0de93ec0797ed57e4190b07e0a7dbe5
+159,211,10,3,a little,a lot,somewhat low,somewhat low,f28844393fa20f21aa95fa99f6dc617b351dba5870d0881ac55c4d381d9a6ea0
+159,212,10,3,a lot,a lot,somewhat high,somewhat high,bdc6f520a3719bac5278a087089ad3380221e4e8569381b620bf42d051db498b
+159,213,10,3,a lot,very little,low,low,31ea4ba9cca621761fc5c628b86b106ed69c8fe174cf9f1104bae175e04abccb
+159,214,10,3,a little,very little,high,high,38160db3daf45163354d221aeada568c5d771dfc8694c069e46f272ba4f62421
+159,215,10,3,very much,very much,extremely high,very high,6a7dd1ff381058868f23dd60e655fbdac35129b77c2ccd4ca0c67c0a14b92704
+159,216,10,3,a little,very much,low,low,fa34f241cc1d3166e1a9b8429205538bc9fb60e498104883a9f94d1fb79bd3a4
+159,217,10,3,average,very much,normal,somewhat high,410e1b8867b08425e263059f0f05d8d77c771d694fe1a1e37a6ddf94b965d9bd
+159,218,10,3,a little,average,normal,normal,02e5796e4a105a07f09d91fff6a23a3d3d5999f04700b0fd57cdcbade7659a92
+159,219,10,3,very little,a little,high,high,beed933099798ff1c15875fdc65a1facd0e78c65c715e4bee17735ad5daf5299
+159,220,10,3,very little,average,normal,normal,0674592823cedbc22fc303c8ca7afc0e182a41b2eb57d8db1f834025b8f27c94
+159,221,10,3,a lot,a little,somewhat low,somewhat low,83e60b1f98d7079a69e4ceea516d037eff90947992ac29aaf301d6e0e812aec0
+159,222,10,3,very much,a little,low,low,9188e1823ca137846d1278ce2dd5af225b47f1518679e77b204df4cd3c743431
+159,223,10,3,a lot,average,normal,normal,2ef3c39784e110d5a2bc68ffd2c5b00d7a9cea037ffc7be8b3e0050713213fe9
+159,224,10,3,a lot,very much,high,very high,2ac155f8da860ef97709967806a98fd37febe85eace4058aac20a5c562258fcf
+159,225,10,3,very much,a lot,high,very high,4e497f977ae1c20abd02b682489a24431cdc22113c040baa219d3e4b771a7894
+159,226,10,3,average,a lot,normal,normal,dfd926d781cf82db31ed6eb8ba042b667018568ec927488bed9ccf12fa4c8ad9
+159,227,10,3,very much,average,normal,normal,52e5a3a655d56ebf45aab84411429440fe3d1265cdd0d1d87cb8d7cfbefed5d7
+159,228,10,3,a little,a little,somewhat high,somewhat high,69859fbf0a0a06997a36b834a98adf4d9eb024fd82ae391a736c2eb264e72f4c
+159,229,10,3,average,a little,normal,normal,059f1f5f2be5a86ef532f9f665089713364d3672e324e11c723aa3363a0918d9
+159,230,10,3,average,average,normal,somewhat high,2f88d7786c92c018a9071e246c3d07d74aae8d4150ffd3f2582dac446289a127
+159,231,11,3,a lot,very much,high,very high,aa5658bf751cce223ec93fcf454c2f752702fcc5254e4cddfd2d92c7da6fb1b2
+159,232,11,3,average,a little,normal,normal,4c03039f4b16f5509d0ed8858207b3df8a8cf739e8ca8ea9ea7d1cc7fc437209
+159,233,11,3,a little,average,normal,normal,48db2755299d6a22580c1d6e0aa7bc21c877e7a6ca57bf495d2ef73348bb536c
+159,234,11,3,a lot,a little,somewhat low,somewhat low,9a583a6fa8f4b7102231e09d315f4c287095439afd702fc4014557e3225b5d80
+159,235,11,3,average,average,normal,somewhat high,db7621889597c66067de757ff2b99c3205d800ac86196469443526b9fe14cb1d
+159,236,11,3,very little,average,normal,normal,a3c0b9321fced5ae5e2ee16dedc7549bc574b872d221c6a1b57f6a4affd449a8
+159,237,11,3,a little,very little,high,high,c4aa814f7e88dca634326b61126d2601378e450e034ba785924b9b1fed5c6215
+159,238,11,3,a little,very much,low,low,82cc1916f9afc389fd1b882c6a6335f17a888c8ed168fe47ef88cb4dc727c02b
+159,239,11,3,very little,very little,extremely high,somewhat high,554294be3cd6579c6af199d1f4a3b9f540dd8868f095389b6f4bb5dc2fe1e087
+159,240,11,3,very much,very little,extremely low,low,2589ed959f10e7f0432b4acfcc2696179cfddaf5541235e26ffc314ad5025e2d
+159,241,11,3,a lot,a lot,somewhat high,somewhat high,9dea5e5284d138f4c05dde544a4baad52831ea3dd3d001b4cdf7523f3bad5e07
+159,242,11,3,very much,a little,low,low,b0ad81980195bb5e929e3a11157fb0142eeeb3ee8bc7b232b9c9a7192eccde29
+159,243,11,3,very little,very much,extremely low,extremely low,4921a60ce2831abbed5139f01ad91f85f7d09fb356ae2f9ca926618b22edb995
+159,244,11,3,very much,very much,extremely high,extremely high,d810feeeb8382c6989db6ccdbe11bdbd44c1148d3d23ac8ef5f98e80ec4bf733
+159,245,11,3,average,very little,normal,normal,b37809f9699828c2d6d1638284633da573d64aa1058c99cd6d48308baa40ba0b
+159,246,11,3,very little,a little,high,high,78cce776bd49c7f4c97dc1467059fc824b3b3ea70d0cb2d1cdf662adfa5f9806
+159,247,11,3,a lot,average,normal,normal,4409f5f1a6e858347015b23b8e8e2ba3d20afe26191406a3f6abf76fba729695
+159,248,11,3,a little,a little,somewhat high,somewhat high,85d56cce3a7107393d2e92b61a4b21a288f6be86ced9be0482de31a392c94110
+159,249,11,3,average,very much,normal,somewhat high,5c590242409b604a2d3c09a4dca7cbf7ee0621070c83337630a40d323f325331
+159,250,11,3,average,a lot,normal,normal,c698a2c096f2f97e6d55db988ed38cb06a65d74ac039d6883dd06884c84d5c2f
+159,251,11,3,very much,a lot,high,very high,352bfb4aacd15e1210220db71365be20497cf8596edd6a4b7e8fc21ba4e058be
+159,252,11,3,very much,average,normal,normal,3a79623286aa6b16a97f95b8a0ce18b19de9f5726dabcb494f35b089bc510824
+159,253,11,3,a lot,very little,low,low,8fff06a27cbec78b1e2b312222bba561e2403f79118ef3458610c7237c5edfbd
+159,254,11,3,a little,a lot,somewhat low,somewhat low,e5dea1104710b4eeed9595955e746ba7776245962b3fd137e25f72c2ac3f806e
+159,255,11,3,very little,a lot,low,low,03ed6595f99caa5611e0c547f20c5f6f3ea27085b3dbb57ff86f674cca3dba99
+159,256,12,3,very much,very little,extremely low,low,29d6b2b55588c260aa3dddcc81d679f4e548a683ef02011bb96f41c2d30f4ece
+159,257,12,3,average,very much,normal,somewhat high,deee6ab34431e50b6f6c945408f4f33d3bcf759fccacbc01590a15c11386844d
+159,258,12,3,very much,a lot,high,very high,001577012932b88f26d35651da539584e62adc779379bf04da837159085130e3
+159,259,12,3,average,a little,normal,normal,46cb28534fa4ac537751dc4ce69d3484c4f4ef34266f76057232845f3935b196
+159,260,12,3,very much,average,normal,somewhat high,31df67fb2dc0ee8f442913c61cb569e2434fa08fb2002709dd4557f9f0b7b5b4
+159,261,12,3,average,a lot,normal,normal,dcbbbd2280f8426b2575f46f454d13cdd8f3657caf147cbb433081681d55b3d0
+159,262,12,3,very little,very little,extremely high,somewhat high,8602d7d67c7d47e0a7e6a93fb7e28f46a72b420de0b356d07f8680c6d61e5538
+159,263,12,3,very little,a lot,low,low,09b0e6f088f7ae5dddd3da9a538f9ef1f3db9a958887c2b5c75da37a72db472d
+159,264,12,3,very little,very much,extremely low,extremely low,f2bc80399fb5bf86b147a14ac9434db35a7fa985a31a107bbcb2303c42a3d5b9
+159,265,12,3,very much,very much,extremely high,extremely high,bef615955fd39b87387ccee9e3227dd4fc67cdd4d4d350dc8b0cafb8a100b761
+159,266,12,3,a little,very much,low,low,d8ce0a0239ed07e4db97a0cec6c34308a2e998df24321e67a942bad45c7bdd0b
+159,267,12,3,a lot,very much,high,high,12aae2ef961a7049fb3ec7f8c17838393bb36aba460f4f65324e0f32c67aefa8
+159,268,12,3,a little,a little,somewhat high,somewhat high,bd8752e87da170ae7eb698562f7a7786aa7a0d9c1091aa3082dd89eae4b46987
+159,269,12,3,very little,average,normal,normal,4c29b1d8b6903bb4e09dfa43c1c8912c7b558229d98401cb4523dc2e896e8271
+159,270,12,3,a lot,a little,somewhat low,somewhat low,96dd013cf9324d5bef4286130fa855a3b23bae87d88696be767be34ffd062bd7
+159,271,12,3,very much,a little,low,low,dea67b8b5a9586dab5400455b2264f6228833cf76aae6d4c3cea65963a826363
+159,272,12,3,a little,a lot,somewhat low,somewhat low,2599fbedc45cf0b26c60552abd1cf1edf5a7f3f2e28825049ce6ab7ac361dc9f
+159,273,12,3,a little,very little,high,high,44b3b472b8c4b4b0e427017c81636ca54f18e89b6d90a8e0d0501b5c1830e56d
+159,274,12,3,average,average,normal,somewhat high,1b08c16f72519682f05e067ccdd1ad784b25a90c83f10be93d243e5f27427123
+159,275,12,3,a lot,a lot,somewhat high,somewhat high,0cc5154d038ada96442bfa5df2332df0df4561102cde9d8b9bfd40e1ad72e333
+159,276,12,3,average,very little,normal,normal,775a24097f21a1a6404f74154f7efece1578c4ddee3bfcb51aadd14cee5ff7c7
+159,277,12,3,a lot,very little,low,low,291eb0c158f4d0c9d87d41c4a011877a77266bd7b28acab12dd61adaa3037dc1
+159,278,12,3,very little,a little,high,high,3327f83534e2c8290d9a261c214186f4f2c1d3cc41ee73eaac055c717403575f
+159,279,12,3,a little,average,normal,normal,39d74499505be1532e148a699d9c12993bad92bfb7ff06a2a9cd0e0bbb91e9da
+159,280,12,3,a lot,average,normal,normal,a5339b4ba8ca6cf8a54e8ca0795658d46fbdaf866ba8d81c2674451b3e2369d7

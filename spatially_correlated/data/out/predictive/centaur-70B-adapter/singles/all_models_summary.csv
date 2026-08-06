@@ -1,0 +1,541 @@
+model_id,overall_nll,prompt
+48,2.4373249486709634,"You will be presented with a series of 16 different environments to explore.
+In each trial, you can select an option between numbers 1 and 30 by pressing the corresponding key.
+By selecting any of these options, you will earn points associated with each unique option.
+Imagine these options 1 through 30 as lying next to each other in an ordered line; options closer to each other tend to have similar rewards as rewards tend to cluster together.
+For each environment, you will be able to make either 5 or 10 choices.
+When you made all your choices in a given environment, you will start making choices in the next unexplored environment.
+The rewards underlying the different options are different in each environment so you will learn them anew for each environment.
+Each environment starts with the value of a single option revealed.
+When you choose the number corresponding to a different option, you will be told the value of that option and receive those points.
+Previously revealed options, including the starting option, can also be reselected, although there may be small changes in the point value.
+It is your task to gain as many points as possible across all 16 environments.
+
+Environment number 1:
+The value of option 22 is 70. You have 10 choices to make in this environment.
+You press <<21>> and receive 42 points.
+You press <<23>> and receive 81 points.
+You press <<24>> and receive 79 points.
+You press <<25>> and receive 70 points.
+You press <<26>> and receive 49 points.
+You press <<29>> and receive 21 points.
+You press <<8>> and receive 40 points.
+You press <<11>> and receive 40 points.
+You press <<4>> and receive 29 points.
+You press <<7>> and receive 46 points.
+
+Environment number 2:
+The value of option 24 is 23. You have 5 choices to make in this environment.
+You press <<13>> and receive 20 points.
+You press <<11>> and receive 71 points.
+You press <<10>> and receive 55 points.
+You press <<8>> and receive 58 points.
+You press <<11>> and receive 72 points.
+
+Environment number 3:
+The value of option 3 is 47. You have 10 choices to make in this environment.
+You press <<19>> and receive 39 points.
+You press <<9>> and receive 4 points.
+You press <<12>> and receive 45 points.
+You press <<16>> and receive 61 points.
+You press <<15>> and receive 53 points.
+You press <<18>> and receive 53 points.
+You press <<17>> and receive 67 points.
+You press <<22>> and receive 42 points.
+You press <<25>> and receive 76 points.
+You press <<26>> and receive 71 points.
+
+Environment number 4:
+The value of option 13 is 49. You have 5 choices to make in this environment.
+You press <<22>> and receive 16 points.
+You press <<13>> and receive 49 points.
+You press <<11>> and receive 6 points.
+You press <<9>> and receive 26 points.
+You press <<16>> and receive 63 points.
+
+Environment number 5:
+The value of option 9 is 24. You have 10 choices to make in this environment.
+You press <<16>> and receive 24 points.
+You press <<11>> and receive 20 points.
+You press <<10>> and receive 5 points.
+You press <<26>> and receive 55 points.
+You press <<29>> and receive 21 points.
+You press <<27>> and receive 46 points.
+You press <<25>> and receive 49 points.
+You press <<23>> and receive 26 points.
+You press <<21>> and receive 53 points.
+You press <<19>> and receive 57 points.
+
+Environment number 6:
+The value of option 9 is 22. You have 5 choices to make in this environment.
+You press <<17>> and receive 62 points.
+You press <<20>> and receive 67 points.
+You press <<22>> and receive 20 points.
+You press <<21>> and receive 27 points.
+You press <<18>> and receive 84 points.
+
+Environment number 7:
+The value of option 10 is 41. You have 10 choices to make in this environment.
+You press <<18>> and receive 27 points.
+You press <<21>> and receive 33 points.
+You press <<13>> and receive 68 points.
+You press <<12>> and receive 61 points.
+You press <<14>> and receive 68 points.
+You press <<15>> and receive 66 points.
+You press <<16>> and receive 40 points.
+You press <<11>> and receive 52 points.
+You press <<5>> and receive 37 points.
+You press <<3>> and receive 22 points.
+
+Environment number 8:
+The value of option 6 is 59. You have 5 choices to make in this environment.
+You press <<17>> and receive 69 points.
+You press <<18>> and receive 57 points.
+You press <<16>> and receive 66 points.
+You press <<14>> and receive 43 points.
+You press <<15>> and receive 58 points.
+
+Environment number 9:
+The value of option 27 is 53. You have 10 choices to make in this environment.
+You press <<12>> and receive 26 points.
+You press <<8>> and receive 70 points.
+You press <<6>> and receive 54 points.
+You press <<11>> and receive 13 points.
+You press <<8>> and receive 70 points.
+You press <<8>> and receive 69 points.
+You press <<7>> and receive 85 points.
+You press <<10>> and receive 9 points.
+You press <<9>> and receive 46 points.
+You press <<5>> and receive 29 points.
+
+Environment number 10:
+The value of option 20 is 61. You have 5 choices to make in this environment.
+You press <<11>> and receive 50 points.
+You press <<8>> and receive 44 points.
+You press <<6>> and receive 58 points.
+You press <<5>> and receive 41 points.
+You press <<13>> and receive 46 points.
+
+Environment number 11:
+The value of option 19 is 6. You have 10 choices to make in this environment.
+You press <<12>> and receive 46 points.
+You press <<8>> and receive 33 points.
+You press <<6>> and receive 36 points.
+You press <<2>> and receive 12 points.
+You press <<5>> and receive 28 points.
+You press <<10>> and receive 77 points.
+You press <<12>> and receive 45 points.
+You press <<11>> and receive 78 points.
+You press <<9>> and receive 42 points.
+You press <<12>> and receive 44 points.
+
+Environment number 12:
+The value of option 6 is 30. You have 5 choices to make in this environment.
+You press <<14>> and receive 57 points.
+You press <<16>> and receive 12 points.
+You press <<11>> and receive 22 points.
+You press <<13>> and receive 69 points.
+You press <<11>> and receive 22 points.
+
+Environment number 13:
+The value of option 11 is 29. You have 10 choices to make in this environment.
+You press <<14>> and receive 49 points.
+You press <<16>> and receive 51 points.
+You press <<18>> and receive 58 points.
+You press <<20>> and receive 27 points.
+You press <<19>> and receive 29 points.
+You press <<17>> and receive 70 points.
+You press <<15>> and receive 46 points.
+You press <<22>> and receive 27 points.
+You press <<25>> and receive 20 points.
+You press <<27>> and receive 22 points.
+
+Environment number 14:
+The value of option 28 is 21. You have 5 choices to make in this environment.
+You press <<14>> and receive 10 points.
+You press <<12>> and receive 72 points.
+You press <<11>> and receive 80 points.
+You press <<10>> and receive 63 points.
+You press <<9>> and receive 49 points.
+
+Environment number 15:
+The value of option 6 is 34. You have 10 choices to make in this environment.
+You press <<14>> and receive 34 points.
+You press <<16>> and receive 50 points.
+You press <<18>> and receive 55 points.
+You press <<19>> and receive 28 points.
+You press <<22>> and receive 60 points.
+You press <<17>> and receive 71 points.
+You press <<20>> and receive 25 points.
+You press <<22>> and receive 62 points.
+You press <<23>> and receive 36 points.
+You press <<21>> and receive 68 points.
+
+Environment number 16:
+The value of option 27 is 48. You have 5 choices to make in this environment.
+You press <<16>> and receive 47 points.
+You press <<11>> and receive 37 points.
+You press <<19>> and receive 21 points.
+You press <<22>> and receive 35 points.
+You press <<25>> and receive 25 points.
+"
+54,1.7346062298088023,"You will be presented with a series of 16 different environments to explore.
+In each trial, you can select an option between numbers 1 and 30 by pressing the corresponding key.
+By selecting any of these options, you will earn points associated with each unique option.
+Imagine these options 1 through 30 as lying next to each other in an ordered line; options closer to each other tend to have similar rewards as rewards tend to cluster together.
+For each environment, you will be able to make either 5 or 10 choices.
+When you made all your choices in a given environment, you will start making choices in the next unexplored environment.
+The rewards underlying the different options are different in each environment so you will learn them anew for each environment.
+Each environment starts with the value of a single option revealed.
+When you choose the number corresponding to a different option, you will be told the value of that option and receive those points.
+Previously revealed options, including the starting option, can also be reselected, although there may be small changes in the point value.
+It is your task to gain as many points as possible across all 16 environments.
+
+Environment number 1:
+The value of option 16 is 39. You have 10 choices to make in this environment.
+You press <<10>> and receive 71 points.
+You press <<9>> and receive 69 points.
+You press <<8>> and receive 61 points.
+You press <<11>> and receive 69 points.
+You press <<12>> and receive 63 points.
+You press <<13>> and receive 55 points.
+You press <<7>> and receive 50 points.
+You press <<23>> and receive 41 points.
+You press <<26>> and receive 35 points.
+You press <<29>> and receive 24 points.
+
+Environment number 2:
+The value of option 1 is 26. You have 5 choices to make in this environment.
+You press <<6>> and receive 37 points.
+You press <<11>> and receive 38 points.
+You press <<15>> and receive 68 points.
+You press <<16>> and receive 56 points.
+You press <<14>> and receive 64 points.
+
+Environment number 3:
+The value of option 22 is 17. You have 10 choices to make in this environment.
+You press <<6>> and receive 27 points.
+You press <<3>> and receive 13 points.
+You press <<12>> and receive 59 points.
+You press <<13>> and receive 74 points.
+You press <<14>> and receive 72 points.
+You press <<15>> and receive 55 points.
+You press <<26>> and receive 23 points.
+You press <<29>> and receive 24 points.
+You press <<18>> and receive 8 points.
+You press <<16>> and receive 25 points.
+
+Environment number 4:
+The value of option 15 is 34. You have 5 choices to make in this environment.
+You press <<2>> and receive 41 points.
+You press <<3>> and receive 46 points.
+You press <<4>> and receive 49 points.
+You press <<5>> and receive 44 points.
+You press <<6>> and receive 36 points.
+
+Environment number 5:
+The value of option 17 is 63. You have 10 choices to make in this environment.
+You press <<16>> and receive 73 points.
+You press <<15>> and receive 77 points.
+You press <<14>> and receive 76 points.
+You press <<13>> and receive 61 points.
+You press <<12>> and receive 39 points.
+You press <<18>> and receive 58 points.
+You press <<23>> and receive 79 points.
+You press <<24>> and receive 71 points.
+You press <<22>> and receive 77 points.
+You press <<25>> and receive 58 points.
+
+Environment number 6:
+The value of option 3 is 63. You have 5 choices to make in this environment.
+You press <<4>> and receive 41 points.
+You press <<2>> and receive 80 points.
+You press <<1>> and receive 75 points.
+You press <<30>> and receive 55 points.
+You press <<29>> and receive 46 points.
+
+Environment number 7:
+The value of option 29 is 48. You have 10 choices to make in this environment.
+You press <<28>> and receive 27 points.
+You press <<3>> and receive 30 points.
+You press <<2>> and receive 22 points.
+You press <<6>> and receive 40 points.
+You press <<5>> and receive 34 points.
+You press <<9>> and receive 69 points.
+You press <<10>> and receive 52 points.
+You press <<8>> and receive 72 points.
+You press <<7>> and receive 57 points.
+You press <<14>> and receive 6 points.
+
+Environment number 8:
+The value of option 1 is 36. You have 5 choices to make in this environment.
+You press <<5>> and receive 71 points.
+You press <<6>> and receive 75 points.
+You press <<7>> and receive 80 points.
+You press <<8>> and receive 85 points.
+You press <<9>> and receive 81 points.
+
+Environment number 9:
+The value of option 30 is 42. You have 10 choices to make in this environment.
+You press <<25>> and receive 49 points.
+You press <<27>> and receive 42 points.
+You press <<23>> and receive 64 points.
+You press <<22>> and receive 76 points.
+You press <<21>> and receive 84 points.
+You press <<20>> and receive 83 points.
+You press <<19>> and receive 74 points.
+You press <<18>> and receive 56 points.
+You press <<17>> and receive 38 points.
+You press <<24>> and receive 54 points.
+
+Environment number 10:
+The value of option 4 is 31. You have 5 choices to make in this environment.
+You press <<9>> and receive 10 points.
+You press <<16>> and receive 68 points.
+You press <<17>> and receive 50 points.
+You press <<15>> and receive 79 points.
+You press <<14>> and receive 76 points.
+
+Environment number 11:
+The value of option 3 is 38. You have 10 choices to make in this environment.
+You press <<7>> and receive 25 points.
+You press <<14>> and receive 20 points.
+You press <<19>> and receive 62 points.
+You press <<20>> and receive 59 points.
+You press <<18>> and receive 49 points.
+You press <<21>> and receive 47 points.
+You press <<22>> and receive 42 points.
+You press <<23>> and receive 43 points.
+You press <<27>> and receive 4 points.
+You press <<28>> and receive 11 points.
+
+Environment number 12:
+The value of option 4 is 34. You have 5 choices to make in this environment.
+You press <<10>> and receive 31 points.
+You press <<16>> and receive 48 points.
+You press <<18>> and receive 60 points.
+You press <<19>> and receive 57 points.
+You press <<17>> and receive 53 points.
+
+Environment number 13:
+The value of option 10 is 6. You have 10 choices to make in this environment.
+You press <<15>> and receive 51 points.
+You press <<19>> and receive 53 points.
+You press <<17>> and receive 37 points.
+You press <<21>> and receive 65 points.
+You press <<22>> and receive 45 points.
+You press <<20>> and receive 66 points.
+You press <<27>> and receive 63 points.
+You press <<28>> and receive 75 points.
+You press <<29>> and receive 68 points.
+You press <<30>> and receive 55 points.
+
+Environment number 14:
+The value of option 16 is 32. You have 5 choices to make in this environment.
+You press <<8>> and receive 20 points.
+You press <<1>> and receive 53 points.
+You press <<27>> and receive 38 points.
+You press <<22>> and receive 26 points.
+You press <<3>> and receive 15 points.
+
+Environment number 15:
+The value of option 9 is 16. You have 10 choices to make in this environment.
+You press <<15>> and receive 38 points.
+You press <<19>> and receive 9 points.
+You press <<13>> and receive 32 points.
+You press <<16>> and receive 46 points.
+You press <<17>> and receive 38 points.
+You press <<3>> and receive 65 points.
+You press <<2>> and receive 73 points.
+You press <<1>> and receive 75 points.
+You press <<4>> and receive 56 points.
+You press <<30>> and receive 58 points.
+
+Environment number 16:
+The value of option 13 is 43. You have 5 choices to make in this environment.
+You press <<12>> and receive 47 points.
+You press <<11>> and receive 55 points.
+You press <<10>> and receive 60 points.
+You press <<9>> and receive 59 points.
+You press <<8>> and receive 59 points.
+"
+70,1.4553279982258875,"You will be presented with a series of 16 different environments to explore.
+In each trial, you can select an option between numbers 1 and 30 by pressing the corresponding key.
+By selecting any of these options, you will earn points associated with each unique option.
+Imagine these options 1 through 30 as lying next to each other in an ordered line; options closer to each other tend to have similar rewards as rewards tend to cluster together.
+For each environment, you will be able to make either 5 or 10 choices.
+When you made all your choices in a given environment, you will start making choices in the next unexplored environment.
+The rewards underlying the different options are different in each environment so you will learn them anew for each environment.
+Each environment starts with the value of a single option revealed.
+When you choose the number corresponding to a different option, you will be told the value of that option and receive those points.
+Previously revealed options, including the starting option, can also be reselected, although there may be small changes in the point value.
+It is your task to gain as many points as possible across all 16 environments.
+
+Environment number 1:
+The value of option 28 is 46. You have 5 choices to make in this environment.
+You press <<27>> and receive 22 points.
+You press <<29>> and receive 72 points.
+You press <<30>> and receive 66 points.
+You press <<17>> and receive 38 points.
+You press <<8>> and receive 40 points.
+
+Environment number 2:
+The value of option 20 is 44. You have 10 choices to make in this environment.
+You press <<21>> and receive 60 points.
+You press <<22>> and receive 81 points.
+You press <<23>> and receive 78 points.
+You press <<24>> and receive 81 points.
+You press <<25>> and receive 63 points.
+You press <<26>> and receive 47 points.
+You press <<6>> and receive 13 points.
+You press <<12>> and receive 70 points.
+You press <<13>> and receive 72 points.
+You press <<11>> and receive 48 points.
+
+Environment number 3:
+The value of option 15 is 25. You have 5 choices to make in this environment.
+You press <<23>> and receive 20 points.
+You press <<5>> and receive 29 points.
+You press <<10>> and receive 5 points.
+You press <<28>> and receive 42 points.
+You press <<29>> and receive 44 points.
+
+Environment number 4:
+The value of option 12 is 32. You have 10 choices to make in this environment.
+You press <<14>> and receive 55 points.
+You press <<15>> and receive 57 points.
+You press <<13>> and receive 32 points.
+You press <<17>> and receive 26 points.
+You press <<25>> and receive 36 points.
+You press <<24>> and receive 33 points.
+You press <<6>> and receive 47 points.
+You press <<5>> and receive 11 points.
+You press <<7>> and receive 46 points.
+You press <<8>> and receive 36 points.
+
+Environment number 5:
+The value of option 5 is 5. You have 5 choices to make in this environment.
+You press <<12>> and receive 22 points.
+You press <<19>> and receive 52 points.
+You press <<20>> and receive 47 points.
+You press <<18>> and receive 47 points.
+You press <<17>> and receive 36 points.
+
+Environment number 6:
+The value of option 24 is 45. You have 10 choices to make in this environment.
+You press <<23>> and receive 52 points.
+You press <<22>> and receive 52 points.
+You press <<21>> and receive 36 points.
+You press <<25>> and receive 58 points.
+You press <<26>> and receive 70 points.
+You press <<26>> and receive 71 points.
+You press <<27>> and receive 56 points.
+You press <<27>> and receive 55 points.
+You press <<26>> and receive 71 points.
+You press <<28>> and receive 41 points.
+
+Environment number 7:
+The value of option 3 is 21. You have 5 choices to make in this environment.
+You press <<11>> and receive 45 points.
+You press <<12>> and receive 18 points.
+You press <<10>> and receive 38 points.
+You press <<18>> and receive 38 points.
+You press <<19>> and receive 19 points.
+
+Environment number 8:
+The value of option 3 is 45. You have 10 choices to make in this environment.
+You press <<4>> and receive 24 points.
+You press <<2>> and receive 83 points.
+You press <<1>> and receive 49 points.
+You press <<8>> and receive 12 points.
+You press <<11>> and receive 69 points.
+You press <<12>> and receive 56 points.
+You press <<10>> and receive 68 points.
+You press <<9>> and receive 52 points.
+You press <<13>> and receive 44 points.
+You press <<14>> and receive 51 points.
+
+Environment number 9:
+The value of option 20 is 79. You have 5 choices to make in this environment.
+You press <<19>> and receive 78 points.
+You press <<18>> and receive 63 points.
+You press <<17>> and receive 78 points.
+You press <<16>> and receive 76 points.
+You press <<15>> and receive 63 points.
+
+Environment number 10:
+The value of option 25 is 40. You have 10 choices to make in this environment.
+You press <<24>> and receive 31 points.
+You press <<26>> and receive 71 points.
+You press <<27>> and receive 57 points.
+You press <<28>> and receive 26 points.
+You press <<17>> and receive 38 points.
+You press <<17>> and receive 39 points.
+You press <<16>> and receive 21 points.
+You press <<14>> and receive 30 points.
+You press <<11>> and receive 52 points.
+You press <<10>> and receive 47 points.
+
+Environment number 11:
+The value of option 22 is 30. You have 5 choices to make in this environment.
+You press <<17>> and receive 37 points.
+You press <<16>> and receive 66 points.
+You press <<15>> and receive 43 points.
+You press <<14>> and receive 40 points.
+You press <<11>> and receive 66 points.
+
+Environment number 12:
+The value of option 13 is 34. You have 10 choices to make in this environment.
+You press <<14>> and receive 10 points.
+You press <<15>> and receive 5 points.
+You press <<21>> and receive 52 points.
+You press <<22>> and receive 53 points.
+You press <<20>> and receive 36 points.
+You press <<19>> and receive 27 points.
+You press <<23>> and receive 53 points.
+You press <<24>> and receive 46 points.
+You press <<25>> and receive 32 points.
+You press <<26>> and receive 30 points.
+
+Environment number 13:
+The value of option 15 is 79. You have 5 choices to make in this environment.
+You press <<14>> and receive 43 points.
+You press <<16>> and receive 74 points.
+You press <<17>> and receive 47 points.
+You press <<13>> and receive 29 points.
+You press <<7>> and receive 11 points.
+
+Environment number 14:
+The value of option 30 is 52. You have 10 choices to make in this environment.
+You press <<29>> and receive 42 points.
+You press <<21>> and receive 15 points.
+You press <<15>> and receive 49 points.
+You press <<14>> and receive 26 points.
+You press <<16>> and receive 57 points.
+You press <<17>> and receive 55 points.
+You press <<18>> and receive 53 points.
+You press <<19>> and receive 35 points.
+You press <<9>> and receive 21 points.
+You press <<8>> and receive 38 points.
+
+Environment number 15:
+The value of option 9 is 6. You have 5 choices to make in this environment.
+You press <<15>> and receive 45 points.
+You press <<16>> and receive 55 points.
+You press <<17>> and receive 58 points.
+You press <<18>> and receive 46 points.
+You press <<14>> and receive 46 points.
+
+Environment number 16:
+The value of option 4 is 22. You have 10 choices to make in this environment.
+You press <<13>> and receive 76 points.
+You press <<14>> and receive 65 points.
+You press <<12>> and receive 57 points.
+You press <<11>> and receive 23 points.
+You press <<15>> and receive 43 points.
+You press <<20>> and receive 73 points.
+You press <<21>> and receive 63 points.
+You press <<19>> and receive 80 points.
+You press <<18>> and receive 49 points.
+You press <<22>> and receive 51 points.
+"
