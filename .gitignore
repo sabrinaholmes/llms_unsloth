@@ -28,3 +28,9 @@ multi_cue_judgment/data/in/combined_df.csv
 multi_cue_judgment/count_unique_answers.py
 #ignore claude.md
 CLAUDE.md
+#ignore summary files
+horizon/data/out/predictive/llama-70B-adapter/singles/all_models_summary.csv
+rl/data/out/predictive/centaur-70B-adapter/singles/all_models_summary.csv
+# ignore 
+horizon/data/out
+rl/data/out

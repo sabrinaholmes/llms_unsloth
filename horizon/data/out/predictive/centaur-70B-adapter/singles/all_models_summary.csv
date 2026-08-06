@@ -1,7 +1,0 @@
-model_id,overall_nll,prompt_path
-centaur-70B-adapter,0.6575788225446428,data/out/predictive/centaur-70B-adapter/singles/prompts/participant_1_c9b4fca3c272.txt.gz
-centaur-70B-adapter,0.5196782402740833,data/out/predictive/centaur-70B-adapter/singles/prompts/participant_2_116d9f7e1e7b.txt.gz
-centaur-70B-adapter,0.3602989639554705,data/out/predictive/centaur-70B-adapter/singles/prompts/participant_7_7412e8ada7b7.txt.gz
-centaur-70B-adapter,0.3955566297161249,data/out/predictive/centaur-70B-adapter/singles/prompts/participant_23_5eaad7f3d273.txt.gz
-centaur-70B-adapter,0.36694077448295204,data/out/predictive/centaur-70B-adapter/singles/prompts/participant_26_b6c392f25310.txt.gz
-centaur-70B-adapter,0.4980729335754231,data/out/predictive/centaur-70B-adapter/singles/prompts/participant_31_c4f0b4cc52c2.txt.gz
