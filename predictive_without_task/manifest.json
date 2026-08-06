@@ -1,0 +1,98 @@
+{
+  "output_root": "prepared_raw_results_by_task",
+  "created_files": [
+    "prepared_raw_results_by_task/rl_waltmann/raw_results.csv",
+    "prepared_raw_results_by_task/rl_waltmann/raw_results.json",
+    "prepared_raw_results_by_task/rl_waltmann/nll_sem_summary.csv",
+    "prepared_raw_results_by_task/rl_waltmann/nll_sem_summary.json",
+    "prepared_raw_results_by_task/wilson_horizon/raw_results.csv",
+    "prepared_raw_results_by_task/wilson_horizon/raw_results.json",
+    "prepared_raw_results_by_task/wilson_horizon/nll_sem_summary.csv",
+    "prepared_raw_results_by_task/wilson_horizon/nll_sem_summary.json",
+    "prepared_raw_results_by_task/wu_spatial/raw_results.csv",
+    "prepared_raw_results_by_task/wu_spatial/raw_results.json",
+    "prepared_raw_results_by_task/wu_spatial/nll_sem_summary.csv",
+    "prepared_raw_results_by_task/wu_spatial/nll_sem_summary.json",
+    "prepared_raw_results_by_task/multi_cue_judgement/raw_results.csv",
+    "prepared_raw_results_by_task/multi_cue_judgement/raw_results.json",
+    "prepared_raw_results_by_task/multi_cue_judgement/nll_sem_summary.csv",
+    "prepared_raw_results_by_task/multi_cue_judgement/nll_sem_summary.json",
+    "prepared_raw_results_by_task/all_tasks_raw_results.csv",
+    "prepared_raw_results_by_task/all_tasks_raw_results.json",
+    "prepared_raw_results_by_task/all_tasks_nll_sem_summary.csv",
+    "prepared_raw_results_by_task/all_tasks_nll_sem_summary.json",
+    "prepared_raw_results_by_task/manifest.json"
+  ],
+  "source_keys_in_centaur_pth": {
+    "wilson": "wilson2014humans",
+    "wu2018": "wu2018generalisation",
+    "mcpl": "collsiöö2023MCPL"
+  },
+  "notes": [
+    "Each task folder has raw_results.csv, raw_results.json, nll_sem_summary.csv, and nll_sem_summary.json.",
+    "method_id=context_free_centaur is the context-free/context-only result from context_free_eval JSON.",
+    "method_id=centaur_full_context_simulation is the full-context Centaur simulation raw NLL from the newest Waltmann JSON or original Centaur .pth.",
+    "Wilson_horizon is split by experiment using original prompt merge order exp1, exp3, exp4, exp5. No exp2 file was found locally or on PACE in the previous check."
+  ],
+  "tasks": {
+    "rl_waltmann": {
+      "task_group": "RL_waltmann",
+      "task_id": "rl_waltmann_centaur",
+      "raw_rows": 15680,
+      "summary_rows": 2,
+      "methods": [
+        "centaur_full_context_simulation",
+        "context_free_centaur"
+      ],
+      "experiments": [
+        "all"
+      ]
+    },
+    "wilson_horizon": {
+      "task_group": "Wilson_horizon",
+      "task_id": "wilson2014humans_all",
+      "raw_rows": 35430,
+      "summary_rows": 8,
+      "methods": [
+        "centaur_full_context_simulation",
+        "context_free_centaur"
+      ],
+      "experiments": [
+        "exp1",
+        "exp3",
+        "exp4",
+        "exp5"
+      ]
+    },
+    "wu_spatial": {
+      "task_group": "Wu_spatial",
+      "task_id": "wu2018generalisation_exp1",
+      "raw_rows": 720,
+      "summary_rows": 2,
+      "methods": [
+        "centaur_full_context_simulation",
+        "context_free_centaur"
+      ],
+      "experiments": [
+        "exp1"
+      ]
+    },
+    "multi_cue_judgement": {
+      "task_group": "Multi-cue_judgement",
+      "task_id": "collsioo2023MCPL_all",
+      "raw_rows": 12272,
+      "summary_rows": 2,
+      "methods": [
+        "centaur_full_context_simulation",
+        "context_free_centaur"
+      ],
+      "experiments": [
+        "all"
+      ]
+    }
+  },
+  "combined": {
+    "raw_rows": 64102,
+    "summary_rows": 14
+  }
+}

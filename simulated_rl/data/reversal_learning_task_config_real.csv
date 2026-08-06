@@ -1,0 +1,10 @@
+parameter,value
+data_source,real
+n_trials,140
+max_trial_plotted,50
+reversal_points_1idx,36;56;71;86;106
+p_high,0.8
+p_low,0.2
+n_subjects,56
+n_gen_sims_per_subject,50
+real_data_csv,/share/users/student/s/snamazova/llms_unsloth/simulated_rl/../rl_waltmann/data/in/test_waltmann_data_cleaned.csv

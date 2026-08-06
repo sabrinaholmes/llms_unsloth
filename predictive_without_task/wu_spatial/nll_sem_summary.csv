@@ -1,0 +1,3 @@
+task_group,task_id,experiment,method_id,method_label,n_trials,mean_nll,sd_nll,sem_nll,source_file,note
+Wu_spatial,wu2018generalisation_exp1,exp1,centaur_full_context_simulation,Centaur full-context simulation,360,1.8318851508122558,1.4265769573308797,0.07518720737797367,original/results/custom_metrics_full_log_likelihoods_marcelbinz-Llama-3.1-Centaur-70B-adapter.pth,
+Wu_spatial,wu2018generalisation_exp1,exp1,context_free_centaur,Context-free Centaur,360,2.484635416666667,1.257047076177091,0.06625219811291323,context_free_eval/wu2018generalisation_exp1_context_free_results.json,

@@ -1,0 +1,28 @@
+[
+  {
+    "task_group": "RL_waltmann",
+    "task_id": "rl_waltmann_centaur",
+    "experiment": "all",
+    "method_id": "centaur_full_context_simulation",
+    "method_label": "Centaur full-context simulation",
+    "n_trials": 7840,
+    "mean_nll": 0.18967894729302853,
+    "sd_nll": 0.6528567614252694,
+    "sem_nll": 0.007373265542660739,
+    "source_file": "context_free_eval/rl_waltmann_centaur_results_contextfree_avg.json",
+    "note": ""
+  },
+  {
+    "task_group": "RL_waltmann",
+    "task_id": "rl_waltmann_centaur",
+    "experiment": "all",
+    "method_id": "context_free_centaur",
+    "method_label": "Context-free Centaur",
+    "n_trials": 7840,
+    "mean_nll": 0.17515193394252232,
+    "sd_nll": 0.6034416236067587,
+    "sem_nll": 0.0068151784483835316,
+    "source_file": "context_free_eval/rl_waltmann_centaur_results_contextfree_avg.json",
+    "note": ""
+  }
+]

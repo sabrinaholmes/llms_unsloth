@@ -1,0 +1,28 @@
+[
+  {
+    "task_group": "Multi-cue_judgement",
+    "task_id": "collsioo2023MCPL_all",
+    "experiment": "all",
+    "method_id": "centaur_full_context_simulation",
+    "method_label": "Centaur full-context simulation",
+    "n_trials": 6136,
+    "mean_nll": 1.123601808315448,
+    "sd_nll": 1.1255136922510691,
+    "sem_nll": 0.01436838999120909,
+    "source_file": "original/results/custom_metrics_full_log_likelihoods_marcelbinz-Llama-3.1-Centaur-70B-adapter.pth",
+    "note": ""
+  },
+  {
+    "task_group": "Multi-cue_judgement",
+    "task_id": "collsioo2023MCPL_all",
+    "experiment": "all",
+    "method_id": "context_free_centaur",
+    "method_label": "Context-free Centaur",
+    "n_trials": 6136,
+    "mean_nll": 1.8901791824161462,
+    "sd_nll": 0.8799622471361921,
+    "sem_nll": 0.011233662310323184,
+    "source_file": "context_free_eval/collsioo2023MCPL_all_results_contextfree_sum.json",
+    "note": ""
+  }
+]

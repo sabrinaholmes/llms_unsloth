@@ -1,0 +1,28 @@
+[
+  {
+    "task_group": "Wu_spatial",
+    "task_id": "wu2018generalisation_exp1",
+    "experiment": "exp1",
+    "method_id": "centaur_full_context_simulation",
+    "method_label": "Centaur full-context simulation",
+    "n_trials": 360,
+    "mean_nll": 1.8318851508122558,
+    "sd_nll": 1.4265769573308797,
+    "sem_nll": 0.07518720737797367,
+    "source_file": "original/results/custom_metrics_full_log_likelihoods_marcelbinz-Llama-3.1-Centaur-70B-adapter.pth",
+    "note": ""
+  },
+  {
+    "task_group": "Wu_spatial",
+    "task_id": "wu2018generalisation_exp1",
+    "experiment": "exp1",
+    "method_id": "context_free_centaur",
+    "method_label": "Context-free Centaur",
+    "n_trials": 360,
+    "mean_nll": 2.484635416666667,
+    "sd_nll": 1.257047076177091,
+    "sem_nll": 0.06625219811291323,
+    "source_file": "context_free_eval/wu2018generalisation_exp1_context_free_results.json",
+    "note": ""
+  }
+]
