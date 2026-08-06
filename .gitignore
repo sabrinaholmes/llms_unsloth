@@ -31,6 +31,9 @@ CLAUDE.md
 #ignore summary files
 horizon/data/out/predictive/llama-70B-adapter/singles/all_models_summary.csv
 rl/data/out/predictive/centaur-70B-adapter/singles/all_models_summary.csv
-# ignore 
+# ignore
 horizon/data/out
 rl/data/out
+multi_cue_judgment/data/out
+spatially_correlated/data/out
+rl_waltmann/data/out
