@@ -16,6 +16,8 @@ unsloth_compiled_cache/
 *.sh
 #ignore prompts
 prompts/
+#ignore data folders
+out/
 #ignores figures
 figures/
 #ignore file with cli command
@@ -26,3 +28,12 @@ multi_cue_judgment/data/in/combined_df.csv
 multi_cue_judgment/count_unique_answers.py
 #ignore claude.md
 CLAUDE.md
+#ignore summary files
+horizon/data/out/predictive/llama-70B-adapter/singles/all_models_summary.csv
+rl/data/out/predictive/centaur-70B-adapter/singles/all_models_summary.csv
+# ignore
+horizon/data/out
+rl/data/out
+multi_cue_judgment/data/out
+spatially_correlated/data/out
+rl_waltmann/data/out
