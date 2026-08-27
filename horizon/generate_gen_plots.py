@@ -19,8 +19,17 @@ from matplotlib.legend_handler import HandlerBase
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import plotting_utils
 
-FIGSIZE = (8, 6)
-BASE_FONT = 24
+TEXT_WIDTH = 5.6  # inches, for a single-column figure in the eLife template
+TARGETED_FIG_HEIGHT = 1.8
+RATIO_NARROW=0.33
+RATIO_WIDE=0.6
+FIGSIZE_ALL={
+    'narrow': (TEXT_WIDTH * RATIO_NARROW, TARGETED_FIG_HEIGHT),
+    'wide': (TEXT_WIDTH * RATIO_WIDE, TARGETED_FIG_HEIGHT),
+}
+FIGSIZE=FIGSIZE_ALL['narrow']
+BASE_FONT=12
+LW=1.5
 
 # Allow overriding the base data folder via CLI or environment
 default_path = os.path.join(os.path.dirname(__file__), 'data', 'out', 'generative')
@@ -1139,7 +1148,7 @@ class HandlerErrorbar(HandlerBase):
 def plot_trial_accuracy_with_multiple_centaur_models(human_df, centaur_dfs=None, labels=None,
                                                       title=None, ylim=(0.65, 0.9),
                                                       centaur_colors=None,
-                                                      yticks=None, xticks=None,
+                                                      yticks=None, xticks=[1, 2, 3, 4, 5,6],
                                                       show_legend=False, legend_labels=[ 'Human (H6)','Centaur-70B(H6)', 'Llama-Instruct-3.1-70B(H6)']):
     """
     Plots human trial accuracy for Horizon 6 with overlay of multiple Centaur models.
@@ -1164,7 +1173,7 @@ def plot_trial_accuracy_with_multiple_centaur_models(human_df, centaur_dfs=None,
     human_h6 = human_df[human_df['horizon'] == 6]
     acc_h6 = trial_accuracy(human_h6)
     ax.plot(range(1, len(acc_h6) + 1), acc_h6['accuracy'], linestyle='-',
-                 label='Human (H6)', color=centaur_colors[0], alpha=0.5, zorder=1)
+                 label='Human (H6)', color=centaur_colors[0], alpha=0.5, zorder=1,lw=LW)
     ax.fill_between(range(1, len(acc_h6) + 1),
                          acc_h6['accuracy'] - acc_h6['se'],
                          acc_h6['accuracy'] + acc_h6['se'],
@@ -1191,16 +1200,18 @@ def plot_trial_accuracy_with_multiple_centaur_models(human_df, centaur_dfs=None,
                             color=color, alpha=0.2)
 
     # --- Plot Decoration ---
-    ax.set_xlabel("Trial",labelpad=10)
+    ax.set_xlabel("Trial")
     ax.set_ylabel("Accuracy rate")
     if xticks is not None:
         ax.set_xticks(xticks)
     ax.set_yticks(yticks if yticks is not None else [0.6, 0.7, 0.8, 0.9, 1.0])
     ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
+    ax.tick_params(axis='x', length=3, color='#888888', labelcolor='#666666',pad=0)
+
     #ax.set_title(f"{title}")
     ax.set_ylim(ylim)
     transform=ax.get_xaxis_transform()
-    ax.tick_params(axis='x', which='major', pad=15)
+    #ax.tick_params(axis='x', which='major', pad=15)
     ax.spines[['top', 'right']].set_visible(False)
     ax.spines[['left', 'bottom']].set_visible(True)
     plotting_utils.style_y_gridlines(ax)
@@ -1234,6 +1245,7 @@ def plot_trial_accuracy_with_multiple_centaur_models(human_df, centaur_dfs=None,
 
 def plot_fifth_trial_accuracy_bar(dfs, labels=None, colors=None,
                                    family_labels=None, family_slices=None,
+                                   primary_labels=None,
                                    title="Accuracy on Trial 5 (Horizon 1 vs 6)"):
     n = len(dfs)
     w = 0.5  # bar width
@@ -1268,41 +1280,55 @@ def plot_fifth_trial_accuracy_bar(dfs, labels=None, colors=None,
     xpos = np.array(xpos)
 
     ax.bar(xpos - w/2, acc_h1_vals, w, yerr=acc_h1_se,
-           label='Horizon 1', color=colors, capsize=5)
+           label='Horizon 1', color=colors, capsize=0,error_kw={'elinewidth':0.5})
     ax.bar(xpos + w/2, acc_h6_vals, w, yerr=acc_h6_se,
-           label='Horizon 6', color=colors, capsize=5,hatch='//',alpha=0.6)
+           label='Horizon 6', color=colors, capsize=0,hatch='//',alpha=0.6,error_kw={'elinewidth':0.5})
 
-    ax.set_ylabel('Accuracy rate on trial 1')
-    ax.set_ylim(0.65, 0.85)
+    ax.set_ylabel('Accuracy rate on trial 1',labelpad=1)
+    ax.set_ylim(0.65, 0.9)
     # set y-ticks from 0 to 1 with step of 0.1
-    ax.set_yticks(np.arange(0.6, 0.85, 0.1))
+    ax.set_yticks(np.arange(0.7, 0.9, 0.1))
     ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
     #ax.set_title(title, pad=20)
     ax.set_xticks(xpos)
-    ax.set_xticklabels([])
-    #ax.set_xticklabels(labels)
-    for i, family_slice in enumerate(family_slices):
-        if isinstance(family_slice, tuple):
-            i0, i1 = family_slice
-            center = ((xpos[i0] + xpos[i1]) / 2)
-        else:
-            center = xpos[family_slice]
-        ax.text(center, -0.10, family_labels[i],
-                ha='center', va='top',
-                transform=ax.get_xaxis_transform())
+    if primary_labels is not None:
+        ax.set_xticklabels(primary_labels, ha='center')
+    else:
+        ax.set_xticklabels([])
 
-    # Visual group dividers
-    for i, family_slice in enumerate(family_slices[:-1]):
-        if isinstance(family_slice, tuple):
-            i0, i1 = family_slice
-    
+    if family_labels is not None and family_slices is not None:
+        family_centers = []
+        for family_slice in family_slices:
+            if isinstance(family_slice, tuple):
+                i0, i1 = family_slice
+                family_centers.append((xpos[i0] + xpos[i1]) / 2)
+            else:
+                family_centers.append(xpos[family_slice])
+
+        ax2 = ax.secondary_xaxis('bottom')
+        ax2.set_xticks(family_centers)
+        ax2.set_xticklabels(family_labels)
+        ax2.spines['bottom'].set_visible(False)
+
+        # Same dynamic pad logic as plot_wsls's family axis: scale off the
+        # actual primary tick fontsize/line-count so a 2-line primary label
+        # (e.g. 'Llama-Instruct\n-3.1-70B') doesn't collide with the family
+        # label sitting beneath it.
+        primary_tick_fontsize = (ax.xaxis.get_majorticklabels()[0].get_fontsize()
+                                  if ax.xaxis.get_majorticklabels() else plt.rcParams['xtick.labelsize'])
+        max_label_lines = max((str(lbl).count('\n') + 1.7 for lbl in (primary_labels or [''])), default=1)
+        base_pad = FIGSIZE[1] * 4
+        pad_value = base_pad + (max_label_lines - 1) * primary_tick_fontsize * 1.4
+        ax2.tick_params(axis='x', pad=pad_value, length=0)
+
     #change legend color to white
     legend_handles = [
-        Patch(facecolor='white', alpha=0.9, label='Horizon 1', edgecolor='black', linewidth=0.8),
-        Patch(facecolor='white', alpha=0.9, hatch='//', label='Horizon 5', edgecolor='black', linewidth=0.8),
+        Patch(facecolor='white', alpha=0.9, label='Horizon 1', edgecolor='black', linewidth=0.5),
+        Patch(facecolor='white', alpha=0.9, hatch='//', label='Horizon 6', edgecolor='black', linewidth=0.5),
     ]
     ax.legend(handles=legend_handles, loc='upper right', ncol=1, frameon=False,
-              columnspacing=1.2, handletextpad=0.5)
+              columnspacing=1.0, handletextpad=0.3,
+              labelspacing=0.2, bbox_to_anchor=(1.02, 1.02), borderaxespad=0.0)
     plotting_utils.remove_bar_frame(ax)
     plotting_utils.style_y_gridlines(ax)
     plt.tight_layout()
@@ -1756,7 +1782,7 @@ for mname, msubjects in model_subjects.items():
     color = model_color_map.get(mname, '#000000')
     label = mname.replace('_', '-')
     fig_m, ax_m = plt.subplots(1, 2, figsize=(24, 8))
-    plotting_utils.set_dynamic_fontsize(fig_width=8, base_font=20)
+    plotting_utils.set_dynamic_fontsize(fig_width=8, base_font=BASE_FONT)
     plot_choice_curves_v2(ax_m, subjects_pilot, bin_edges, RTmin, RTmax,
                           AZblue=human_color, AZred=human_color)
     plot_model_lines(ax_m, msubjects, bin_edges,
@@ -1806,14 +1832,23 @@ fig_acc, leg_acc = plot_trial_accuracy_with_multiple_centaur_models(
 )
 
 # ── Trial-5 accuracy bar chart ───────────────────────────────────────────────
-all_dfs    = [human_free] + model_free_dfs
-all_labels = ['Human'] + model_labels
-all_colors = model_plot_colors[:len(all_dfs)]
+# Centaur, then Llama, then Human last -- human_color sits at index 0 of
+# model_plot_colors, so it's moved to the end alongside human_free/'Human'.
+all_dfs    = model_free_dfs + [human_free]
+all_labels = model_labels + ['Human']
+all_colors = model_plot_colors[1:] + [model_plot_colors[0]]
+# Two-tier x-axis labels, matching plot_wsls: '70B' over 'Centaur' / '70B'
+# over 'Llama', and a lone 'Human' (blank second tier, no duplicate text).
+_t5_families, _t5_sizes = zip(*(plotting_utils.family_and_size_label(lbl) for lbl in all_labels))
+primary_t5 = [size if size else family for family, size in zip(_t5_families, _t5_sizes)]
+family_t5  = [family if size else '' for family, size in zip(_t5_families, _t5_sizes)]
+
 fig_t5 = plot_fifth_trial_accuracy_bar(
     dfs=all_dfs,
-    labels=['Human','Centaur-70B','Llama-Instruct\n-3.1-70B',],
+    labels=all_labels,
     colors=all_colors,
-    family_labels=['' for _ in all_dfs],
+    primary_labels=primary_t5,
+    family_labels=family_t5,
     family_slices=list(range(len(all_dfs))),
 )
 
@@ -1825,7 +1860,7 @@ if args.save_dir:
         fig = plt.figure(num)
         fname = os.path.join(args.save_dir, f'figure_{num}.png')
         try:
-            fig.savefig(fname, bbox_inches='tight')
+            fig.savefig(fname, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
             saved += 1
         except Exception as e:
             print(f"Warning: failed to save figure {num}: {e}")

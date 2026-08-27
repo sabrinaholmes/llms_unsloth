@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import ConnectionPatch
 import argparse
+from sklearn.cluster import KMeans
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import plotting_utils
@@ -23,10 +24,21 @@ REVERSAL_POINTS = (36, 56, 71, 86, 106)
 # stays ~0.79 through trial 36 and only drops at trial 37). The already-generated LLM
 # CSVs on disk reflect that shifted schedule, so their true first reversal is trial 37.
 REVERSAL_POINTS_LLM_GENERATED = tuple(p + 1 for p in REVERSAL_POINTS)
-FIGSIZE_STRIP = (10, 6)
+TEXT_WIDTH = 5.6  # inches, for a single-column figure in the eLife template
+TARGETED_FIG_HEIGHT = 2.2
+RATIO_NARROW=0.31
+RATIO_WIDE=0.61
+FIGSIZE={
+    'narrow': (TEXT_WIDTH * RATIO_NARROW, TARGETED_FIG_HEIGHT),
+    'wide': (TEXT_WIDTH * RATIO_WIDE, TARGETED_FIG_HEIGHT),
+}
+FIGSIZE_STRIP = FIGSIZE['wide']
 #FIGSIZE_WSLS = (8, 6)
-FIGSIZE_BARE_SPAGHETTI = (3, 6)
-BASE_FONT = 24
+FIGSIZE_BARE_SPAGHETTI = ((TEXT_WIDTH * RATIO_WIDE)/3, TARGETED_FIG_HEIGHT)
+FIGSIZE_PER_MODEL = (TEXT_WIDTH * RATIO_NARROW, TARGETED_FIG_HEIGHT/1.8)
+BASE_FONT = 12
+LW=1.5
+FIG_HEIGHT_RUNS = 1.2  # inches, for a single-column figure in the eLife template
 def read_data_from_folder(folder_path):
     dfs = pd.DataFrame()
 
@@ -245,6 +257,7 @@ def plot_bandit_choice_trends_single_axis(human_df=None, df_rep=None, dfs=None, 
         plotting_utils.set_dynamic_fontsize(fig_width=fig_size[0], base_font=BASE_FONT)
     else:
         fig = ax.figure
+        plotting_utils.set_dynamic_fontsize(fig_width=fig.get_size_inches()[0], base_font=BASE_FONT)
 
     # --- Post-reversal shading (drawn first, behind everything else) ---
     if shade_post_reversal and reversal_trials:
@@ -261,7 +274,7 @@ def plot_bandit_choice_trends_single_axis(human_df=None, df_rep=None, dfs=None, 
         mean, sem = stats.mean, stats.error
         human_color = colors[0]
 
-        ax.plot(mean.index, mean.values, color=human_color, linewidth=0.5, label='Human', alpha=1)
+        ax.plot(mean.index, mean.values, color=human_color, linewidth=LW, label='Human', alpha=1)
         if margins:
             ax.fill_between(mean.index, mean - sem, mean + sem, color=human_color, alpha=0.2)
 
@@ -271,7 +284,7 @@ def plot_bandit_choice_trends_single_axis(human_df=None, df_rep=None, dfs=None, 
         mean, sem = stats.mean, stats.error
         rep_color = colors[-1]
 
-        ax.plot(mean.index, mean.values, color=rep_color, linewidth=1.5, label=labels[-1], alpha=1)
+        ax.plot(mean.index, mean.values, color=rep_color, linewidth=LW, label=labels[-1], alpha=1)
         if margins:
             ax.fill_between(mean.index, mean - sem, mean + sem, color=rep_color, alpha=0.3, hatch='/')
 
@@ -283,7 +296,7 @@ def plot_bandit_choice_trends_single_axis(human_df=None, df_rep=None, dfs=None, 
             mean, sem = stats.mean, stats.error
             model_color = model_colors[i % len(model_colors)]
 
-            ax.plot(mean.index, mean.values, label=label, color=model_color, linewidth=1.5, alpha=1)
+            ax.plot(mean.index, mean.values, label=label, color=model_color, linewidth=LW, alpha=1)
             if margins:
                 ax.fill_between(mean.index, mean - sem, mean + sem, color=model_color, alpha=0.4)
 
@@ -305,14 +318,18 @@ def plot_bandit_choice_trends_single_axis(human_df=None, df_rep=None, dfs=None, 
     # Scale labelpad off the actual figure's width (not fig_size, which is ignored
     # once ax is passed in by a caller) so labels tuned for a large standalone
     # figure don't look oversized on a small embedded composite panel.
+    plotting_utils.set_dynamic_fontsize(fig_width=fig.get_size_inches()[0], base_font=BASE_FONT)
     fig_width = fig.get_size_inches()[0]
-    ax.set_xlabel("Trial", labelpad=plotting_utils.get_dynamic_labelpad(fig_width, base_pad=10))
+    ax.set_xlabel("Trial", labelpad=plotting_utils.get_dynamic_labelpad(fig_width, base_pad=3))
     ax.set_ylabel("Choice rate\n(original high-value arm)",
-                  labelpad=plotting_utils.get_dynamic_labelpad(fig_width, base_pad=20))
+                  labelpad=plotting_utils.get_dynamic_labelpad(fig_width, base_pad=3))
     ax.set_xlim(xlim)
-    ax.set_ylim(ymin, 1.05)
+    ax.set_ylim(ymin, 1.1)
+    ax.set_yticks([0.0, 0.25, 0.5, 0.75, 1.0])
+    plotting_utils.remove_bar_frame(ax)
+    plotting_utils.style_ticks(ax)
     plotting_utils.style_y_gridlines(ax)
-    ax.margins(x=0.04)
+    ax.margins(x=0.04,y=0.4)
 
     if standalone:
         # --- Legend saved separately ---
@@ -353,7 +370,7 @@ def plot_bandit_choice_trends_with_inset(human_df=None, df_rep=None, dfs=None, l
         stats = plotting_utils.aggregate_trend(human_df, trial_col, bandit_avg_col)
         mean, sem = stats.mean, stats.error
         human_color = colors[0]
-        ax_main.plot(mean.index, mean.values, color=human_color, linewidth=0.5, label='Human', alpha=1)
+        ax_main.plot(mean.index, mean.values, color=human_color, linewidth=LW, label='Human', alpha=1)
         if margins:
             ax_main.fill_between(mean.index, mean - sem, mean + sem, color=human_color, alpha=0.2)
 
@@ -361,7 +378,7 @@ def plot_bandit_choice_trends_with_inset(human_df=None, df_rep=None, dfs=None, l
         stats = plotting_utils.aggregate_trend(df_rep, trial_col, bandit_avg_col)
         mean, sem = stats.mean, stats.error
         rep_color = colors[-1]
-        ax_main.plot(mean.index, mean.values, color=rep_color, linewidth=1.5, label=labels[-1], alpha=1)
+        ax_main.plot(mean.index, mean.values, color=rep_color, linewidth=LW, label=labels[-1], alpha=1)
         if margins:
             ax_main.fill_between(mean.index, mean - sem, mean + sem, color=rep_color, alpha=0.3, hatch='/')
 
@@ -371,7 +388,7 @@ def plot_bandit_choice_trends_with_inset(human_df=None, df_rep=None, dfs=None, l
             stats = plotting_utils.aggregate_trend(df, trial_col, bandit_avg_col)
             mean, sem = stats.mean, stats.error
             model_color = model_colors[i % len(model_colors)]
-            ax_main.plot(mean.index, mean.values, label=label, color=model_color, linewidth=1.5, alpha=1)
+            ax_main.plot(mean.index, mean.values, label=label, color=model_color, linewidth=LW, alpha=1)
             if margins:
                 ax_main.fill_between(mean.index, mean - sem, mean + sem, color=model_color, alpha=0.4)
 
@@ -403,6 +420,7 @@ def plot_bandit_choice_trends_with_inset(human_df=None, df_rep=None, dfs=None, l
     ax_main.set_ylim(y_lo, y_hi)
     plotting_utils.style_y_gridlines(ax_main)
 
+
     # --- Compact floating inset: [left, bottom, width, height] in figure coordinates ---
     ax_inset = fig.add_axes([0.71, 0.20, 0.26, 0.55])
     ax_inset.set_facecolor('#f5f5f5')
@@ -424,7 +442,7 @@ def plot_bandit_choice_trends_with_inset(human_df=None, df_rep=None, dfs=None, l
     ax_inset.set_xlim(z_lo, z_hi)
     ax_inset.set_ylim(y_lo, y_hi)
     ax_inset.set_title(f"trials {z_lo}–{z_hi} (individual runs)", color='#444444', pad=4)
-    ax_inset.tick_params(axis='both', length=3, color='#888888')
+    plotting_utils.style_ticks(ax_inset)
     plotting_utils.style_y_gridlines(ax_inset)
 
     # Connection lines match the rectangle color so they read as one visual unit
@@ -472,7 +490,7 @@ def plot_bandit_choice_trends_with_endpoint_strip(
     fig = plt.figure(figsize=fig_size)
     left_main, bottom, width_main, height = 0.07, 0.14, 0.61, 0.78
     gap = 0.01  # Adjust your desired gap here (3% of figure width)
-    width_strip = 0.10
+    width_strip = 0.2
 
     ax_main = fig.add_axes([left_main, bottom, width_main, height])
     ax_strip = fig.add_axes([left_main + width_main + gap, bottom, width_strip, height])
@@ -486,7 +504,7 @@ def plot_bandit_choice_trends_with_endpoint_strip(
         stats = plotting_utils.aggregate_trend(human_df, trial_col, bandit_avg_col)
         mean, sem = stats.mean, stats.error
         human_color = colors[0]
-        ax_main.plot(mean.index, mean.values, color=human_color, linewidth=0.5, label='Human', alpha=1)
+        ax_main.plot(mean.index, mean.values, color=human_color, linewidth=LW, label='Human', alpha=1)
         if margins:
             ax_main.fill_between(mean.index, mean - sem, mean + sem, color=human_color, alpha=0.2)
 
@@ -494,7 +512,7 @@ def plot_bandit_choice_trends_with_endpoint_strip(
         stats = plotting_utils.aggregate_trend(df_rep, trial_col, bandit_avg_col)
         mean, sem = stats.mean, stats.error
         rep_color = colors[-1]
-        ax_main.plot(mean.index, mean.values, color=rep_color, linewidth=1.5, label=labels[-1], alpha=1)
+        ax_main.plot(mean.index, mean.values, color=rep_color, linewidth=LW, label=labels[-1], alpha=1)
         if margins:
             ax_main.fill_between(mean.index, mean - sem, mean + sem, color=rep_color, alpha=0.3, hatch='/')
 
@@ -507,7 +525,7 @@ def plot_bandit_choice_trends_with_endpoint_strip(
             stats = plotting_utils.aggregate_trend(df, trial_col, bandit_avg_col)
             mean, sem = stats.mean, stats.error
             model_color = model_colors[i % len(model_colors)]
-            ax_main.plot(mean.index, mean.values, label=label, color=model_color, linewidth=1.5, alpha=1)
+            ax_main.plot(mean.index, mean.values, label=label, color=model_color, linewidth=LW, alpha=1)
             if margins:
                 ax_main.fill_between(mean.index, mean - sem, mean + sem, color=model_color, alpha=0.4)
             t = endpoint_trial if endpoint_trial is not None else int(df[trial_col].max())
@@ -534,6 +552,7 @@ def plot_bandit_choice_trends_with_endpoint_strip(
                         labelpad=plotting_utils.get_dynamic_labelpad(fig_size[0], base_pad=20))
     ax_main.set_xlim(xlim)
     ax_main.set_ylim(y_lo, y_hi)
+    #ax_main.axis('scaled')
     plotting_utils.style_y_gridlines(ax_main)
 
     # --- Dot strip panel ---
@@ -604,7 +623,7 @@ def plot_bandit_choice_trends_with_colored_strip(
         trial_col="trial_num", bandit_avg_col="chose_preferred",
         reversal_trials=list(REVERSAL_POINTS), timeline=None,
         xlim=(0, 100), margins=True,
-        endpoint_trial=None,
+        endpoint_trial=None, strip_window=1,
         fig_size=FIGSIZE_STRIP,
         ax_main=None, ax_strip=None):
     """
@@ -612,6 +631,14 @@ def plot_bandit_choice_trends_with_colored_strip(
     dot strip gets its own colored frame (light tinted fill + solid colored border) instead
     of a shared grey background. Per-model colored ConnectionPatch lines link the endpoint
     circle on the main plot to the matching strip column.
+
+    strip_window (int or None): number of trials ending at (and including) `endpoint_trial`
+        over which each run's own mean `bandit_avg_col` is computed for the strip. 1
+        (default) reproduces the old behavior of plotting each run's raw value at that
+        single trial; e.g. 10 plots each run's individual mean across trials
+        [endpoint_trial - 9, endpoint_trial]. None uses each run's mean across its whole
+        session (all trials, ignoring endpoint_trial/window), for an overall per-run
+        performance distribution instead of a windowed or single-trial one.
 
     ax_main/ax_strip: existing Axes pair to draw into (e.g. two panels of a larger
         composite figure, typically a subgridspec). When both are None (default), a
@@ -624,9 +651,9 @@ def plot_bandit_choice_trends_with_colored_strip(
     standalone = ax_main is None
     if standalone:
         fig = plt.figure(figsize=fig_size)
-        left_main, bottom, width_main, height = 0.07, 0.14, 0.61, 0.78
-        gap = 0.03  # Adjust your desired gap here (3% of figure width)
-        width_strip = 0.2
+        left_main, bottom, width_main, height = 0.07, 0.14, 0.53, 0.64
+        gap = 0.06  # Adjust your desired gap here (3% of figure width)
+        width_strip = 0.28
 
         ax_main = fig.add_axes([left_main, bottom, width_main, height])
         ax_strip = fig.add_axes([left_main + width_main + gap, bottom, width_strip, height])
@@ -643,7 +670,7 @@ def plot_bandit_choice_trends_with_colored_strip(
         stats = plotting_utils.aggregate_trend(human_df, trial_col, bandit_avg_col)
         mean, sem = stats.mean, stats.error
         human_color = colors[0]
-        ax_main.plot(mean.index, mean.values, color=human_color, linewidth=0.5, label='Human', alpha=1)
+        ax_main.plot(mean.index, mean.values, color=human_color, linewidth=LW, label='Human', alpha=1)
         if margins:
             ax_main.fill_between(mean.index, mean - sem, mean + sem, color=human_color, alpha=0.2)
 
@@ -651,7 +678,7 @@ def plot_bandit_choice_trends_with_colored_strip(
         stats = plotting_utils.aggregate_trend(df_rep, trial_col, bandit_avg_col)
         mean, sem = stats.mean, stats.error
         rep_color = colors[-1]
-        ax_main.plot(mean.index, mean.values, color=rep_color, linewidth=1.5, label=labels[-1], alpha=1)
+        ax_main.plot(mean.index, mean.values, color=rep_color, linewidth=LW, label=labels[-1], alpha=1)
         if margins:
             ax_main.fill_between(mean.index, mean - sem, mean + sem, color=rep_color, alpha=0.3, hatch='/')
 
@@ -662,25 +689,38 @@ def plot_bandit_choice_trends_with_colored_strip(
             stats = plotting_utils.aggregate_trend(df, trial_col, bandit_avg_col)
             mean, sem = stats.mean, stats.error
             model_color = model_colors[i % len(model_colors)]
-            ax_main.plot(mean.index, mean.values, label=label, color=model_color, linewidth=1.5, alpha=1)
+            ax_main.plot(mean.index, mean.values, label=label, color=model_color, linewidth=LW, alpha=1)
             if margins:
                 ax_main.fill_between(mean.index, mean - sem, mean + sem, color=model_color, alpha=0.4)
             t = endpoint_trial if endpoint_trial is not None else int(df[trial_col].max())
             if t in mean.index:
-                endpoint_marks.append((t, mean.loc[t], i, model_color))
+                # ey matches what the strip actually plots for this model: a windowed
+                # mean when strip_window is an int > 1, or the full-session mean when
+                # strip_window is None, rather than the single-trial trend value.
+                if strip_window is None:
+                    ey = df[bandit_avg_col].mean()
+                else:
+                    window_lo = t - strip_window + 1
+                    ey = df[(df[trial_col] >= window_lo) & (df[trial_col] <= t)][bandit_avg_col].mean()
+                endpoint_marks.append((t, ey, i, model_color))
 
     for ex, ey, _, ec in endpoint_marks:
-        ax_main.plot(ex, ey, 'o', color=ec, markersize=8,
-                     markeredgecolor='white', markeredgewidth=1.5, zorder=6)
+        ax_main.plot(ex, ey, 'o', color=ec, markersize=3,
+                     markeredgecolor='white', markeredgewidth=0.5, zorder=6)
 
     for reversal in reversal_trials:
         ax_main.axvline(x=reversal, color='black', linestyle='--', linewidth=1.0, alpha=0.45, zorder=7)
         ax_main.text(reversal, 0.01, 'reversal', rotation=0, va='bottom', ha='center', alpha=0.45, zorder=8)
 
-    # Small grey band marking the endpoint trial the strip is drawn from, so the
-    # main plot visually flags which trial's distribution the strip shows.
-    #if endpoint_trial is not None:
-        #ax_main.axvspan(endpoint_trial - 1.5, endpoint_trial + 1.5,color='#888888', alpha=0.15, zorder=0)
+    # Grey band marking the strip_window of trials the strip is drawn from (just
+    # endpoint_trial itself when strip_window==1). Skipped when strip_window is
+    # None, since the strip then covers the whole session and shading the full
+    # plot would add nothing. So the main plot visually flags which trials'
+    # distribution the strip shows.
+    if endpoint_trial is not None and strip_window is not None:
+        window_lo = endpoint_trial - strip_window + 1
+        ax_main.axvspan(window_lo - 0.5, endpoint_trial + 0.5,
+                         color='#888888', alpha=0.12, zorder=0)
 
     if timeline is not None:
         bandit_1_rewards = [trial["bandit_1"]["value"] for trial in timeline]
@@ -696,12 +736,10 @@ def plot_bandit_choice_trends_with_colored_strip(
 
     # Same y-axis treatment as the strip boxes (tick values, grey tick/spine
     # styling, boxed lowercase label) so the two panels read as one visual system.
-    ax_main.spines['left'].set_color('#aaaaaa')
-    ax_main.spines['left'].set_linewidth(0.8)
-    ax_main.spines['right'].set_visible(False)
-    ax_main.spines['top'].set_visible(False)
+    plotting_utils.remove_bar_frame(ax_main)
     ax_main.set_yticks([0.0, 0.25, 0.5, 0.75, 1.0])
-    ax_main.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
+    plotting_utils.style_ticks(ax_main)
+
     ax_main.set_ylabel("Choice rate\n(original high-value arm)",
                         labelpad=plotting_utils.get_dynamic_labelpad(fig_width, base_pad=10))
 
@@ -718,7 +756,7 @@ def plot_bandit_choice_trends_with_colored_strip(
     rng = np.random.default_rng(42)
     strip_colors = []
     t_display = endpoint_trial
-    col_h = y_hi - y_lo - 0.02
+    col_h = y_hi - y_lo
 
     if dfs is not None and labels is not None and colors is not None:
         model_colors = colors[1:]
@@ -728,26 +766,35 @@ def plot_bandit_choice_trends_with_colored_strip(
             if t_display is None:
                 t_display = t
 
-            # Colored frame: light fill + solid border in model color
+            # Colored frame: light fill + solid border in model color. Width is less
+            # than the 1.0 column spacing (rather than >= 1.0) so neighboring frames
+            # have a visible gap instead of touching/overlapping borders.
             ax_strip.add_patch(mpatches.Rectangle(
-                (i - 0.44, y_lo + 0.01), 0.88, col_h,
+                (i - 0.4, y_lo + 0.01), 0.8, col_h,
                 facecolor=model_color, alpha=0.07, linewidth=0, zorder=1
             ))
             ax_strip.add_patch(mpatches.Rectangle(
-                (i - 0.44, y_lo + 0.01), 0.88, col_h,
-                facecolor='none', edgecolor=model_color, linewidth=1.4, zorder=2
+                (i - 0.4, y_lo + 0.01), 0.8, col_h,
+                facecolor='none', edgecolor=model_color, linewidth=0.5, zorder=2
             ))
 
-            run_vals = df[df[trial_col] == t].groupby('model_id')[bandit_avg_col].mean()
+            if strip_window is None:
+                run_vals = df.groupby('model_id')[bandit_avg_col].mean()
+            else:
+                window_lo = t - strip_window + 1
+                run_vals = (
+                    df[(df[trial_col] >= window_lo) & (df[trial_col] <= t)]
+                    .groupby('model_id')[bandit_avg_col].mean()
+                )
             if run_vals.empty:
                 strip_colors.append(model_color)
                 continue
             jitter = rng.uniform(-0.13, 0.13, len(run_vals))
             ax_strip.scatter(i + jitter, run_vals.values,
-                             color=model_color, s=22, alpha=0.75, zorder=3, linewidths=0)
+                             color=model_color, s=2, alpha=0.5, zorder=4, linewidths=0.5)
             mean_val = run_vals.mean()
             ax_strip.hlines(mean_val, i - 0.24, i + 0.24,
-                            colors=model_color, linewidth=2.2, zorder=4)
+                            colors=model_color, linewidth=LW-0.5, zorder=3)
             strip_colors.append(model_color)
 
     short_labels = [_short_model_label(l) for l in labels]
@@ -759,12 +806,24 @@ def plot_bandit_choice_trends_with_colored_strip(
         tick.set_color(col)
         tick.set_fontweight('bold')
 
-    # (0.5, 1.02) places text centered horizontally, slightly above the top edge
+    if strip_window is None:
+        strip_title = "Distribution of individual\nmean choice rates\n(full session)"
+    elif strip_window > 1 and t_display is not None:
+        strip_title = f"Distribution of individual\nmean choice rates,\ntrials {t_display - strip_window + 1}–{t_display}"
+    else:
+        strip_title = f"Distribution of choice\nrates at trial {t_display}"
+
+    # (0.5, 1.02) places text centered horizontally, slightly above the top edge.
+    # Explicit smaller fontsize (rather than inheriting the ambient font.size) so
+    # the 3-line title reliably fits the headroom above ax_strip instead of
+    # getting clipped by the figure canvas.
+    title_fontsize = plotting_utils.get_dynamic_fontsize(
+        multiplier=0.65, fig_width=fig_size[0], base_font=BASE_FONT)
     ax_strip.text(
-        0.5, 1.02, 
-        f"Distribution of choice\nrates at trial {t_display}", 
+        0.5, 1.02,
+        strip_title,
         transform=ax_strip.transAxes,
-        ha='center', va='bottom',
+        ha='center', va='bottom', fontsize=title_fontsize,
         fontweight='normal', color='#444444'
     )
     ax_strip.set_xlim(-0.5, len(labels) - 0.5)
@@ -910,6 +969,60 @@ def plot_main_with_per_model_spaghetti(
     return fig
 
 
+def _draw_bare_spaghetti_panel(ax, mc, df, trial_col, bandit_avg_col, z_lo, z_hi, reversal_trial,
+                                show_grid=False, yaxis_side=None):
+    """
+    Shared draw routine for a single bare spaghetti panel (individual runs dashed +
+    bold mean, in model color mc, no axis labels/ticks, x-axis always spineless).
+    Used by both plot_bare_spaghetti_per_model (one figure per model) and
+    plot_bare_spaghetti_combined (all models as panels of one figure).
+
+    show_grid: if True, draws light horizontal gridlines at 0/0.25/0.5/0.75/1.0.
+
+    yaxis_side: None (default) draws no y-axis spine/ticks at all (fully bare).
+        'left' shows a left y-axis spine with tick marks/labels, so a single
+        shared spine can be drawn on just one panel of a row (e.g. the
+        leftmost) instead of repeating it on every panel.
+    """
+    df_zoom = df[(df[trial_col] >= z_lo) & (df[trial_col] <= z_hi)]
+    for _, run_df in df_zoom.groupby('model_id'):
+        ax.plot(run_df[trial_col], run_df[bandit_avg_col],
+                color=mc, linewidth=0.6, alpha=0.35, linestyle='--')
+
+    mean_z = plotting_utils.aggregate_trend(df_zoom, trial_col, bandit_avg_col, compute_error=False).mean
+    ax.plot(mean_z.index, mean_z.values, color=mc, linewidth=LW, alpha=1, linestyle='-')
+
+    # zorder=5 puts the reversal line/label above the spaghetti and mean
+    # lines (both default zorder=2), which previously sat on top of the
+    # line at zorder=0 and hid it.
+    if reversal_trial is not None and z_lo <= reversal_trial <= z_hi:
+        ax.axvline(x=reversal_trial, color='black', linestyle='--', linewidth=1.0, alpha=0.3, zorder=5)
+        ax.text(reversal_trial, 0.15, 'reversal', rotation=0, va='center', ha='center',
+                alpha=0.7, transform=ax.get_xaxis_transform(), zorder=5)
+
+    ax.set_xlim(z_lo, z_hi)
+    ax.set_ylim(-0.02, 1.05)
+    ax.set_xticks([])
+
+    if yaxis_side == 'left':
+        ax.set_yticks([0.0, 0.25, 0.5, 0.75, 1.0] if show_grid else [0, 0.5, 1])
+    else:
+        ax.set_yticks([])
+
+    if show_grid:
+        plotting_utils.style_y_gridlines(ax)
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.tick_params(axis='x', length=0, labelbottom=False)
+    if yaxis_side == 'left':
+        ax.spines['left'].set_visible(True)
+        ax.yaxis.tick_left()
+        ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
+    else:
+        ax.tick_params(axis='y', length=0, labelleft=False)
+
+
 def plot_bare_spaghetti_per_model(
         dfs=None, labels=None, colors=None,
         trial_col="trial_num", bandit_avg_col="chose_preferred",
@@ -940,33 +1053,50 @@ def plot_bare_spaghetti_per_model(
         mc = model_colors[j % len(model_colors)]
         fig, ax = plt.subplots(figsize=(panel_w, panel_h))
 
-        df_zoom = df[(df[trial_col] >= z_lo) & (df[trial_col] <= z_hi)]
-        for _, run_df in df_zoom.groupby('model_id'):
-            ax.plot(run_df[trial_col], run_df[bandit_avg_col],
-                    color=mc, linewidth=0.6, alpha=0.35, linestyle='--')
+        _draw_bare_spaghetti_panel(ax, mc, df, trial_col, bandit_avg_col, z_lo, z_hi, reversal_trial,
+                                   yaxis_side='left')
 
-        mean_z = plotting_utils.aggregate_trend(df_zoom, trial_col, bandit_avg_col, compute_error=False).mean
-        ax.plot(mean_z.index, mean_z.values, color=mc, linewidth=2.0, alpha=1, linestyle='-')
-
-        # zorder=5 puts the reversal line/label above the spaghetti and mean
-        # lines (both default zorder=2), which previously sat on top of the
-        # line at zorder=0 and hid it.
-        if reversal_trial is not None and z_lo <= reversal_trial <= z_hi:
-            ax.axvline(x=reversal_trial, color='black', linestyle='--', linewidth=1.0, alpha=0.3, zorder=5)
-            ax.text(reversal_trial, 0.15, 'reversal', rotation=0, va='center', ha='center',
-                    alpha=0.7, transform=ax.get_xaxis_transform(), zorder=5)
-
-        ax.set_xlim(z_lo, z_hi)
-        ax.set_ylim(-0.02, 1.05)
-        ax.set_xticks([])
-        ax.set_yticks([])
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-
-        plt.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
+        plt.subplots_adjust(left=0.12, right=0.99, top=0.99, bottom=0.01)
         figs.append((fig, label))
 
     return figs
+
+
+def plot_bare_spaghetti_combined(
+        dfs=None, labels=None, colors=None,
+        trial_col="trial_num", bandit_avg_col="chose_preferred",
+        zoom_window=(50, 100),
+        reversal_trial=None,
+        panel_size=FIGSIZE_BARE_SPAGHETTI):
+    """
+    Single figure containing all of plot_bare_spaghetti_per_model's per-model bare
+    panels side by side (same panel content/style, plus light horizontal gridlines,
+    laid out as one row instead of separate saved figures/no titles). Returns one fig.
+
+    panel_size: (width, height) of each individual panel; the combined figure width
+        scales with the number of models.
+    """
+    if not dfs:
+        return None
+
+    n = len(dfs)
+    model_colors = (colors[1:] if colors else ['#333333'] * n)
+    z_lo, z_hi = zoom_window
+    panel_w, panel_h = panel_size
+    fig_size = (panel_w * n, panel_h)
+    plotting_utils.set_dynamic_fontsize(fig_width=panel_w, base_font=BASE_FONT)
+
+    fig, axes = plt.subplots(1, n, figsize=fig_size)
+    if n == 1:
+        axes = [axes]
+
+    for j, (df, ax) in enumerate(zip(dfs, axes)):
+        mc = model_colors[j % len(model_colors)]
+        _draw_bare_spaghetti_panel(ax, mc, df, trial_col, bandit_avg_col, z_lo, z_hi, reversal_trial,
+                                   show_grid=True, yaxis_side=('left' if j == 0 else None))
+
+    plt.subplots_adjust(left=0.08, right=0.99, top=0.99, bottom=0.01, wspace=0.05)
+    return fig
 
 
 def plot_bare_spaghetti_per_model_ranked(
@@ -974,11 +1104,11 @@ def plot_bare_spaghetti_per_model_ranked(
         trial_col="trial_num", bandit_avg_col="chose_preferred",
         zoom_window=(50, 100),
         reversal_trial=None,
-        spaghetti_alpha=0.12,
+        spaghetti_alpha=0.02,
         n_highlight=4,
         highlight_seed=42,
         fig_size=None,
-        ax=None, model_index=None):
+        ax=None, model_index=None, show_yaxis=True):
     """
     Same panel layout as plot_bare_spaghetti_per_model, but with a draw order
     meant to make individual-run structure more visible:
@@ -1023,7 +1153,7 @@ def plot_bare_spaghetti_per_model_ranked(
         # color. Drawn first so later layers sit on top of it.
         for run_id, run_df in run_groups:
             ax.plot(run_df[trial_col], run_df[bandit_avg_col],
-                    color=mc, linewidth=0.6, linestyle='--',
+                    color=mc, linewidth=(LW/5), linestyle='--',
                     alpha=spaghetti_alpha, zorder=1)
 
         # 2) Highlighted subset: a few runs replotted on top, dashed, so they
@@ -1034,11 +1164,11 @@ def plot_bare_spaghetti_per_model_ranked(
             run_df = df_zoom[df_zoom['model_id'] == run_id]
             ax.plot(run_df[trial_col], run_df[bandit_avg_col],
                     color=mc, linestyle='--',
-                    linewidth=1.4, alpha=0.9, zorder=2)
+                    linewidth=(LW/5), alpha=0.9, zorder=2)
 
         # 3) Mean line: drawn last so it sits on top of everything else.
         mean_z = plotting_utils.aggregate_trend(df_zoom, trial_col, bandit_avg_col, compute_error=False).mean
-        ax.plot(mean_z.index, mean_z.values, color=mc, linewidth=2.2, alpha=1,
+        ax.plot(mean_z.index, mean_z.values, color=mc, linewidth=LW, alpha=1,
                 linestyle='-', zorder=3)
 
         # zorder=5/4 puts the reversal line/label above the mean line
@@ -1052,17 +1182,25 @@ def plot_bare_spaghetti_per_model_ranked(
         ax.set_xlim(z_lo, z_hi)
         ax.set_ylim(-0.02, 1.05)
 
-        # Only right (y) and bottom (x) spines are shown; left/top are hidden.
+        # Only left (y) and bottom (x) spines are shown; right/top are hidden.
         # Ticks are kept sparse: y at 0/0.5/1, x at the zoom window's start,
-        # midpoint, and end.
-        ax.spines['left'].set_visible(False)
+        # midpoint, and end. show_yaxis=False drops the left spine/ticks too
+        # (e.g. for every panel but the first in a combined row sharing one
+        # y-axis), while the mean/spaghetti lines and x-axis stay unchanged.
+        ax.spines['left'].set_visible(show_yaxis)
         ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(True)
+        ax.spines['right'].set_visible(False)
         ax.spines['bottom'].set_visible(True)
 
-        ax.yaxis.tick_right()
-        ax.set_yticks([0, 0.5, 1])
-        ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
+        ax.tick_params(axis='x', length=3, color='#888888', labelcolor='#666666')
+        if show_yaxis:
+            ax.yaxis.tick_left()
+            ax.set_yticks([0.00,0.25, 0.50,0.75, 1])
+            ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
+        else:
+            ax.set_yticks([])
+            ax.tick_params(axis='y', length=0, labelleft=False)
+
         plotting_utils.style_y_gridlines(ax)
 
         x_mid = round((z_lo + z_hi) / 2)
@@ -1081,12 +1219,303 @@ def plot_bare_spaghetti_per_model_ranked(
     for j, (df, label) in enumerate(zip(dfs, labels)):
         fig, ax_j = plt.subplots(figsize=(panel_w, panel_h))
         _draw_one(ax_j, j, df, label)
-        # Small margin on all sides so the (now-visible) right/bottom spines
+        # Small margin on all sides so the (now-visible) left/bottom spines
         # and their tick labels sit clear of the figure edge.
-        plt.subplots_adjust(left=0.05, right=0.90, top=0.95, bottom=0.12)
+        plt.subplots_adjust(left=0.15, right=0.98, top=0.95, bottom=0.12)
         figs.append((fig, label))
 
     return figs
+
+
+def plot_bare_spaghetti_ranked_combined(
+        dfs=None, labels=None, colors=None,
+        trial_col="trial_num", bandit_avg_col="chose_preferred",
+        zoom_window=(50, 100),
+        reversal_trial=None,
+        spaghetti_alpha=0.02,
+        n_highlight=4,
+        highlight_seed=42,
+        panel_size=FIGSIZE_BARE_SPAGHETTI):
+    """
+    Single figure containing all of plot_bare_spaghetti_per_model_ranked's per-model
+    ranked/layered panels side by side (same panel content/style incl. gridlines,
+    laid out as one row instead of separate saved figures/no titles). Returns one fig.
+
+    panel_size: (width, height) of each individual panel; the combined figure width
+        scales with the number of models.
+    """
+    if not dfs:
+        return None
+
+    n = len(dfs)
+    panel_w, panel_h = panel_size
+    fig_size = (FIGSIZE['wide'][0],  FIG_HEIGHT_RUNS)
+    plotting_utils.set_dynamic_fontsize(fig_width=panel_w, base_font=BASE_FONT)
+
+    fig, axes = plt.subplots(1, n, figsize=fig_size)
+    if n == 1:
+        axes = [axes]
+
+    for j, ax in enumerate(axes):
+        plot_bare_spaghetti_per_model_ranked(
+            dfs=dfs, labels=labels, colors=colors,
+            trial_col=trial_col, bandit_avg_col=bandit_avg_col,
+            zoom_window=zoom_window, reversal_trial=reversal_trial,
+            spaghetti_alpha=spaghetti_alpha, n_highlight=n_highlight, highlight_seed=highlight_seed,
+            ax=ax, model_index=j, show_yaxis=(j == 0)
+        )
+
+    plt.subplots_adjust(left=0.08, right=0.98, top=0.99, bottom=0.10, wspace=0.15)
+    return fig
+
+
+def plot_bare_spaghetti_ranked_stacked(
+        dfs=None, labels=None, colors=None,
+        trial_col="trial_num", bandit_avg_col="chose_preferred",
+        zoom_window=(50, 100),
+        reversal_trial=None,
+        spaghetti_alpha=0.02,
+        n_highlight=4,
+        highlight_seed=42,
+        panel_size=FIGSIZE_PER_MODEL):
+    """
+    Single figure containing all of plot_bare_spaghetti_per_model_ranked's per-model
+    ranked/layered panels stacked vertically (one row per model) instead of side by
+    side. Unlike plot_bare_spaghetti_ranked_combined, which shares a single y-axis
+    across the row, every panel here keeps its own left y-axis and bottom x-axis,
+    since stacked panels read as separate rows rather than one shared plot.
+
+    panel_size: (width, height) of each individual panel; the stacked figure's
+        width is fixed at panel_size[0] and its height scales with the number of
+        models (panel_size[1] * n).
+    """
+    if not dfs:
+        return None
+
+    n = len(dfs)
+    panel_w, panel_h = panel_size
+    fig_size = (panel_w, panel_h * n)
+    plotting_utils.set_dynamic_fontsize(fig_width=panel_w, base_font=BASE_FONT)
+
+    fig, axes = plt.subplots(n, 1, figsize=fig_size)
+    if n == 1:
+        axes = [axes]
+
+    for j, ax in enumerate(axes):
+        plot_bare_spaghetti_per_model_ranked(
+            dfs=dfs, labels=labels, colors=colors,
+            trial_col=trial_col, bandit_avg_col=bandit_avg_col,
+            zoom_window=zoom_window, reversal_trial=reversal_trial,
+            spaghetti_alpha=spaghetti_alpha, n_highlight=n_highlight, highlight_seed=highlight_seed,
+            ax=ax, model_index=j, show_yaxis=True
+        )
+
+    plt.subplots_adjust(left=0.15, right=0.98, top=0.98, bottom=0.06, hspace=0.2)
+    return fig
+
+
+def _family_color_pair(label):
+    """
+    (dark, light) colors for a model's family, straight from plotting_utils
+    (e.g. CENTAUR_ORANGE, LLAMA_COLORS) rather than the single shade
+    prepare_bandit_choice_data already assigned this model for the legend --
+    a single model's k-means clusters need both ends of its family's pair to
+    shade dark-to-light.
+    """
+    ll = label.lower()
+    if ll.startswith('centaur'):
+        return plotting_utils.CENTAUR_ORANGE
+    if ll.startswith('llama'):
+        return plotting_utils.LLAMA_COLORS
+    if ll.startswith('human'):
+        return plotting_utils.HUMAN_COLORS
+    return ['#333333', '#999999']
+
+
+def _cluster_color_ramp(dark, light, k):
+    """
+    k hex colors interpolated from dark to light inclusive (k=2 reproduces
+    exactly (dark, light); k=1 returns just [dark]).
+    """
+    if k <= 1:
+        return [dark]
+    dr, dg, db = int(dark[1:3], 16), int(dark[3:5], 16), int(dark[5:7], 16)
+    lr, lg, lb = int(light[1:3], 16), int(light[3:5], 16), int(light[5:7], 16)
+    ramp = []
+    for i in range(k):
+        t = i / (k - 1)
+        r = round(dr + (lr - dr) * t)
+        g = round(dg + (lg - dg) * t)
+        b = round(db + (lb - db) * t)
+        ramp.append(f'#{r:02x}{g:02x}{b:02x}')
+    return ramp
+
+
+def _draw_kmeans_cluster_panel(ax, df, trial_col, bandit_avg_col, z_lo, z_hi, reversal_trial,
+                                cluster_colors, k=2, seed=42, yaxis_side='right'):
+    """
+    K-means clusters each run's trajectory over [z_lo, z_hi] (one point per
+    trial) into k groups, then draws every run thin/dashed/low-alpha in its
+    cluster's color, with each cluster's centroid (the k-means cluster
+    center, not a per-cluster re-average) drawn bold on top. Unlike the plain
+    bare panels, x/y ticks stay labeled and a lower-left legend names each
+    cluster with its run count, so cluster values can be read off directly.
+
+    Runs missing any trial in [z_lo, z_hi] are dropped (k-means needs
+    equal-length vectors). If there are too few runs to form k clusters, the
+    panel falls back to a single overall mean line in cluster_colors[0].
+
+    yaxis_side: 'left', 'right', or None. Which side (if any) shows y-axis
+        tick marks/labels -- horizontal gridlines are drawn regardless. Use
+        'left' for a combined figure's first/leftmost panel and None for the
+        rest, so a shared y-axis reads once instead of repeating per panel.
+    """
+    df_zoom = df[(df[trial_col] >= z_lo) & (df[trial_col] <= z_hi)]
+    pivot = df_zoom.pivot_table(index='model_id', columns=trial_col, values=bandit_avg_col).dropna()
+    trials = pivot.columns.values
+    X = pivot.values
+
+    if X.shape[0] <= k:
+        mean_z = plotting_utils.aggregate_trend(df_zoom, trial_col, bandit_avg_col, compute_error=False).mean
+        ax.plot(mean_z.index, mean_z.values, color=cluster_colors[0], linewidth=LW, alpha=1)
+    else:
+        km = KMeans(n_clusters=k, n_init=10, random_state=seed).fit(X)
+        for run_idx in range(X.shape[0]):
+            c = cluster_colors[km.labels_[run_idx] % len(cluster_colors)]
+            ax.plot(trials, X[run_idx], color=c, linewidth=0.6, alpha=0.0, linestyle='--', zorder=1)
+        for cl in range(k):
+            n_cl = np.sum(km.labels_ == cl)
+            ax.plot(trials, km.cluster_centers_[cl], color=cluster_colors[cl % len(cluster_colors)],
+                    linewidth=2.0, alpha=1, zorder=3, label=f"cluster {cl + 1} (n={n_cl})")
+
+    if reversal_trial is not None and z_lo <= reversal_trial <= z_hi:
+        ax.axvline(x=reversal_trial, color='black', linestyle='--', linewidth=1.0, alpha=0.3, zorder=5)
+        ax.text(reversal_trial, 0.15, 'reversal', rotation=0, va='center', ha='center',
+                alpha=0.7, transform=ax.get_xaxis_transform(), zorder=5)
+
+    ax.set_xlim(z_lo, z_hi)
+    ax.set_ylim(-0.02, 1.05)
+
+    ax.set_yticks([0.0, 0.25, 0.5, 0.75, 1.0])
+    ax.set_xticks([z_lo, round((z_lo + z_hi) / 2), z_hi])
+    ax.set_xlabel("Trial",labelpad=2)    
+    plotting_utils.style_y_gridlines(ax)
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['left'].set_visible(yaxis_side == 'left')
+    ax.spines['right'].set_visible(yaxis_side == 'right')
+    if yaxis_side == 'left':
+        ax.yaxis.tick_left()
+        ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
+        ax.set_ylabel("Choice rate\n(original high-value arm)",labelpad=2)
+
+    elif yaxis_side == 'right':
+        ax.yaxis.tick_right()
+        ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
+        ax.set_ylabel("Choice rate\n(original high-value arm)",labelpad=2)
+
+    else:
+        ax.tick_params(axis='y', left=False, right=False, labelleft=False, labelright=False)
+    ax.tick_params(axis='x', length=3, color='#888888', labelcolor='#666666')
+
+    # Legend sits below the x-axis (not inside the plot area) so it never overlaps
+    # the spaghetti/centroid lines; fontsize scales off this panel's own axes width
+    # (bbox in display coords -> inches), not a hardcoded reference width, so it
+    # reads sensibly whether this is a standalone per-model figure or one narrow
+    # panel of the combined multi-model figure.
+    ax_width_in = ax.get_window_extent().transformed(ax.figure.dpi_scale_trans.inverted()).width
+    legend_fontsize = plotting_utils.get_dynamic_fontsize(multiplier=0.5, fig_width=ax_width_in, base_font=BASE_FONT)
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), frameon=False,
+              ncol=1, fontsize=legend_fontsize,columnspacing=0.7, handletextpad=0.3, handlelength=1.2)
+
+
+def plot_bare_spaghetti_per_model_kmeans(
+        dfs=None, labels=None, colors=None,
+        trial_col="trial_num", bandit_avg_col="chose_preferred",
+        zoom_window=(50, 100),
+        reversal_trial=None,
+        k=2,
+        cluster_seed=42,
+        fig_size=None):
+    """
+    Same panel layout as plot_bare_spaghetti_per_model, but instead of one
+    overall mean, k-means clusters each model's post-window run trajectories
+    into k groups (default 2) and draws each cluster's own centroid. Cluster
+    shades are interpolated from the model's family dark color down to its
+    light color (plotting_utils.CENTAUR_ORANGE / LLAMA_COLORS / HUMAN_COLORS),
+    so k=2 reproduces exactly that family's (dark, light) pair.
+
+    k: number of clusters per model. 2 is the sane default; 3 or 4 are also
+       supported, but cluster separation isn't guaranteed to be meaningful at
+       every k for every model -- check silhouette score (e.g. via
+       sklearn.metrics.silhouette_score on the same per-run trial matrix)
+       before trusting a given k, since noisier models (fewer/less
+       polarized runs) can produce arbitrary splits.
+
+    Returns a list of (fig, label) pairs, one standalone figure per model.
+    """
+    if not dfs:
+        return []
+
+    z_lo, z_hi = zoom_window
+    panel_w = fig_size[0] if fig_size else 4
+    panel_h = fig_size[1] if fig_size else 4
+    plotting_utils.set_dynamic_fontsize(fig_width=panel_w, base_font=BASE_FONT)
+
+    figs = []
+    for label, df in zip(labels, dfs):
+        dark, light = _family_color_pair(label)
+        cluster_colors = _cluster_color_ramp(dark, light, k)
+        fig, ax = plt.subplots(figsize=(panel_w, panel_h))
+        _draw_kmeans_cluster_panel(ax, df, trial_col, bandit_avg_col, z_lo, z_hi, reversal_trial,
+                                    cluster_colors, k=k, seed=cluster_seed)
+        plt.subplots_adjust(left=0.05, right=0.90, top=0.95, bottom=0.30)
+        figs.append((fig, label))
+
+    return figs
+
+
+def plot_bare_spaghetti_kmeans_combined(
+        dfs=None, labels=None, colors=None,
+        trial_col="trial_num", bandit_avg_col="chose_preferred",
+        zoom_window=(50, 100),
+        reversal_trial=None,
+        k=2,
+        cluster_seed=42,
+        panel_size=FIGSIZE_BARE_SPAGHETTI):
+    """
+    Single figure containing all of plot_bare_spaghetti_per_model_kmeans's
+    per-model k-means-clustered panels side by side (same panel content/style
+    plus light gridlines), laid out as one row instead of separate saved
+    figures. Returns one fig.
+
+    panel_size: (width, height) of each individual panel; the combined figure
+        width scales with the number of models.
+    """
+    if not dfs:
+        return None
+
+    n = len(dfs)
+    z_lo, z_hi = zoom_window
+    panel_w, panel_h = panel_size
+    fig_size = (panel_w * n, panel_h)
+    plotting_utils.set_dynamic_fontsize(fig_width=panel_w, base_font=BASE_FONT)
+
+    fig, axes = plt.subplots(1, n, figsize=fig_size)
+    if n == 1:
+        axes = [axes]
+
+    for j, (label, df, ax) in enumerate(zip(labels, dfs, axes)):
+        dark, light = _family_color_pair(label)
+        cluster_colors = _cluster_color_ramp(dark, light, k)
+        # Only the leftmost panel shows a y-axis (on its left); the rest share
+        # that same 0-1 scale via gridlines alone, so it isn't repeated per panel.
+        yaxis_side = 'left' if j == 0 else None
+        _draw_kmeans_cluster_panel(ax, df, trial_col, bandit_avg_col, z_lo, z_hi, reversal_trial,
+                                    cluster_colors, k=k, seed=cluster_seed, yaxis_side=yaxis_side)
+
+    plt.subplots_adjust(left=0.06, right=0.98, top=0.95, bottom=0.12, wspace=0.15)
+    return fig
 
 
 def prepare_bandit_choice_data(base_path='./data/out/generative',
@@ -1219,7 +1648,7 @@ def prepare_bandit_choice_data(base_path='./data/out/generative',
 
 def bandit_choice_trends(base_path='./data/out/generative', save_dir='./figures',
                          rw_path='./data/in/test_waltmann_data_cleaned.csv',
-                         subsample_seed=42, max_trial_to_plot=50):
+                         subsample_seed=42, max_trial_to_plot=50, kmeans_k=2):
     """
     Load all model single-run CSVs from `base_path`, compute each run's "chose preferred
     arm" indicator, group models into families, pick colors, and plot combined trends.
@@ -1246,6 +1675,10 @@ def bandit_choice_trends(base_path='./data/out/generative', save_dir='./figures'
                           (default 50). The Waltmann PRLT design has reversals at
                           REVERSAL_POINTS = (36, 56, 71, 86, 106); with the default of 50
                           trials, only the first reversal (36) falls inside the plotted range.
+    - kmeans_k: number of k-means clusters per model for the bare k-means spaghetti variant
+                (default 2; see plot_bare_spaghetti_per_model_kmeans). 3 or 4 are also
+                supported, but check silhouette score before trusting a given k -- not
+                every model's post-reversal runs separate cleanly.
     """
     save_dir = os.path.abspath(save_dir)
     os.makedirs(save_dir, exist_ok=True)
@@ -1269,11 +1702,11 @@ def bandit_choice_trends(base_path='./data/out/generative', save_dir='./figures'
                                                            trial_col='trial_num', bandit_avg_col='chose_preferred',
                                                            reversal_trials=in_range_reversals,
                                                            xlim=(1, max_trial), margins=True,
-                                                           fig_size=(12, 10))
-    out_fig = os.path.join(save_dir, f'chose_preferred_arm.png')
-    out_legend = os.path.join(save_dir, f'chose_preferred_arm_legend.png')
-    fig.savefig(out_fig, dpi=200, bbox_inches='tight')
-    legend_fig.savefig(out_legend, dpi=200, bbox_inches='tight')
+                                                           fig_size=FIGSIZE['wide'])
+    out_fig = os.path.join(save_dir, f'chose_preferred_arm_{RATIO_WIDE}.png')
+    out_legend = os.path.join(save_dir, f'chose_preferred_arm_legend_{RATIO_WIDE}.png')
+    plotting_utils.save_panel(fig, out_fig, figsize=FIGSIZE['wide'])
+    #legend_fig.savefig(out_legend, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     plt.close(fig)
     plt.close(legend_fig)
 
@@ -1285,12 +1718,12 @@ def bandit_choice_trends(base_path='./data/out/generative', save_dir='./figures'
         reversal_trials=in_range_reversals,
         xlim=(1, max_trial), margins=True,
         zoom_window=(zoom_lo, max_trial),
-        fig_size=(16, 7)
+        fig_size=FIGSIZE['wide']
     )
-    out_inset = os.path.join(save_dir, f'chose_preferred_arm_inset.png')
-    out_inset_legend = os.path.join(save_dir, f'chose_preferred_arm_inset_legend.png')
-    fig_inset.savefig(out_inset, dpi=200, bbox_inches='tight')
-    legend_inset.savefig(out_inset_legend, dpi=200, bbox_inches='tight')
+    out_inset = os.path.join(save_dir, f'chose_preferred_arm_inset_{RATIO_WIDE}.png')
+    out_inset_legend = os.path.join(save_dir, f'chose_preferred_arm_inset_legend_{RATIO_WIDE}.png')
+    #plotting_utils.save_panel(fig_inset, out_inset, figsize=FIGSIZE['wide'])
+    #legend_inset.savefig(out_inset_legend, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     plt.close(fig_inset)
     plt.close(legend_inset)
 
@@ -1304,27 +1737,32 @@ def bandit_choice_trends(base_path='./data/out/generative', save_dir='./figures'
         endpoint_trial=max_trial,
         fig_size=FIGSIZE_STRIP
     )
-    out_strip = os.path.join(save_dir, f'chose_preferred_arm_strip.png')
-    out_strip_legend = os.path.join(save_dir, f'chose_preferred_arm_strip_legend.png')
-    fig_strip.savefig(out_strip, dpi=200, bbox_inches='tight')
-    legend_strip.savefig(out_strip_legend, dpi=200, bbox_inches='tight')
+    out_strip = os.path.join(save_dir, f'chose_preferred_arm_strip_{RATIO_WIDE}.png')
+    out_strip_legend = os.path.join(save_dir, f'chose_preferred_arm_strip_legend_{RATIO_WIDE}.png')
+    #plotting_utils.save_panel(fig_strip, out_strip, figsize=FIGSIZE_STRIP)
+    #legend_strip.savefig(out_strip_legend, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     plt.close(fig_strip)
     plt.close(legend_strip)
 
-    # Colored-frame strip version
+    # Colored-frame strip version: distribution of each run's own mean choice rate
+    # across the full session (rather than each run's raw value at a single trial),
+    # so the strip shows a continuous per-run overall-performance distribution
+    # instead of a near-binary chose_preferred distribution. endpoint_trial only
+    # anchors where the connector dot sits on the main line (x-position); it does
+    # not restrict which trials go into each run's mean when strip_window is None.
     fig_cstrip, legend_cstrip = plot_bandit_choice_trends_with_colored_strip(
         human_df=None, df_rep=None,
         dfs=dfs, labels=labels, colors=colors,
         trial_col='trial_num', bandit_avg_col='chose_preferred',
         reversal_trials=in_range_reversals,
         xlim=(1, max_trial), margins=True,
-        endpoint_trial=max_trial,
-        fig_size=(16, 7)
+        endpoint_trial=max_trial, strip_window=5,
+        fig_size=FIGSIZE_STRIP
     )
-    out_cstrip = os.path.join(save_dir, f'chose_preferred_arm_colored_strip.png')
-    out_cstrip_legend = os.path.join(save_dir, f'chose_preferred_arm_colored_strip_legend.png')
-    fig_cstrip.savefig(out_cstrip, dpi=200, bbox_inches='tight')
-    legend_cstrip.savefig(out_cstrip_legend, dpi=200, bbox_inches='tight')
+    out_cstrip = os.path.join(save_dir, f'chose_preferred_arm_colored_strip_{RATIO_WIDE}.png')
+    out_cstrip_legend = os.path.join(save_dir, f'chose_preferred_arm_colored_strip_legend_{RATIO_WIDE}.png')
+    plotting_utils.save_panel(fig_cstrip, out_cstrip, figsize=FIGSIZE_STRIP)
+    #legend_cstrip.savefig(out_cstrip_legend, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     plt.close(fig_cstrip)
     plt.close(legend_cstrip)
 
@@ -1344,7 +1782,7 @@ def bandit_choice_trends(base_path='./data/out/generative', save_dir='./figures'
     )
     out_spaghetti = os.path.join(save_dir, f'chose_preferred_arm_spaghetti.png')
     if fig_spaghetti is not None:
-        fig_spaghetti.savefig(out_spaghetti, dpi=200, bbox_inches='tight')
+        fig_spaghetti.savefig(out_spaghetti, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
         plt.close(fig_spaghetti)
         print(f"Saved spaghetti plot: {out_spaghetti}")
 
@@ -1363,10 +1801,24 @@ def bandit_choice_trends(base_path='./data/out/generative', save_dir='./figures'
     for fig_bare, model_label in bare_figs:
         safe_label = re.sub(r'[^a-zA-Z0-9_-]', '_', model_label)
         path = os.path.join(save_dir, f'chose_preferred_arm_bare_{safe_label}.png')
-        fig_bare.savefig(path, dpi=200, bbox_inches='tight')
+        #plotting_utils.save_panel(fig_bare, path, figsize=FIGSIZE_BARE_SPAGHETTI)
         plt.close(fig_bare)
         out_bare.append(path)
         print(f"Saved bare spaghetti: {path}")
+
+    # Combined version: all per-model bare panels above, as one figure/PNG.
+    fig_bare_combined = plot_bare_spaghetti_combined(
+        dfs=dfs, labels=labels, colors=colors,
+        trial_col='trial_num', bandit_avg_col='chose_preferred',
+        zoom_window=(bare_zoom_lo, max_trial),
+        reversal_trial=zoom_lo,
+        panel_size=FIGSIZE_BARE_SPAGHETTI
+    )
+    out_bare_combined = os.path.join(save_dir, f'chose_preferred_arm_bare_combined_{RATIO_WIDE}.png')
+    #plotting_utils.save_panel(fig_bare_combined, out_bare_combined,
+                               #figsize=(FIGSIZE_BARE_SPAGHETTI[0] * len(dfs), FIGSIZE_BARE_SPAGHETTI[1]))
+    plt.close(fig_bare_combined)
+    print(f"Saved combined bare spaghetti: {out_bare_combined}")
 
     # Bare per-model spaghetti, ranked/layered variant: spaghetti colored by
     # rank drawn first, a highlighted subset with distinct linestyles drawn on
@@ -1385,23 +1837,91 @@ def bandit_choice_trends(base_path='./data/out/generative', save_dir='./figures'
     for fig_bare, model_label in bare_ranked_figs:
         safe_label = re.sub(r'[^a-zA-Z0-9_-]', '_', model_label)
         path = os.path.join(save_dir, f'chose_preferred_arm_bare_ranked_{safe_label}.png')
-        fig_bare.savefig(path, dpi=200, bbox_inches='tight')
+        plotting_utils.save_panel(fig_bare, path, figsize=FIGSIZE_BARE_SPAGHETTI)
         plt.close(fig_bare)
         out_bare_ranked.append(path)
         print(f"Saved bare ranked spaghetti: {path}")
 
+    # Combined version: all per-model ranked panels above, as one figure/PNG.
+    fig_bare_ranked_combined = plot_bare_spaghetti_ranked_combined(
+        dfs=dfs, labels=labels, colors=colors,
+        trial_col='trial_num', bandit_avg_col='chose_preferred',
+        zoom_window=(zoom_lo, max_trial),
+        reversal_trial=zoom_lo,
+        panel_size=FIGSIZE_BARE_SPAGHETTI
+    )
+    out_bare_ranked_combined = os.path.join(save_dir, f'chose_preferred_arm_bare_ranked_combined_{RATIO_WIDE}.png')
+    plotting_utils.save_panel(fig_bare_ranked_combined, out_bare_ranked_combined,
+                               figsize=(FIGSIZE['wide'][0], FIG_HEIGHT_RUNS))
+    plt.close(fig_bare_ranked_combined)
+    print(f"Saved combined bare ranked spaghetti: {out_bare_ranked_combined}")
+
+    # Bare per-model spaghetti, k-means variant: each model's post-reversal runs
+    # are split into kmeans_k clusters (default 2) and each cluster's centroid is
+    # drawn in a shade interpolated from the model's family dark->light color pair
+    # (k=2 reproduces exactly that pair, e.g. centaur's orange/yellow, llama's
+    # blue/light-blue). Same zoom window as the ranked variant above.
+    bare_kmeans_figs = plot_bare_spaghetti_per_model_kmeans(
+        dfs=dfs, labels=labels, colors=colors,
+        trial_col='trial_num', bandit_avg_col='chose_preferred',
+        zoom_window=(zoom_lo, max_trial),
+        reversal_trial=zoom_lo,
+        k=kmeans_k,
+        fig_size=FIGSIZE_BARE_SPAGHETTI
+    )
+    out_bare_kmeans = []
+    for fig_bare, model_label in bare_kmeans_figs:
+        safe_label = re.sub(r'[^a-zA-Z0-9_-]', '_', model_label)
+        path = os.path.join(save_dir, f'chose_preferred_arm_bare_kmeans_{safe_label}.png')
+        plotting_utils.save_panel(fig_bare, path, figsize=FIGSIZE_BARE_SPAGHETTI)
+        plt.close(fig_bare)
+        out_bare_kmeans.append(path)
+        print(f"Saved bare k-means spaghetti: {path}")
+
+    # Combined version: all per-model k-means panels above, as one figure/PNG.
+    fig_bare_kmeans_combined = plot_bare_spaghetti_kmeans_combined(
+        dfs=dfs, labels=labels, colors=colors,
+        trial_col='trial_num', bandit_avg_col='chose_preferred',
+        zoom_window=(zoom_lo, max_trial),
+        reversal_trial=zoom_lo,
+        k=kmeans_k,
+        panel_size=FIGSIZE_BARE_SPAGHETTI
+    )
+
+    out_bare_kmeans_combined = os.path.join(save_dir, f'chose_preferred_arm_bare_kmeans_combined_{RATIO_WIDE}.png')
+    plotting_utils.save_panel(fig_bare_kmeans_combined, out_bare_kmeans_combined,
+                               figsize=(FIGSIZE_BARE_SPAGHETTI[0] * len(dfs), FIGSIZE_BARE_SPAGHETTI[1]))
+    plt.close(fig_bare_kmeans_combined)
+
+    fig_bare_ranked_stacked=plot_bare_spaghetti_ranked_stacked(
+        dfs=dfs, labels=labels, colors=colors,
+        trial_col='trial_num', bandit_avg_col='chose_preferred',
+        zoom_window=(zoom_lo, max_trial),
+        reversal_trial=zoom_lo,
+        panel_size=FIGSIZE_PER_MODEL
+    )
+    out_bare_ranked_stacked = os.path.join(save_dir, f'chose_preferred_arm_bare_ranked_stacked_{RATIO_WIDE}.png')
+    plotting_utils.save_panel(fig_bare_ranked_stacked, out_bare_ranked_stacked,
+                               figsize=(FIGSIZE_PER_MODEL[0], FIGSIZE_PER_MODEL[1] * len(dfs)))
+    plt.close(fig_bare_ranked_stacked)
+    print(f"Saved combined bare k-means spaghetti: {out_bare_kmeans_combined}")
+
     return (out_fig, out_legend, out_inset, out_inset_legend, out_strip, out_strip_legend,
-            out_cstrip, out_cstrip_legend, out_spaghetti, out_bare, out_bare_ranked)
+            out_cstrip, out_cstrip_legend, out_spaghetti, out_bare, out_bare_combined,
+            out_bare_ranked, out_bare_ranked_combined, out_bare_kmeans, out_bare_kmeans_combined)
 
 
 def _discover_bare_pngs(save_dir, prefix='chose_preferred_arm_bare_'):
     """
     Find the per-model "bare" spaghetti PNGs saved by plot_bare_spaghetti_per_model
-    (excludes the '..._bare_ranked_...' variant). Returns (paths, labels) sorted so
-    'human' comes first, then alphabetically.
+    (excludes the '..._bare_ranked_...' variant and the combined multi-panel PNGs).
+    Returns (paths, labels) sorted so 'human' comes first, then alphabetically.
     """
     pattern = os.path.join(save_dir, f'{prefix}*.png')
-    paths = [p for p in glob.glob(pattern) if '_bare_ranked_' not in os.path.basename(p)]
+    excluded = ('_bare_ranked_', '_bare_combined', '_bare_ranked_combined',
+                '_bare_kmeans_', '_bare_kmeans_combined')
+    paths = [p for p in glob.glob(pattern)
+             if not any(token in os.path.basename(p) for token in excluded)]
 
     def sort_key(p):
         name = os.path.basename(p)
@@ -1501,7 +2021,7 @@ def build_summary_figure(save_dir='./figures',
         _place_image_panel(ax, png, panel_label='D' if i == 0 else None, title=title)
 
     out_path = out_path or os.path.join(save_dir, 'summary_figure.png')
-    fig.savefig(out_path, dpi=250, bbox_inches='tight')
+    plotting_utils.save_panel(fig, out_path, figsize=fig_size)
     plt.close(fig)
     print(f"Saved composite summary figure: {out_path}")
     return out_path
@@ -1524,6 +2044,10 @@ if __name__ == '__main__':
                         help='Only plot trials up to and including this trial number (default: 50). '
                              'The Waltmann reversal schedule is REVERSAL_POINTS = (36, 56, 71, 86, 106); '
                              'only reversals within this range are drawn.')
+    parser.add_argument('--kmeans_k', type=int, default=2,
+                        help='Number of k-means clusters per model for the bare k-means spaghetti '
+                             'variant (default: 2). 3 or 4 are also supported, but check silhouette '
+                             'score before trusting a given k for a given model.')
     parser.add_argument('--composite', action='store_true',
                         help='Instead of regenerating the trend plots, assemble the 4-panel summary '
                              'figure (A: predictive NLL, B: generative colored-strip, C: WSLS bars, '
@@ -1540,4 +2064,5 @@ if __name__ == '__main__':
         rw_path = args.rw_path if args.rw_path else None
         bandit_choice_trends(base_path=args.base, save_dir=args.out,
                              rw_path=rw_path,
-                             subsample_seed=args.subsample_seed, max_trial_to_plot=args.max_trial)
+                             subsample_seed=args.subsample_seed, max_trial_to_plot=args.max_trial,
+                             kmeans_k=args.kmeans_k)

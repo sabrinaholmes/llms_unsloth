@@ -14,14 +14,12 @@ separately for training and test blocks, for both human and LLM data.
 """
 
 import os
-import sys
-import argparse
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 import plotting_utils
 
 VERBAL_TO_NUM = {
@@ -43,17 +41,8 @@ LLAMA_DIR   = 'data/out/generative/llama-70B-adapter/singles'
 
 TRAINING_BLOCKS = list(range(1, 11))
 TEST_BLOCKS     = [11, 12]
-TEXT_WIDTH = 5.6  # inches, for a single-column figure in the eLife template
-TARGETED_FIG_HEIGHT = 1.8
-RATIO_NARROW=0.31
-RATIO_WIDE=0.6
-FIGSIZE_ALL={
-    'narrow': (TEXT_WIDTH * RATIO_NARROW, TARGETED_FIG_HEIGHT),
-    'wide': (TEXT_WIDTH * RATIO_WIDE, TARGETED_FIG_HEIGHT),
-}
-FIGSIZE=FIGSIZE_ALL['narrow']
-BASE_FONT=12
-LW=1.5
+
+
 def v2n(val):
     """Map a verbal string (or numeric string/value) to numeric. Returns NaN if unknown."""
     if isinstance(val, (int, float)):
@@ -167,6 +156,17 @@ AB_YTICKS = list(range(0, 31, 5))
 C_YLIM    = (0, 30)
 C_YTICKS  = list(range(0, 31, 5))
 
+def set_dynamic_fontsize(fig_size, base_font=20):
+    scale = fig_size[1] / 6
+    plt.rcParams.update({
+        'font.size': base_font * scale * 0.8,
+        'axes.titlesize': base_font * scale * 1.2,
+        'axes.labelsize': base_font * scale * 0.9,
+        'xtick.labelsize': base_font * scale * 0.9,
+        'ytick.labelsize': base_font * scale * 0.9,
+        'legend.fontsize': base_font * scale * 0.7,
+    })
+
 def make_figure(agg, title='', colors=('black', 'grey')):
     """
     agg: DataFrame from rmse_by_block_condition
@@ -179,7 +179,7 @@ def make_figure(agg, title='', colors=('black', 'grey')):
       D = Summary mean RMSE over test blocks
     """
     verbal_color, numeric_color = colors
-    plotting_utils.set_dynamic_fontsize(fig_width=9, base_font=20)
+    set_dynamic_fontsize((18, 9))
     fig, axes = plt.subplots(2, 2, figsize=(18, 9))
     fig.suptitle(title, fontweight='bold', y=1.01)
 
@@ -208,7 +208,6 @@ def make_figure(agg, title='', colors=('black', 'grey')):
         ax.set_yticks(AB_YTICKS)
         ax.legend(title='Format', frameon=False)
         ax.spines[['top', 'right']].set_visible(False)
-        plotting_utils.style_y_gridlines(ax)
 
     def _plot_summary(ax, panel_label, src_agg, xlabel):
         summary_data = {}
@@ -235,16 +234,14 @@ def make_figure(agg, title='', colors=('black', 'grey')):
         ax.set_xlim(-0.5, 1.5)
         ax.set_xticks(x)
         ax.set_xticklabels(['Additive', 'Non-Additive'])
-        ax.tick_params(axis='x',length=3, color='#888888', labelcolor='#666666' )
-        ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
-        ax.set_xlabel(xlabel)
+        ax.tick_params(axis='x', pad=10)
+        ax.set_xlabel(xlabel, labelpad=4)
         ax.set_ylabel('RMSE')
         ax.set_title(panel_label, loc='left', fontweight='bold')
         ax.set_ylim(*C_YLIM)
         ax.set_yticks(C_YTICKS)
         ax.legend(title='Format', frameon=False)
         ax.spines[['top', 'right']].set_visible(False)
-        plotting_utils.style_y_gridlines(ax)
         ax.annotate('', xy=(1, -0.12), xytext=(0, -0.12),
                     xycoords=('data', 'axes fraction'),
                     arrowprops=dict(arrowstyle='-', color='black'))
@@ -291,7 +288,6 @@ def make_combined_figure(sources):
     ):
         ax.set_title(panel_label, loc='left', fontweight='bold')
         ax.spines[['top', 'right']].set_visible(False)
-        plotting_utils.style_y_gridlines(ax)
 
         if panel_label in ('A', 'B'):
             verbal_cond, numeric_cond = task_conds
@@ -308,12 +304,12 @@ def make_combined_figure(sources):
                     lbl = f"{src['label']} – {fmt}"
                     ax.errorbar(
                         sub['block'], sub['mean_rmse'], yerr=sub['sem_rmse'],
-                        marker='o', markersize=5, linewidth=LW, linestyle=ls,
+                        marker='o', markersize=5, linewidth=1.4, linestyle=ls,
                         markerfacecolor=color if filled else 'white',
                         markeredgecolor=color, color=color,
                         label=lbl, capsize=2,
                     )
-            ax.set_xlabel(f'Block\n{xlabel_suffix}')
+            ax.set_xlabel(f'Block\n{xlabel_suffix}', labelpad=4)
             ax.set_ylabel('RMSE')
             ax.set_xticks(TRAINING_BLOCKS)
             ax.set_ylim(*AB_YLIM)
@@ -361,79 +357,9 @@ def make_combined_figure(sources):
     return fig
 
 
-def make_shaded_training_figure(sources, cond_verbal, cond_numeric, task_label, style='markers'):
-    """
-    Single-panel figure comparing sources on one task (Additive or Non-Additive)
-    across training blocks, with SEM shown as shaded bands instead of error bars.
-
-    sources: same structure as in make_combined_figure.
-    style: 'markers' -> circle markers + per-source dashed/dotted linestyles
-           'plain'   -> no markers, all lines solid
-    No legend is drawn on the axes; use save_legend() with the returned
-    handles/labels to render the legend separately.
-
-    Returns (fig, handles, labels).
-    """
-    plotting_utils.set_dynamic_fontsize(fig_width=FIGSIZE[0], base_font=BASE_FONT)
-    fig, ax = plt.subplots(figsize=FIGSIZE)
-    linestyles = ['-', '--', ':'] if style == 'markers' else ['-', '-', '-']
-    marker = 'o' if style == 'markers' else None
-
-    for src, ls in zip(sources, linestyles):
-        agg = src['agg']
-        train = agg[agg['block'].isin(TRAINING_BLOCKS)]
-        for cond, fmt, color, filled in [
-            (cond_verbal,  'Verbal',  src['verbal_color'],  True),
-            (cond_numeric, 'Numeric', src['numeric_color'], False),
-        ]:
-            sub = train[train['condition'] == cond].sort_values('block')
-            if sub.empty:
-                continue
-            lbl = f"{src['label']} – {fmt}"
-            ax.plot(
-                sub['block'], sub['mean_rmse'],
-                marker=marker, markersize=5, linewidth=LW, linestyle=ls,
-                markerfacecolor=(color if filled else 'white') if marker else 'none',
-                markeredgecolor=color if marker else 'none', color=color,
-                label=lbl,
-            )
-            ax.fill_between(
-                sub['block'],
-                sub['mean_rmse'] - sub['sem_rmse'],
-                sub['mean_rmse'] + sub['sem_rmse'],
-                color=color, alpha=0.15, linewidth=0,
-            )
-
-    ax.set_title(task_label)
-    ax.set_xlabel('Block')
-    ax.set_ylabel('RMSE')
-    ax.set_xticks([2,4,6,8,10])
-    ax.set_ylim(*AB_YLIM)
-    ax.set_yticks(AB_YTICKS)
-    ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
-    ax.tick_params(axis='x', length=3, color='#888888', labelcolor='#666666')
-
-    ax.spines[['top', 'right']].set_visible(False)
-    plotting_utils.style_y_gridlines(ax)
-
-    handles, labels = ax.get_legend_handles_labels()
-
-    plt.tight_layout()
-    return fig, handles, labels
-
-
-def save_legend(handles, labels, path, ncol=1):
-    """Render handles/labels as a standalone legend figure and save it."""
-    fig_leg = plt.figure(figsize=(3.2, 0.32 * len(labels) + 0.3))
-    fig_leg.legend(handles, labels, loc='center', frameon=False, ncol=ncol)
-    fig_leg.savefig(path, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
-    plt.close(fig_leg)
-
-
-def main(save_dir='figures'):
-    save_dir = os.path.abspath(save_dir)
+def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    os.makedirs(save_dir, exist_ok=True)
+    os.makedirs('figures', exist_ok=True)
 
     print("Loading data...")
     human_df   = load_human()
@@ -447,55 +373,27 @@ def main(save_dir='figures'):
     # Individual plots
     for agg, title, colors, fname in [
         (human_agg,   'Human Baseline', ('black',    'grey'),      'rmse_training_human.png'),
-        (centaur_agg, 'Centaur-70B',    tuple(plotting_utils.CENTAUR_ORANGE),  'rmse_training_centaur.png'),
-        (llama_agg,   'Llama-Instruct-3.1-70B', tuple(plotting_utils.LLAMA_COLORS),  'rmse_training_llama.png'),
+        (centaur_agg, 'Centaur-70B',    ('#D55E00',  '#E69F00'),  'rmse_training_centaur.png'),
+        (llama_agg,   'Llama-Instruct-3.1-70B', ('#0072B2',  '#56B4E9'),  'rmse_training_llama.png'),
     ]:
         fig = make_figure(agg, title=title, colors=colors)
-        out = os.path.join(save_dir, fname)
+        out = f'figures/{fname}'
         plotting_utils.save_panel(fig, out, figsize=(18, 9))
         print(f"Saved {out}")
 
     # Combined comparison plot
     sources = [
         {'label': 'Human',   'agg': human_agg,   'verbal_color': 'black',   'numeric_color': 'grey'},
-        {'label': 'Centaur-70B',             'agg': centaur_agg, 'verbal_color': plotting_utils.CENTAUR_ORANGE[0], 'numeric_color': plotting_utils.CENTAUR_ORANGE[1]},
-        {'label': 'Llama-Instruct-3.1-70B', 'agg': llama_agg,   'verbal_color': plotting_utils.LLAMA_COLORS[0], 'numeric_color': plotting_utils.LLAMA_COLORS[1]},
+        {'label': 'Centaur-70B',             'agg': centaur_agg, 'verbal_color': '#D55E00', 'numeric_color': '#E69F00'},
+        {'label': 'Llama-Instruct-3.1-70B', 'agg': llama_agg,   'verbal_color': '#0072B2', 'numeric_color': '#56B4E9'},
     ]
     fig_combined = make_combined_figure(sources)
-    out = os.path.join(save_dir, 'rmse_training_combined.png')
+    out = 'figures/rmse_training_combined.png'
     fig_combined.savefig(out, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     print(f"Saved {out}")
 
-    # Separate additive / non-additive plots with shaded SEM bands.
-    # Two style variants each: markers+dashed lines, and plain solid lines.
-    # Legend is not drawn on the axes; saved once per style as its own file.
-    task_specs = [
-        ('Additive',     1, 2, 'additive'),
-        ('Non-Additive', 3, 4, 'nonadditive'),
-    ]
-    legend_saved = {'markers': False, 'plain': False}
-    for style, style_suffix in [('markers', ''), ('plain', '_plain')]:
-        for task_label, cond_verbal, cond_numeric, task_suffix in task_specs:
-            fig, handles, labels = make_shaded_training_figure(
-                sources, cond_verbal=cond_verbal, cond_numeric=cond_numeric,
-                task_label=task_label, style=style,
-            )
-            out = os.path.join(save_dir, f'rmse_training_combined_{task_suffix}_shaded{style_suffix}.png')
-            plotting_utils.save_panel(fig, out, figsize=FIGSIZE)
-            print(f"Saved {out}")
-
-            if not legend_saved[style]:
-                legend_out = os.path.join(save_dir, f'rmse_training_combined_shaded_legend{style_suffix}.png')
-                save_legend(handles, labels, legend_out)
-                print(f"Saved {legend_out}")
-                legend_saved[style] = True
-
-    #plt.show()
+    plt.show()
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--save-dir', default='figures',
-                        help='Directory to save figures into (default: %(default)s)')
-    args = parser.parse_args()
-    main(save_dir=args.save_dir)
+    main()

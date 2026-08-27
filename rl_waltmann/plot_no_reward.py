@@ -18,6 +18,7 @@ transition_analysis.py's full suite (WSLS scatter, time-resolved stay rate,
 reward-conditioned heatmaps, ...) separately on both the Baseline and Partial
 generative data, not just Baseline.
 """
+import argparse
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -49,10 +50,32 @@ MODEL_INFO = [
     ('centaur-70B-adapter', 'Centaur', plotting_utils.CENTAUR_ORANGE),
     ('llama-70B-adapter', 'Llama', plotting_utils.LLAMA_COLORS),
 ]
-FIGSIZE = (8,6.5)
-BASE_FONT = 24
-PARTIAL="No reward"
+# eLife single-column width (inches)
+TEXT_WIDTH = 5.6  
+
+# 1. LaTeX Minipage allocation -- must match the \begin{minipage}[t]{X\textwidth}
+# used in figures/panel_no_reward.tex (currently 0.49\textwidth per panel, with
+# \hfill eating the remaining 0.02\textwidth as the gap between panels).
+MINIPAGE_RATIO = 0.49
+
+# 2. Inner padding/border of `panelbox_2x2` (figures/preamble_panels.tex: "panelbox
+# base" sets left=6pt right=6pt, and boxrule=1.2pt draws the frame *outside* that
+# padding on each side) -- total horizontal space eaten from the minipage width:
+# left + right + 2*boxrule = 6 + 6 + 2*1.2 = 14.4pt = 14.4/72.27in.
+PANELBOX_PADDING = 14.4 / 72.27
+
+# Target plot height in inches
+TARGETED_FIG_HEIGHT = 2.2  
+
+# Calculate exact image width to avoid LaTeX scaling
+PLOT_WIDTH = (TEXT_WIDTH * MINIPAGE_RATIO) - PANELBOX_PADDING
+
+FIGSIZE = (PLOT_WIDTH, TARGETED_FIG_HEIGHT)
+BASE_FONT = 12.0
+PARTIAL="No\nreward"
 BASELINE="Full\nprompt"
+
+
 def build_panel_a_family_mapping():
     """
     Baseline (data/out/predictive) vs Partial (data/out/predictive_no_rewards)
@@ -153,7 +176,7 @@ def build_abc_figure(family_mapping, bandit_data, wsls_data, wsls_colors,
         ax=ax_b, dfs=bandit_data['dfs'], labels=bandit_data['labels'], colors=bandit_data['colors'],
         reversal_trials=bandit_data['in_range_reversals'], xlim=(1, bandit_data['max_trial']))
 
-    plot_wsls(wsls_data, ax=ax_c, colors=wsls_colors, show_xticklabels=True)
+    plot_wsls(wsls_data, ax=ax_c, colors=wsls_colors, show_xticklabels=False)
 
     # Reuse the line handles already drawn on ax_b (colors/labels match exactly)
     # rather than re-deriving them, so the combined figure's legend and the
@@ -195,12 +218,17 @@ def build_panel_b_figure(bandit_data, fig_size=FIGSIZE):
 
 def build_panel_c_figure(wsls_data, wsls_colors, figsize=FIGSIZE, base_font=BASE_FONT):
     """Standalone panel C (win-stay/lose-stay bars), same content as the embedded version."""
-    return plot_wsls(wsls_data, colors=wsls_colors, show_xticklabels=True,
+    return plot_wsls(wsls_data, colors=wsls_colors, show_xticklabels=False,
                       figsize=figsize, base_font=base_font)
 
 
 if __name__ == '__main__':
-    FIGURES_DIR = os.path.join(SCRIPT_DIR, 'figures', 'partial')
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out-dir', default=os.path.join(SCRIPT_DIR, 'figures', 'partial'),
+                         help="Output folder for the figures (default: figures/partial)")
+    args = parser.parse_args()
+
+    FIGURES_DIR = args.out_dir
     os.makedirs(FIGURES_DIR, exist_ok=True)
 
     family_mapping = build_panel_a_family_mapping()
@@ -209,21 +237,27 @@ if __name__ == '__main__':
 
     fig_abc = build_abc_figure(family_mapping, bandit_data, wsls_data, wsls_colors)
     fig_abc.savefig(os.path.join(FIGURES_DIR, 'panel_abc_baseline_partial_rl_waltmann.png'),
-                     dpi=200, bbox_inches='tight')
+           bbox_inches='tight',
+           pad_inches=0.02,
+           dpi=300,
+           transparent=True)
 
     fig_a = build_panel_a_figure(family_mapping)
-    fig_a.savefig(os.path.join(FIGURES_DIR, 'panel_a_baseline_partial_rl_waltmann.png'),
-                  dpi=200, bbox_inches='tight')
+    plotting_utils.save_panel(fig_a, os.path.join(FIGURES_DIR, 'panel_a_baseline_partial_rl_waltmann.png'),
+               figsize=FIGSIZE)
 
     fig_b, fig_legend = build_panel_b_figure(bandit_data)
-    fig_b.savefig(os.path.join(FIGURES_DIR, 'panel_b_baseline_partial_rl_waltmann.png'),
-                  dpi=200, bbox_inches='tight')
+    plotting_utils.save_panel(fig_b, os.path.join(FIGURES_DIR, 'panel_b_baseline_partial_rl_waltmann.png'),
+               figsize=FIGSIZE)
     fig_legend.savefig(os.path.join(FIGURES_DIR, 'legend_baseline_partial_rl_waltmann.png'),
-                        dpi=200, bbox_inches='tight')
+              bbox_inches='tight',
+              pad_inches=0.02,
+              dpi=300,
+              transparent=True)
 
     fig_c = build_panel_c_figure(wsls_data, wsls_colors)
-    fig_c.savefig(os.path.join(FIGURES_DIR, 'panel_c_baseline_partial_rl_waltmann.png'),
-                  dpi=200, bbox_inches='tight')
+    plotting_utils.save_panel(fig_c, os.path.join(FIGURES_DIR, 'panel_c_baseline_partial_rl_waltmann.png'),
+               figsize=FIGSIZE)
 
     print(f"Saved combined (A/B/C), panel A, panel B, panel C, and legend PNGs to {FIGURES_DIR}")
 

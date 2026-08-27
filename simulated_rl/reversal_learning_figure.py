@@ -13,7 +13,7 @@ heuristic models are then compared:
              their own (using only the task's true reward contingencies)
              to see what behavior they produce from scratch.
 
-Run: python3 reversal_learning_figure.py [--no_loglik_bars] [--no_title]
+Run: python3 reversal_learning_figure.py [--no_loglik_bars] [--no_title] [--legend {all,predictive,none}]
 Outputs: CSVs in data/, PNGs in figures/ (legends saved separately as *_legend.png)
 """
 
@@ -26,6 +26,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+from matplotlib.patches import Patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import plotting_utils
@@ -45,10 +46,17 @@ parser.add_argument("--no_loglik_bars", dest="show_loglik_bars", action="store_f
                      help="Skip drawing the log-likelihood inset bar chart on the predictive panel(s)")
 parser.add_argument("--no_title", dest="show_title", action="store_false",
                      help="Hide the panel title (e.g. 'Predictive performance / model fits')")
-parser.add_argument("--data_source", choices=["simulated", "real"], default="simulated",
-                     help="'simulated' (default): ground-truth data from the Q-learning agent. "
-                          "'real': fit to actual human choice/reward histories from "
-                          "rl_waltmann/data/in/ instead of simulating them.")
+parser.add_argument("--legend", choices=["all", "predictive", "none"], default="all",
+                     help="Which panels get the on-axis legend (Human/Repetition/WS-LS) and the "
+                          "separate *_legend.png file. 'all' (default): predictive column of the "
+                          "combined figure + both standalone panels. 'predictive': predictive "
+                          "panels only (combined figure's predictive column + standalone "
+                          "predictive panel) -- the generative panels never get one. 'none': "
+                          "no panel gets one.")
+parser.add_argument("--data_source", choices=["simulated", "real"], default="real",
+                     help="'real' (default): fit to actual human choice/reward histories from "
+                          "rl_waltmann/data/in/. 'simulated': ground-truth data from the "
+                          "Q-learning agent instead.")
 parser.add_argument("--real_data_csv", default=None,
                      help="CSV path to use when --data_source=real (default: "
                           "rl_waltmann/data/in/test_waltmann_data_cleaned.csv)")
@@ -59,8 +67,10 @@ parser.add_argument("--max_trial", type=int, default=None,
                           "first-reversal-trial + 14 (matching rl_waltmann's own default "
                           "plotting window) for --data_source=real, so the real-data figure "
                           "shows the first reversal plus its recovery instead of all 5 blocks.")
-parser.set_defaults(show_loglik_bars=True, show_title=True)
+parser.set_defaults(show_loglik_bars=False, show_title=True)
 args = parser.parse_args()
+show_legend_predictive = args.legend in ("all", "predictive")
+show_legend_generative = args.legend == "all"
 
 from reversal_learning_sim import (
     N_TRIALS, REVERSAL, P_HIGH, P_LOW,
@@ -315,6 +325,42 @@ def _preferred_prob_curve(trials_1idx, reversal_points_1idx):
     return np.where(n_flips % 2 == 0, P_HIGH, P_LOW)
 
 
+def _set_ylabel_choice_a(ax):
+    """Replaces the default two-line ylabel set by plot_bandit_choice_trends_single_axis
+    ("Choice rate\n(original high-value arm)") with "Choice rate" / "choice A" as two
+    stacked, differently-colored lines -- "choice A" colored the same as the "A 80%"
+    schedule label above. A single Text can't mix colors, so this is built out of two
+    Text objects (rotated 90deg) anchored at the exact same point, following
+    matplotlib's "rainbow text" recipe -- with the second one's string prefixed by
+    "\\n" so it lands on the native second-line slot. For a rotated Text, matplotlib
+    offsets line 2 *perpendicular* to the reading direction (not after it), which is
+    exactly the original label's own layout: "Choice rate" sits outboard (away from
+    the axis) and the second line sits inboard (closer to it, like "(original
+    high-value arm)" did) -- reusing that same anchor point keeps the new label's
+    position/spacing identical to the one it replaces."""
+    fig = ax.figure
+    fig.canvas.draw()  # layout the original ylabel so its position/size are real
+    renderer = fig.canvas.get_renderer()
+    orig_label = ax.yaxis.label
+    label_fontsize = orig_label.get_fontsize()
+    bbox = orig_label.get_window_extent(renderer)
+    # Extra clearance from the tick labels, beyond what the original label's own
+    # labelpad already reserved -- the inboard ("(option A)") column sits closer to
+    # the axis than a single-line label would, so it needs a bit more room of its
+    # own; scaled the same way generate_gen_plots.py scales the original labelpad.
+    fig_width = fig.get_size_inches()[0]
+    extra_pad_px = plotting_utils.get_dynamic_labelpad(fig_width, base_pad=10) * fig.dpi / 72
+    label_x = ax.transAxes.inverted().transform((bbox.x0 + bbox.width / 2 - extra_pad_px, 0))[0]
+    label_y = ax.transAxes.inverted().transform((0, bbox.y0 + bbox.height / 2))[1]
+    ax.set_ylabel("")
+    from matplotlib.transforms import offset_copy
+    ax.text(label_x, label_y, "Choice rate", color="black", transform=ax.transAxes,
+             rotation=90, fontsize=label_fontsize, ha="center", va="center")
+    inboard_trans = offset_copy(ax.transAxes, fig=fig, x=label_fontsize * 1.2, y=0, units="points")
+    ax.text(label_x, label_y, "(option A)", color=COL_HIGH, transform=inboard_trans,
+             rotation=90, fontsize=label_fontsize, ha="center", va="center")
+
+
 def draw_panel(fig, gs, row_top, row_main, grid_col, data_col,
                show_legend=False, show_inset=False, legend_path=None):
     """Draws the reward-schematic strip + choice-rate panel into the given
@@ -364,31 +410,49 @@ def draw_panel(fig, gs, row_top, row_main, grid_col, data_col,
         ax=ax,
     )
 
+    # Y-axis label: multi-color to match the "A 80%"/"B 20%" schedule text above --
+    # "choice A" is set in the same color as "A 80%" since choice rate here always
+    # tracks the arm that started out high-value (i.e. choice A).
+    _set_ylabel_choice_a(ax)
+
     if show_legend:
-        # human_df's label is hardcoded to "Human" inside the shared function;
-        # relabel it here since this panel's ground truth is the simulated
-        # Q-learning agent, not a human subject.
+        # human_df's label is hardcoded to "Human" inside the shared function.
+        data_label = "Data (Q-learning agent)" if args.data_source == "simulated" else "Human"
         handles, labels_legend = ax.get_legend_handles_labels()
-        data_label = "Data (Q-learning agent)" if args.data_source == "simulated" else "Data (real subjects)"
         labels_legend = [data_label if l == "Human" else l for l in labels_legend]
-        # Saved as its own figure rather than embedded on the axis, so the main
-        # panel stays uncluttered and the legend can be reused/positioned freely.
+        # Small filled squares instead of the default line-sample handles.
+        square_handles = [Patch(facecolor=h.get_color(), edgecolor="none") for h in handles]
+        # Sized down from the main tick/label font since this legend has to fit
+        # inside the axes alongside the curves, not in its own figure. (Note:
+        # called with fig_width as a keyword -- get_dynamic_fontsize's first
+        # positional arg is `multiplier`, not `fig_width`.)
+        onaxis_fontsize = plotting_utils.get_dynamic_fontsize(fig_width=fig_width, base_font=24)
+        ax.legend(square_handles, labels_legend, loc="lower left", frameon=False,
+                  fontsize=onaxis_fontsize, handlelength=0.8, handleheight=0.8,
+                  borderaxespad=0.6, labelspacing=0.4)
+
+        # Also saved as its own figure so the legend can be reused/positioned
+        # freely elsewhere (e.g. combined-figure layouts) at full size.
+        legend_fontsize = plotting_utils.get_dynamic_fontsize(fig_width, base_font=BASE_FONT)
         legend_fig = plt.figure(figsize=(4, 1.2))
         legend_ax = legend_fig.add_subplot(111)
         legend_ax.axis("off")
-        legend_ax.legend(handles, labels_legend, loc="center", frameon=False,
-                          fontsize=plotting_utils.get_dynamic_fontsize(fig_width, base_font=BASE_FONT))
-        legend_fig.savefig(legend_path, dpi=200, bbox_inches="tight", facecolor="white")
+        legend_ax.legend(square_handles, labels_legend, loc="center", frameon=False,
+                          fontsize=legend_fontsize, handlelength=1, handleheight=1)
+        legend_fig.savefig(legend_path, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
         plt.close(legend_fig)
         print(f"Saved {legend_path}")
 
     if show_inset:
-        ax_inset = ax.inset_axes([0.06, 0.06, 0.22, 0.30])
+        # Top-right: the predictive curves are high there before the reversal
+        # and low after, leaving that corner free -- unlike bottom-left, which
+        # is now taken by the on-axis legend above.
+        ax_inset = ax.inset_axes([0.68, 0.60, 0.28, 0.34])
         ax_inset.bar([0, 1], [ll_wsls_bar, ll_rep_bar],
                      color=[COL_WSLS, COL_REP], width=0.7,
                      edgecolor="black", linewidth=0.8)
         ax_inset.set_xticks([])
-        inset_fontsize = plotting_utils.get_dynamic_fontsize(fig_width, base_font=BASE_FONT)
+        inset_fontsize = plotting_utils.get_dynamic_fontsize(fig_width=fig_width, base_font=8)
         ax_inset.set_ylabel("Log-likelihood", labelpad=2, fontsize=inset_fontsize)
         ax_inset.tick_params(labelsize=inset_fontsize, pad=1)
         ax_inset.set_ylim(min(ll_rep_bar, ll_wsls_bar) * 1.3, 0)
@@ -415,10 +479,10 @@ plotting_utils.set_dynamic_fontsize(fig_width=11, base_font=BASE_FONT)
 gs = GridSpec(2, 2, height_ratios=[0.12, 1], hspace=0.08, wspace=0.28,
               top=GS_TOP, bottom=0.13, left=0.07, right=0.98)
 for col in range(2):
-    draw_panel(fig, gs, 0, 1, col, col, show_legend=(col == 0),
+    draw_panel(fig, gs, 0, 1, col, col, show_legend=(col == 0 and show_legend_predictive),
                show_inset=(col == 0 and args.show_loglik_bars),
                legend_path=f"{FIGURES_DIR}/reversal_learning_figure{TAG}_legend.png")
-fig.savefig(f"{FIGURES_DIR}/reversal_learning_figure{TAG}.png", dpi=200, bbox_inches="tight", facecolor="white")
+plotting_utils.save_panel(fig, f"{FIGURES_DIR}/reversal_learning_figure{TAG}.png", figsize=(11, 5.2))
 plt.close(fig)
 print(f"Saved reversal_learning_figure{TAG}.png")
 
@@ -427,9 +491,9 @@ fig_pred = plt.figure(figsize=FIGSIZE_ALONE)
 plotting_utils.set_dynamic_fontsize(fig_width=FIGSIZE_ALONE[0], base_font=BASE_FONT)
 gs_pred = GridSpec(2, 1, height_ratios=[0.12, 1], hspace=0.08,
                     top=GS_TOP, bottom=0.13, left=0.13, right=0.97)
-draw_panel(fig_pred, gs_pred, 0, 1, 0, 0, show_legend=True, show_inset=args.show_loglik_bars,
+draw_panel(fig_pred, gs_pred, 0, 1, 0, 0, show_legend=show_legend_predictive, show_inset=args.show_loglik_bars,
            legend_path=f"{FIGURES_DIR}/reversal_learning_predictive{TAG}_legend.png")
-fig_pred.savefig(f"{FIGURES_DIR}/reversal_learning_predictive{TAG}.png", dpi=200, bbox_inches="tight", facecolor="white")
+plotting_utils.save_panel(fig_pred, f"{FIGURES_DIR}/reversal_learning_predictive{TAG}.png", figsize=FIGSIZE_ALONE)
 plt.close(fig_pred)
 print(f"Saved reversal_learning_predictive{TAG}.png")
 
@@ -438,8 +502,8 @@ fig_gen = plt.figure(figsize=FIGSIZE_ALONE)
 plotting_utils.set_dynamic_fontsize(fig_width=FIGSIZE_ALONE[0], base_font=BASE_FONT)
 gs_gen = GridSpec(2, 1, height_ratios=[0.12, 1], hspace=0.08,
                    top=GS_TOP, bottom=0.13, left=0.13, right=0.97)
-draw_panel(fig_gen, gs_gen, 0, 1, 0, 1, show_legend=True, show_inset=False,
+draw_panel(fig_gen, gs_gen, 0, 1, 0, 1, show_legend=show_legend_generative, show_inset=False,
            legend_path=f"{FIGURES_DIR}/reversal_learning_generative{TAG}_legend.png")
-fig_gen.savefig(f"{FIGURES_DIR}/reversal_learning_generative{TAG}.png", dpi=200, bbox_inches="tight", facecolor="white")
+plotting_utils.save_panel(fig_gen, f"{FIGURES_DIR}/reversal_learning_generative{TAG}.png", figsize=FIGSIZE_ALONE)
 plt.close(fig_gen)
 print(f"Saved reversal_learning_generative{TAG}.png")

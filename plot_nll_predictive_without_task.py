@@ -13,6 +13,7 @@ added as its own single-entry 'domain-specific' family instead of a third
 entry in 'centaur', reusing the same family predictive_plots.py already
 uses elsewhere for the RW cognitive-model baseline (same pink/grey color).
 """
+import argparse
 import json
 import os
 import sys
@@ -21,6 +22,7 @@ import pandas as pd
 
 sys.path.insert(0, os.path.dirname(__file__))
 import predictive_plots as pp
+import plotting_utils
 
 # rl_waltmann's RW model (rescorla_wagner.py) is fit on 50 train participants
 # and evaluated per-trial on 6 held-out test participants -- restrict the
@@ -30,7 +32,16 @@ import predictive_plots as pp
 RL_WALTMANN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'rl_waltmann')
 RW_TEST_SPLIT_PATH = os.path.join(RL_WALTMANN_DIR, 'data', 'out', 'rw', 'train_test_split.json')
 RW_FULL_SINGLES_DIR = os.path.join(RL_WALTMANN_DIR, 'data', 'out', 'rw_full', 'singles')
-
+TEXT_WIDTH = 5.6  # inches, for a single-column figure in the eLife template
+TARGETED_FIG_HEIGHT = 2.2
+RATIO_NARROW=0.5
+RATIO_WIDE=0.6
+FIGSIZE_ALL={
+    'narrow': (TEXT_WIDTH * RATIO_NARROW, TARGETED_FIG_HEIGHT),
+    'wide': (TEXT_WIDTH * RATIO_WIDE, TARGETED_FIG_HEIGHT),
+}
+FIGSIZE_BAR = FIGSIZE_ALL['narrow']
+BASE_FONT = 12
 
 def _rl_waltmann_test_participants():
     with open(RW_TEST_SPLIT_PATH) as f:
@@ -93,8 +104,8 @@ def _family_mapping_with_cognitive_model(centaur_models, folder_name):
 
 def _save(family_mapping, num_choices, out_png):
     fig = pp.plot_loglikelihood_bars_dynamic(family_mapping=family_mapping, num_choices=num_choices,
-                                               show_xticklabels=True)
-    fig.savefig(out_png, dpi=300)
+                                               show_xticklabels=True,figsize=FIGSIZE_BAR)
+    plotting_utils.save_panel(fig, out_png, figsize=FIGSIZE_BAR)
     print(f"Saved {out_png}")
 
 
@@ -116,7 +127,7 @@ def plot_task(folder_name, out_dir='figures/'):
         family_mapping = {'centaur': centaur_models}
         rw_mean, rw_sem = _rl_waltmann_rw_bar(test_participants)
         family_mapping['domain-specific'] = [(rw_mean, rw_sem, 'RW')]
-        no_context_dir = os.path.join(out_dir, 'no_context')
+        no_context_dir = os.path.join(out_dir)
         if not os.path.exists(no_context_dir):
             os.makedirs(no_context_dir)
         out_png = os.path.join(no_context_dir, f'nll_bars_without_task_{folder_name}.png')
@@ -137,7 +148,7 @@ def plot_task(folder_name, out_dir='figures/'):
             centaur_models.append((mean, sem, METHOD_LABELS[method_id]))
         family_mapping = _family_mapping_with_cognitive_model(centaur_models, folder_name)
         
-        no_context_dir = os.path.join(out_dir, 'no_context')
+        no_context_dir = os.path.join(out_dir)
         if not os.path.exists(no_context_dir):
             os.makedirs(no_context_dir)
         out_png = os.path.join(no_context_dir, f'nll_bars_without_task_{folder_name}.png')
@@ -159,7 +170,7 @@ def plot_task(folder_name, out_dir='figures/'):
         family_mapping = _family_mapping_with_cognitive_model(centaur_models, folder_name)
         suffix = '' if experiment == 'all' else f'_{experiment}'
         # in figures folder create folder no context to save the figures
-        no_context_dir = os.path.join(out_dir, 'no_context')
+        no_context_dir = os.path.join(out_dir)
         if not os.path.exists(no_context_dir):
             os.makedirs(no_context_dir)
         out_png = os.path.join(no_context_dir, f'nll_bars_without_task_{folder_name}{suffix}.png')
@@ -167,5 +178,10 @@ def plot_task(folder_name, out_dir='figures/'):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out-dir', default='figures/',
+                         help="Output folder for the figures (default: figures/)")
+    args = parser.parse_args()
+
     for folder_name in FOLDER_TO_TASK_KEY:
-        plot_task(folder_name)
+        plot_task(folder_name, out_dir=args.out_dir)

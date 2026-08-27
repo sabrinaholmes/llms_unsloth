@@ -149,7 +149,9 @@ def _combined_figure(draw_panel_fn, data, title, save_path=None):
     fig.suptitle(title, y=1.03)
     plt.tight_layout()
     if save_path:
-        fig.savefig(save_path, dpi=200, bbox_inches='tight')
+        # suptitle sits at y=1.03, above the canvas -- needs bbox_inches='tight'
+        # to grow the saved canvas to include it, not save_panel's fixed letterbox.
+        fig.savefig(save_path, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
         print(f"Saved: {save_path}")
     return fig
 
@@ -160,7 +162,7 @@ def _single_figure(draw_panel_fn, display_name, colors, df, save_path=None, figs
     draw_panel_fn(ax, display_name, colors, df, figsize[0])
     plt.tight_layout()
     if save_path:
-        fig.savefig(save_path, dpi=200, bbox_inches='tight')
+        plotting_utils.save_panel(fig, save_path, figsize=figsize)
         print(f"Saved: {save_path}")
     return fig
 

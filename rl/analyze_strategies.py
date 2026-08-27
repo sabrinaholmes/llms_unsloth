@@ -101,7 +101,7 @@ def plot_strategies(summary: pd.DataFrame, out_path: str = 'figures/strategy_ana
     plotting_utils.style_y_gridlines(ax)
 
     plt.tight_layout()
-    fig.savefig(out_path, dpi=200)
+    fig.savefig(out_path, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     plt.close(fig)
     print(f'Saved plot to {out_path}')
     return fig
@@ -144,7 +144,7 @@ def plot_bandit1_choice_rate(summary: pd.DataFrame, out_path: str = 'figures/ban
         line.set_linewidth(5)
 
     plt.tight_layout()
-    fig.savefig(out_path, dpi=200, bbox_inches='tight')
+    fig.savefig(out_path, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     plt.close(fig)
     print(f'Saved plot to {out_path}')
     return fig

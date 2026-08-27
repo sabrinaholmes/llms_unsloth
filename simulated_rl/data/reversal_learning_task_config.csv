@@ -1,9 +1,11 @@
 parameter,value
+data_source,simulated
 n_trials,30
-reversal,15
+max_trial_plotted,30
+reversal_points_1idx,16
 p_high,0.8
 p_low,0.2
-alpha_true,0.1
-noise_sd_true,0.2
 n_subjects,32
 n_gen_sims_per_subject,50
+alpha_true,0.1
+noise_sd_true,0.2

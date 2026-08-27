@@ -13,6 +13,7 @@ import sys
 import json
 import glob
 import re
+import argparse
 
 import numpy as np
 import pandas as pd
@@ -31,8 +32,17 @@ MODELS = {
 }
 OUT_DIR = os.path.join(BASE, "figures")
 os.makedirs(OUT_DIR, exist_ok=True)
-FIGSIZE=(8,6)
-BASE_FONT=24
+TEXT_WIDTH = 5.6  # inches, for a single-column figure in the eLife template
+TARGETED_FIG_HEIGHT = 1.8
+RATIO_NARROW=0.31
+RATIO_WIDE=0.68
+FIGSIZE_ALL={
+    'narrow': (TEXT_WIDTH * RATIO_NARROW, TARGETED_FIG_HEIGHT),
+    'wide': (TEXT_WIDTH * RATIO_WIDE, TARGETED_FIG_HEIGHT),
+}
+FIGSIZE=FIGSIZE_ALL['narrow']
+BASE_FONT=12
+LW=1.5
 
 # ── colour palette ─────────────────────────────────────────────────────────────
 # Human: scenario 0=dark red, scenario 1=black
@@ -164,7 +174,7 @@ def compute_stats(records, scenario, kernel, horizon):
 
 # ── plotting ───────────────────────────────────────────────────────────────────
 
-def draw_lines(ax, stats, color, ls, lw=2.0, alpha=1.0, shade_alpha=0.15,
+def draw_lines(ax, stats, color, ls, lw=LW, alpha=1.0, shade_alpha=0.15,
                metric="avg", zorder=2):
     if stats is None:
         return
@@ -186,7 +196,7 @@ def make_figure(model_name, human_records, model_records, base_font=20):
     human_color = COLORS["human"]
     model_color = COLORS[model_name]
     plotting_utils.set_dynamic_fontsize(fig_width=9, base_font=base_font)
-    fig, axes = plt.subplots(2, 2, figsize=(12, 9), sharey="row")
+    fig, axes = plt.subplots(2, 2, figsize=FIGSIZE, sharey="row")
     fig.suptitle(model_name.replace("-", " ").title(), y=1.01)
 
     for row_idx, metric in enumerate(metrics):
@@ -201,14 +211,14 @@ def make_figure(model_name, human_records, model_records, base_font=20):
                     h_stats = compute_stats(human_records, scenario, kernel, horizon)
                     draw_lines(ax, h_stats,
                                color=human_color[scenario], ls=ls,
-                               lw=2.5, alpha=1.0, shade_alpha=0.20,
+                               lw=LW, alpha=1.0, shade_alpha=0.20,
                                metric=metric, zorder=4)
 
                     # model (behind human)
                     m_stats = compute_stats(model_records, scenario, kernel, horizon)
                     draw_lines(ax, m_stats,
                                color=model_color[scenario], ls=ls,
-                               lw=1.8, alpha=0.75, shade_alpha=0.10,
+                               lw=LW, alpha=0.75, shade_alpha=0.10,
                                metric=metric, zorder=2)
 
             ax.set_xlabel("Trial")
@@ -222,19 +232,19 @@ def make_figure(model_name, human_records, model_records, base_font=20):
     # scenario colours — human
     for s in scenarios:
         legend_handles.append(
-            mlines.Line2D([], [], color=human_color[s], lw=2.5,
+            mlines.Line2D([], [], color=human_color[s], lw=LW,
                           label=f"Human – {SCENARIO_LABEL[s]}"))
     legend_handles.append(mlines.Line2D([], [], color="none", label=""))
     # scenario colours — model
     for s in scenarios:
         legend_handles.append(
-            mlines.Line2D([], [], color=model_color[s], lw=1.8, alpha=0.75,
+            mlines.Line2D([], [], color=model_color[s], lw=LW, alpha=0.75,
                           label=f"{MODEL_LABELS[model_name]} – {SCENARIO_LABEL[s]}"))
     legend_handles.append(mlines.Line2D([], [], color="none", label=""))
     # horizon line styles
     for h in horizons:
         legend_handles.append(
-            mlines.Line2D([], [], color="grey", ls=HORIZON_STYLE[h], lw=2,
+            mlines.Line2D([], [], color="grey", ls=HORIZON_STYLE[h], lw=LW,
                           label=HORIZON_LABEL[h]))
 
     axes[0, 1].legend(handles=legend_handles, frameon=False,
@@ -257,7 +267,7 @@ def make_comparison_figure(records_dict, base_font=20):
     metric_labels = {"avg": "Average reward", "max": "Maximum reward"}
 
     plotting_utils.set_dynamic_fontsize(fig_width=12, base_font=base_font)
-    fig, axes = plt.subplots(2, 2, figsize=(12, 9), sharey="row")
+    fig, axes = plt.subplots(2, 2, figsize=FIGSIZE, sharey="row")
     fig.suptitle("Centaur vs Llama", y=1.01)
 
     for row_idx, metric in enumerate(metrics):
@@ -272,7 +282,7 @@ def make_comparison_figure(records_dict, base_font=20):
                         stats = compute_stats(model_records, scenario, kernel, horizon)
                         draw_lines(ax, stats,
                                    color=color_map[scenario], ls=ls,
-                                   lw=2.0, alpha=1.0, shade_alpha=0.15,
+                                   lw=LW, alpha=1.0, shade_alpha=0.15,
                                    metric=metric, zorder=2)
 
             ax.set_xlabel("Trial Number")
@@ -288,12 +298,12 @@ def make_comparison_figure(records_dict, base_font=20):
         color_map = COLORS[model_name]
         for s in scenarios:
             legend_handles.append(
-                mlines.Line2D([], [], color=color_map[s], lw=2,
+                mlines.Line2D([], [], color=color_map[s], lw=LW,
                               label=f"{label} – {SCENARIO_LABEL[s]}"))
         legend_handles.append(mlines.Line2D([], [], color="none", label=""))
     for h in horizons:
         legend_handles.append(
-            mlines.Line2D([], [], color="grey", ls=HORIZON_STYLE[h], lw=2,
+            mlines.Line2D([], [], color="grey", ls=HORIZON_STYLE[h], lw=LW,
                           label=HORIZON_LABEL[h]))
 
     axes[0, 1].legend(handles=legend_handles, frameon=False,
@@ -335,7 +345,7 @@ def make_all_figure(human_records, model_records_dict, base_font=20):
                         draw_lines(ax, stats,
                                    color=color_map[scenario],
                                    ls=HORIZON_STYLE[horizon],
-                                   lw=lw, alpha=alpha, shade_alpha=shade_alpha,
+                                   lw=LW, alpha=alpha, shade_alpha=shade_alpha,
                                    metric=metric, zorder=zorder)
             ax.set_xlabel("Trial Number")
             ax.set_ylabel(metric_labels[metric])
@@ -354,7 +364,7 @@ def make_all_figure(human_records, model_records_dict, base_font=20):
             source_order, [-0.04, -0.11, -0.18]):
         row_handles = [
             mlines.Line2D([], [], color=COLORS[source_key][s],
-                          ls=HORIZON_STYLE[h], lw=lw, alpha=alpha,
+                          ls=HORIZON_STYLE[h], lw=LW, alpha=alpha,
                           label=f"{source_label} – {SCENARIO_LABEL[s]}, {short_h[h]}")
             for s in scenarios for h in horizons
         ]
@@ -396,16 +406,19 @@ def make_avg_reward_long_horizon_figures(human_records, model_records_dict, base
                 stats = compute_stats(records, scenario, kernel, horizon)
                 draw_lines(ax, stats,
                            color=color_map[scenario], ls="-",
-                           lw=lw, alpha=alpha, shade_alpha=shade_alpha,
+                           lw=LW, alpha=alpha, shade_alpha=shade_alpha,
                            metric="avg", zorder=zorder)
 
         ax.set_xlabel("Trial")
         ax.set_ylabel("Average reward")
+        ax.set_yticks([40,50,60,70,80])
         ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
+        ax.set_xticks([2,4,6,8,10])
+        ax.tick_params(axis='x', length=3, color='#888888', labelcolor='#666666',pad=0)
         ax.spines[["top", "right"]].set_visible(False)
         plotting_utils.style_y_gridlines(ax)
         #make title bold
-        ax.set_title(f"{KERNEL_LABEL[kernel]}",weight='bold')
+        ax.set_title(f"{KERNEL_LABEL[kernel]}")
 
         plt.tight_layout()
         figs[kernel] = fig
@@ -428,7 +441,7 @@ def make_avg_reward_long_horizon_legend(base_font=20):
     }
 
     legend_handles = [
-        mlines.Line2D([], [], color=COLORS[source_key][s], lw=lw, alpha=alpha,
+        mlines.Line2D([], [], color=COLORS[source_key][s], lw=LW, alpha=alpha,
                       label=f"{source_labels[source_key]} – {SCENARIO_LABEL[s]}")
         for source_key, lw, alpha in source_styles
         for s in scenarios
@@ -453,7 +466,7 @@ def main():
 
         fig = make_figure(model_name, human_records, model_records)
         out_path = os.path.join(OUT_DIR, f"reward_by_trial_{model_name}.png")
-        fig.savefig(out_path, dpi=150, bbox_inches="tight")
+        fig.savefig(out_path, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
         plt.close(fig)
         print(f"  Saved {out_path}")
 
@@ -464,7 +477,7 @@ def main():
     print("Creating centaur vs llama comparison...")
     fig = make_comparison_figure(model_records_dict)
     out_path = os.path.join(OUT_DIR, "reward_by_trial_centaur_vs_llama.png")
-    fig.savefig(out_path, dpi=150, bbox_inches="tight")
+    fig.savefig(out_path, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     plt.close(fig)
     print(f"  Saved {out_path}")
 
@@ -472,7 +485,7 @@ def main():
     print("Creating centaur + llama + human combined figure...")
     fig = make_all_figure(human_records, model_records_dict)
     out_path = os.path.join(OUT_DIR, "reward_by_trial_all.png")
-    fig.savefig(out_path, dpi=150, bbox_inches="tight")
+    fig.savefig(out_path, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     plt.close(fig)
     print(f"  Saved {out_path}")
 
@@ -481,13 +494,13 @@ def main():
     avg_figs = make_avg_reward_long_horizon_figures(human_records, model_records_dict)
     for kernel, fig in avg_figs.items():
         out_path = os.path.join(OUT_DIR, f"avg_reward_long_horizon_{kernel}.png")
-        fig.savefig(out_path, dpi=150, bbox_inches="tight")
+        plotting_utils.save_panel(fig, out_path, figsize=FIGSIZE)
         plt.close(fig)
         print(f"  Saved {out_path}")
 
     legend_fig = make_avg_reward_long_horizon_legend()
     legend_path = os.path.join(OUT_DIR, "avg_reward_long_horizon_legend.png")
-    legend_fig.savefig(legend_path, dpi=150, bbox_inches="tight")
+    legend_fig.savefig(legend_path, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     plt.close(legend_fig)
     print(f"  Saved {legend_path}")
 
@@ -517,37 +530,60 @@ def sweep_fontsizes(base_fonts=(14, 16, 18, 20, 22, 24, 26)):
         for model_name, model_records in model_records_dict.items():
             fig = make_figure(model_name, human_records, model_records, base_font=base_font)
             fig.savefig(os.path.join(sweep_dir, f"reward_by_trial_{model_name}.png"),
-                        dpi=150, bbox_inches="tight")
+               bbox_inches='tight',
+               pad_inches=0.02,
+               dpi=300,
+               transparent=True)
             plt.close(fig)
 
         fig = make_comparison_figure(model_records_dict, base_font=base_font)
         fig.savefig(os.path.join(sweep_dir, "reward_by_trial_centaur_vs_llama.png"),
-                    dpi=150, bbox_inches="tight")
+           bbox_inches='tight',
+           pad_inches=0.02,
+           dpi=300,
+           transparent=True)
         plt.close(fig)
 
         fig = make_all_figure(human_records, model_records_dict, base_font=base_font)
         fig.savefig(os.path.join(sweep_dir, "reward_by_trial_all.png"),
-                    dpi=150, bbox_inches="tight")
+           bbox_inches='tight',
+           pad_inches=0.02,
+           dpi=300,
+           transparent=True)
         plt.close(fig)
 
         avg_figs = make_avg_reward_long_horizon_figures(human_records, model_records_dict, base_font=base_font)
         for kernel, fig in avg_figs.items():
             fig.savefig(os.path.join(sweep_dir, f"avg_reward_long_horizon_{kernel}.png"),
-                        dpi=150, bbox_inches="tight")
+               bbox_inches='tight',
+               pad_inches=0.02,
+               dpi=300,
+               transparent=True)
             plt.close(fig)
 
         legend_fig = make_avg_reward_long_horizon_legend(base_font=base_font)
         legend_fig.savefig(os.path.join(sweep_dir, "avg_reward_long_horizon_legend.png"),
-                            dpi=150, bbox_inches="tight")
+                  bbox_inches='tight',
+                  pad_inches=0.02,
+                  dpi=300,
+                  transparent=True)
         plt.close(legend_fig)
 
     print(f"Done. Compare folders under {sweep_root}")
 
 
 if __name__ == "__main__":
-    if "--sweep-fontsizes" in sys.argv:
-        idx = sys.argv.index("--sweep-fontsizes")
-        sizes = [int(s) for s in sys.argv[idx + 1:] if s.lstrip("-").isdigit()]
-        sweep_fontsizes(tuple(sizes) if sizes else (14, 16, 18, 20, 22, 24, 26))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--save-dir", "-o", default=OUT_DIR,
+                        help="Directory to save figures into (default: %(default)s)")
+    parser.add_argument("--sweep-fontsizes", nargs="*", type=int, default=None,
+                        help="Rerun figures across candidate base font sizes")
+    args = parser.parse_args()
+
+    OUT_DIR = args.save_dir
+    os.makedirs(OUT_DIR, exist_ok=True)
+
+    if args.sweep_fontsizes is not None:
+        sweep_fontsizes(tuple(args.sweep_fontsizes) if args.sweep_fontsizes else (14, 16, 18, 20, 22, 24, 26))
     else:
         main()

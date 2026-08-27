@@ -320,8 +320,8 @@ def bandit_choice_trends(base_path='./llms_unsloth/rl/data/out/generative', choi
 
     out_fig = os.path.join(save_dir, f'bandit_choice_trends_choice_{choice}.png')
     out_legend = os.path.join(save_dir, f'bandit_choice_trends_legend_choice_{choice}.png')
-    fig.savefig(out_fig, dpi=200, bbox_inches='tight')
-    legend_fig.savefig(out_legend, dpi=200, bbox_inches='tight')
+    fig.savefig(out_fig, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
+    legend_fig.savefig(out_legend, bbox_inches='tight', pad_inches=0.02, dpi=300, transparent=True)
     plt.close(fig)
     plt.close(legend_fig)
     print(f"Saved plots: {out_fig}, {out_legend}")

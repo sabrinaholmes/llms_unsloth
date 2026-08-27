@@ -7,4 +7,4 @@ p_high,0.8
 p_low,0.2
 n_subjects,56
 n_gen_sims_per_subject,50
-real_data_csv,/share/users/student/s/snamazova/llms_unsloth/simulated_rl/../rl_waltmann/data/in/test_waltmann_data_cleaned.csv
+real_data_csv,/Users/sabrinanamazova/Documents/llm_evaluation/llms_unsloth/simulated_rl/../rl_waltmann/data/in/test_waltmann_data_cleaned.csv

@@ -22,9 +22,15 @@ TASK_NUM_CHOICES = {
     'multi_cue_judgment': 9,
     'rl_waltmann': 2,
 }
-
-FIGSIZE=(8,6)
-BASE_FONT=24
+TEXT_WIDTH = 5.6  # inches, for a single-column figure in the eLife template
+TARGETED_FIG_HEIGHT = 2.2
+RATIO_NARROW=0.38
+RATIO_WIDE=0.6
+FIGSIZE={
+    'narrow': (TEXT_WIDTH * RATIO_NARROW, TARGETED_FIG_HEIGHT),
+    'wide': (TEXT_WIDTH * RATIO_WIDE, TARGETED_FIG_HEIGHT),
+}
+BASE_FONT=12
 def read_data_from_folder(folder_path):
     dfs = pd.DataFrame()
     # join without a leading slash — a leading '/' makes os.path.join return '/singles'
@@ -147,7 +153,7 @@ def calculate_negative_log_likelihood_stats(df, column_name='nll'):
         return mean, sem
 
 
-def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=FIGSIZE, nll_column='nll', num_choices=2,
+def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=FIGSIZE['narrow'], nll_column='nll', num_choices=2,
                                      ax=None, show_xticklabels=False, show_bars=True):
     """Plot mean NLL by family.
 
@@ -169,6 +175,7 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=FIGSIZE, nll_co
     """
     standalone = ax is None
     if standalone:
+        #print(f"Creating standalone figure with figsize={figsize}")
         plotting_utils.set_dynamic_fontsize(fig_width=figsize[0], base_font=BASE_FONT)
     # If caller didn't provide mapping, build from globals
     if family_mapping is None:
@@ -300,11 +307,11 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=FIGSIZE, nll_co
 
     if show_bars:
         bars = ax.bar(xpos, means, w, yerr=errs,
-                      color=colors[:len(means)])
+                      color=colors[:len(means)],error_kw={'elinewidth':0.5},capsize=0)
 
         for bar in bars:
             height = bar.get_height()
-            ax.annotate(f'{height:.4f}',
+            ax.annotate(f'{height:.3f}',
                         xy=(bar.get_x() + bar.get_width() / 2, height),
                         xytext=(0, 3),
                         textcoords="offset points",
@@ -326,12 +333,17 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=FIGSIZE, nll_co
     # not a concern now that the label lives outside the axes' data extent.)
     #rotate text to 90 degrees to avoid overlapping with the bars
     ax.text(1.01, chance_nll, 'Random\nguessing',
-            va='center', ha='left', alpha=0.45, rotation=90, clip_on=False,
+            va='center', ha='left', alpha=0.7, rotation=90, clip_on=False,
             transform=ax.get_yaxis_transform())
 
     ax.set_xticks(xpos)
+    #ax.axis('scaled')
     if show_xticklabels:
-        ax.set_xticklabels(used_labels, ha='center')
+        # Smaller than the family row below (Centaur/Llama) so the condition
+        # tag (e.g. 'Full prompt'/'No reward') reads as subordinate to it.
+        primary_fontsize = plotting_utils.get_dynamic_fontsize(
+            multiplier=0.7, fig_width=figsize[0], base_font=BASE_FONT)
+        ax.set_xticklabels(used_labels, ha='center', fontsize=primary_fontsize)
     else:
         ax.set_xticklabels([])
     # family centers for secondary axis
@@ -374,7 +386,7 @@ def plot_loglikelihood_bars_dynamic(family_mapping=None, figsize=FIGSIZE, nll_co
         else:
             divider_pos = xpos[fslice] + w / 2 + gap_out / 2
 
-    ax.set_ylabel('Negative log-likelihood (NLL)', labelpad=(20 if standalone else 6),
+    ax.set_ylabel('Negative log-likelihood', labelpad=(1.5 if standalone else 3),
                fontsize=plotting_utils.get_dynamic_fontsize(multiplier=1.3, fig_width=figsize[0], base_font=BASE_FONT))
     #ax.yaxis.set_label_coords(-0.12, 0.4)
     ax.tick_params(axis='y', length=3, color='#888888', labelcolor='#666666')
@@ -446,15 +458,16 @@ def build_family_mapping(base_path='predictive', nll_column='log_likelihood', in
     return family_mapping
 
 
-def load_and_plot(base_path='predictive', out_png='loglikelihood_bars.png', nll_column='log_likelihood',
-                   include_participants=None, num_choices=2, show_bars=True):
+def load_and_plot(base_path='predictive', out='figures/', nll_column='log_likelihood',
+                   include_participants=None, num_choices=2, show_bars=True,task=None):
     family_mapping = build_family_mapping(base_path, nll_column=nll_column,
                                           include_participants=include_participants)
 
     fig = plot_loglikelihood_bars_dynamic(family_mapping=family_mapping, nll_column=nll_column,
-                                           figsize=FIGSIZE, num_choices=num_choices, show_bars=show_bars)
+                                           figsize=FIGSIZE['narrow'], num_choices=num_choices, show_bars=show_bars,show_xticklabels=True)
     print({k: len(v) for k, v in family_mapping.items()})
-    fig.savefig(out_png, dpi=300)
+    out_png = os.path.join(out, f'nll_bars_{task}_{RATIO_NARROW}.png')
+    plotting_utils.save_panel(fig, out_png, figsize=FIGSIZE['narrow'])
     print(f"Saved plot to {out_png}")
 
 
@@ -496,6 +509,6 @@ if __name__ == '__main__':
     base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), args.task, 'data', 'out', 'predictive')
     out_png = args.out or f'nll_bars_{args.task}.png'
     num_choices = args.num_choices or TASK_NUM_CHOICES.get(args.task, 2)
-    load_and_plot(base_path=base_path, out_png=out_png, nll_column='nll',
+    load_and_plot(base_path=base_path, out=out_png, nll_column='nll',
                   include_participants=include_participants, num_choices=num_choices,
-                  show_bars=args.show_bars)
+                  show_bars=args.show_bars, task=args.task)
